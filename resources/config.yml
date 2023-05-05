@@ -1,0 +1,10 @@
+commands:
+  money:
+    description: "AAA"
+    name: "money"
+    aliases: []
+    sub:
+      pay:
+        description: "AAA"
+        name: "money"
+        aliases: []
