@@ -35,6 +35,7 @@ use UnknowL\lib\commando\traits\ArgumentableTrait;
 use UnknowL\lib\commando\traits\IArgumentable;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\Plugin;
+use UnknowL\utils\CommandUtils;
 use function explode;
 
 abstract class BaseSubCommand implements IArgumentable, IRunnable {
@@ -119,7 +120,7 @@ abstract class BaseSubCommand implements IArgumentable, IRunnable {
 				return true;
 			}
 		}
-
+		$sender->sendMessage(CommandUtils::PERMISSION_ERROR_MESSAGE);
 		return false;
 	}
 

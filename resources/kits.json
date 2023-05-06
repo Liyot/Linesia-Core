@@ -1,0 +1,24 @@
+{
+	"kits":
+	{
+		"base":
+		{
+			"armorContents": ["306:0", "307:0", "308:0", "309:0"],
+			"armorDisplay": [0, 9, 18, 27],
+			"contents": ["103:0", "104:0"],
+			"contentDisplay": [1, 10],
+			"rank": ["joueur"],
+			"displayName": "Base"
+		},
+
+		"refill":
+		{
+			"armorContents": ["306:0", "307:0", "308:0", "309:0"],
+			"armorDisplay": [0, 9, 18, 27],
+			"contents": ["103:0", "104:0"],
+			"contentDisplay": [1, 10],
+			"rank": ["joueur"],
+			"displayName": "Refill"
+		}
+	}
+}

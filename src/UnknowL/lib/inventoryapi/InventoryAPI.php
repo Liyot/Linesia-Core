@@ -13,13 +13,6 @@ use UnknowL\lib\inventoryapi\inventories\{BaseInventoryCustom, SimpleChestInvent
 
 class InventoryAPI 
 {
-    
-    use SingletonTrait;
-
-    public function __construct()
-    {
-        self::$instance = $this;
-    }
 
     public static function createSimpleChest(bool $isViewOnly = false): SimpleChestInventory {
         $inventory = new SimpleChestInventory();

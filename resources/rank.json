@@ -1,0 +1,20 @@
+{
+	"ranks":
+	{
+		"player":
+		{
+			"displayName": "Joueur",
+			"default": true,
+			"chatFormat": "{&tag}§5{&factionName} §f[§4{&rank}§f] §4{&playerName} : {&message}",
+			"permissions": [""]
+		},
+
+		"modo":
+		{
+			"displayName": "Moderateur",
+			"default": false,
+			"chatFormat": "{&tag}§5{&factionName} §f[§4{&rank}§f] §4{&playerName} : {&message}",
+			"permissions": [""]
+		}
+	}
+}

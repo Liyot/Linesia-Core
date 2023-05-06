@@ -34,7 +34,7 @@ final class CommandSettings
 
 	final public function getSubSettings(string $name): self
 	{
-		return $this->getSubSettings($name);
+		return $this->subs[$name];
 	}
 
 	/**

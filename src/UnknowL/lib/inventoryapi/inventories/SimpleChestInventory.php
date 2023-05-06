@@ -12,6 +12,7 @@ use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\player\Player;
 use pocketmine\block\tile\Nameable;
 use pocketmine\world\Position;
+use UnknowL\player\LinesiaPlayer;
 
 class SimpleChestInventory extends BaseInventoryCustom
 {
@@ -25,7 +26,7 @@ class SimpleChestInventory extends BaseInventoryCustom
         parent::onClose($who);
     }
 
-    public function send(Player $player)
+    public function send(LinesiaPlayer $player)
     {
         if (!isset($this->hasSend[$player->getXuid()])) {
             $this->holder = new Position((int)$player->getPosition()->getX(), (int)$player->getPosition()->getY() + 3, (int)$player->getPosition()->getZ(), $player->getWorld());

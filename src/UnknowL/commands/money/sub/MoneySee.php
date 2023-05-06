@@ -41,14 +41,14 @@ final class MoneySee extends BaseSubCommand
 		{
 			if((!is_null($target = CommandUtils::checkTarget($args["joueur"]))))
 			{
-				$sender->sendMessage(sprintf("Le joueur %s possède %d monnaie", $target->getName(), $target->getEconomyManager()->getMoney()));
+				$sender->sendMessage(sprintf("Le joueur %s possède %d $", $target->getName(), $target->getEconomyManager()->getMoney()));
 			}
 			return;
 		}
 
 		if(empty($args))
 		{
-			$sender->sendMessage(sprintf("Vous possédez %d monnaie", $sender->getEconomyManager()->getMoney()));
+			$sender->sendMessage(sprintf("Vous possédez %d $", $sender->getEconomyManager()->getMoney()));
 		}
 	}
 }

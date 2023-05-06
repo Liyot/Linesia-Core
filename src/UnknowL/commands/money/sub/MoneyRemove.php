@@ -42,8 +42,6 @@ final class MoneyRemove extends BaseSubCommand
 					$target->getEconomyManager()->reduce($args["montant"]);
 				}
 			}
-			return;
 		}
-		$sender->sendMessage(CommandUtils::PERMISSION_ERROR_MESSAGE);
 	}
 }

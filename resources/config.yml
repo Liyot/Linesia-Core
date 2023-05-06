@@ -8,3 +8,23 @@ commands:
         description: "AAA"
         name: "money"
         aliases: []
+      set:
+        description: "AAA"
+        name: "money"
+        aliases: [ ]
+      remove:
+        description: "AAA"
+        name: "money"
+        aliases: [ ]
+      give:
+        description: "AAA"
+        name: "money"
+        aliases: [ ]
+      see:
+        description: "AAA"
+        name: "money"
+        aliases: [ ]
+  kit:
+    description: "AAA"
+    name: "kit"
+    aliases: [ ]

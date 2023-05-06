@@ -1,8 +1,10 @@
 <?php
 
+namespace UnknowL\player;
+
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
-use UnknowL\player\LinesiaPlayer;
+use UnknowL\Linesia;
 use UnknowL\trait\PropertiesTrait;
 
 final class PlayerProperties
@@ -16,7 +18,7 @@ final class PlayerProperties
 	{
 		if(!($nbt = $this->player->saveNBT())->getCompoundTag('properties') || empty($nbt->getCompoundTag("properties")->getValue())){
 			$this->setBaseProperties([
-
+				"rank" => Linesia::getInstance()->getRankManager()->getDefaultRank()->getName()
 			]);
 		}else{
 			$this->setBaseProperties($this->TagtoArray($nbt->getCompoundTag("properties")));

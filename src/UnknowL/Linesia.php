@@ -15,5 +15,15 @@ final class Linesia extends PluginBase
 	{
 		self::setInstance($this);
 		$this->loadAll();
+
+		global $name;
+
+		$array = [3, 2, 3, 5];
+		array_map(function ($value)
+		{
+			$name = $value;
+		}, $array);
+
+		var_dump($name);
 	}
 }

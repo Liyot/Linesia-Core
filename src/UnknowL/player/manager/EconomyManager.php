@@ -27,19 +27,19 @@ final class EconomyManager extends PlayerManager
 	final public function reduce(int $amount): void
 	{
 		$this->money + $amount < 0 ? $this->money = 0 : $this->money -= $amount;
-		$this->player->sendMessage("Votre monnaie à été réduite de $amount monnaie");
+		$this->player->sendMessage("Votre $ à été réduite de $amount $");
 	}
 
 	final public function add(int $amount): void
 	{
 		$this->money += $amount;
-		$this->player->sendMessage("Votre monnaie à été augmenté de $amount");
+		$this->player->sendMessage("Votre $ à été augmenté de $amount");
 	}
 
 	final public function set(int $amount): void
 	{
 		$this->money = abs($amount);
-		$this->player->sendMessage("Votre monnaie à été défini à $amount monnaie");
+		$this->player->sendMessage("Votre $ à été défini à $amount $");
 	}
 
 	final public function transfer(int $amount, LinesiaPlayer $target): bool
@@ -47,8 +47,8 @@ final class EconomyManager extends PlayerManager
 		if($amount <= $this->money)
 		{
 			$target->getEconomyManager()->add($amount);
-			$this->player->sendMessage(sprintf("Vous avez transférer %d monnaie à %s", $amount, $target->getName()));
-			$target->sendMessage(sprintf("Le joueur %s vous à transférer %d monnaie", $target->getName(), $amount));
+			$this->player->sendMessage(sprintf("Vous avez transférer %d $ à %s", $amount, $target->getName()));
+			$target->sendMessage(sprintf("Le joueur %s vous à transférer %d $", $target->getName(), $amount));
 			return true;
 		}
 		return false;

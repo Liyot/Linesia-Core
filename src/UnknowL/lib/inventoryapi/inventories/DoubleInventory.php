@@ -4,6 +4,7 @@ namespace UnknowL\lib\inventoryapi\inventories;
 
 use pocketmine\block\VanillaBlocks;
 use pocketmine\nbt\tag\CompoundTag;
+use UnknowL\task\DelayTask;
 use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
 use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
@@ -12,8 +13,7 @@ use pocketmine\network\mcpe\protocol\types\CacheableNbt;
 use pocketmine\player\Player;
 use pocketmine\block\tile\Nameable;
 use pocketmine\world\Position;
-use UnknowL\lib\inventoryapi\schedulers\DelayTask;
-use UnknowL\lib\inventoryapi\InventoryAPI;
+use UnknowL\Linesia;
 
 class DoubleInventory extends SimpleChestInventory {
 
@@ -45,7 +45,7 @@ class DoubleInventory extends SimpleChestInventory {
                 ->setInt("pairz", $this->holder->z);
             $player->getNetworkSession()->sendDataPacket(BlockActorDataPacket::create(BlockPosition::fromVector3($this->holder), new CacheableNbt($nbt)));
             $player->getNetworkSession()->sendDataPacket(BlockActorDataPacket::create(BlockPosition::fromVector3($this->holder->add(1, 0, 0)), new CacheableNbt(CompoundTag::create())));
-            Main::getInstance()->getScheduler()->scheduleDelayedTask(new DelayTasks($player, $this), 20); // Delay for PS4 /!\ and switch GUI use bug.
+            Linesia::getInstance()->getScheduler()->scheduleDelayedTask(new DelayTask($player, $this), 20); // Delay for PS4 /!\ and switch GUI use bug.
             $this->hasSend[$player->getXuid()] = true;
         }
     }

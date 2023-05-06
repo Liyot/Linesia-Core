@@ -2,10 +2,8 @@
 
 namespace UnknowL\commands;
 
-use pocketmine\Server;
 use pocketmine\utils\Config;
 use UnknowL\Linesia;
-use UnknowL\player\LinesiaPlayer;
 
 final class CommandManager
 {

@@ -39,8 +39,6 @@ final class MoneyGive extends BaseSubCommand
 					$target->getEconomyManager()->add($args["montant"]);
 				}
 			}
-			return;
 		}
-		$sender->sendMessage(CommandUtils::PERMISSION_ERROR_MESSAGE);
 	}
 }

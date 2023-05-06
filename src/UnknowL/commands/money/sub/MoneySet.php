@@ -41,8 +41,6 @@ final class MoneySet extends BaseSubCommand
 					$target->getEconomyManager()->set($args["montant"]);
 				}
 			}
-			return;
 		}
-		$sender->sendMessage(CommandUtils::PERMISSION_ERROR_MESSAGE);
 	}
 }
