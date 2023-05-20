@@ -33,6 +33,7 @@ namespace UnknowL\lib\commando\constraint;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
+use UnknowL\player\LinesiaPlayer;
 
 class ConsoleRequiredConstraint extends BaseConstraint {
 
@@ -45,6 +46,6 @@ class ConsoleRequiredConstraint extends BaseConstraint {
     }
 
     public function isVisibleTo(CommandSender $sender): bool {
-		return !($sender instanceof AKPlayer);
+		return !($sender instanceof LinesiaPlayer);
 	}
 }

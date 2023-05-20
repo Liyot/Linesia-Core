@@ -23,9 +23,9 @@ final class RankManager
 		$this->loadAll();
 	}
 
-	final public function getRank(string $name): Rank
+	final public function getRank(string $name): ?Rank
 	{
-		return $this->ranks[strtolower($name)];
+		return $this->ranks[strtolower($name)] ?? null;
 	}
 
 	final public function getDefaultRank(): Rank

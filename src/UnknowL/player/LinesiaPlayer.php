@@ -44,4 +44,10 @@ final class LinesiaPlayer extends Player
 	{
 		return $this->rank;
 	}
+
+	final public function setRank(Rank $rank): self
+	{
+		$this->rank = $rank;
+		return $this;
+	}
 }

@@ -3,10 +3,12 @@
 namespace UnknowL\trait;
 
 use pocketmine\Server;
-use pocketmine\utils\Utils;
+use pocketmine\utils\Filesystem;
 use UnknowL\commands\CommandManager;
 use UnknowL\commands\kit\KitCommand;
 use UnknowL\commands\money\MoneyCommand;
+use UnknowL\commands\shop\ShopHandler;
+use UnknowL\commands\shop\ShopCommand;
 use UnknowL\kits\KitManager;
 use UnknowL\lib\commando\exception\HookAlreadyRegistered;
 use UnknowL\lib\commando\PacketHooker;
@@ -14,6 +16,7 @@ use UnknowL\Linesia;
 use UnknowL\listener\PacketListener;
 use UnknowL\listener\PlayerListener;
 use UnknowL\rank\RankManager;
+use UnknowL\task\ClearlagTask;
 
 trait LoaderTrait
 {
@@ -23,6 +26,10 @@ trait LoaderTrait
 	private RankManager $rankManager;
 
 	private KitManager $kitManager;
+
+	private ClearlagTask $ClearlagManager;
+
+	private ShopHandler $shopHandler;
 
 	/**
 	 * @throws HookAlreadyRegistered
@@ -35,6 +42,8 @@ trait LoaderTrait
 		$this->loadResources();
 		$this->loadCommands();
 		$this->loadListeners();
+		$this->loadTask();
+		$this->loadFolder();
 		Linesia::getInstance()->getLogger()->notice("§a Activation du core Faction");
 	}
 	
@@ -50,6 +59,7 @@ trait LoaderTrait
 		$this->commandManager = new CommandManager();
 		$this->rankManager = new RankManager();
 		$this->kitManager = new KitManager();
+		$this->shopHandler = new ShopHandler();
 	}
 
 	/**
@@ -69,11 +79,25 @@ trait LoaderTrait
 
 	}
 
-	public function loadCommands(): void
+	private function loadCommands(): void
 	{
 		Server::getInstance()->getCommandMap()->register("", new KitCommand());
 		Server::getInstance()->getCommandMap()->register("", new MoneyCommand());
+		Server::getInstance()->getCommandMap()->register("", new ShopCommand());
 	}
+
+	private function loadTask(): void
+	{
+		Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new ClearlagTask(), 20 * 60 * 5);
+	}
+
+	private function loadFolder(): void
+	{
+		@mkdir(Linesia::getInstance()->getDataFolder().DIRECTORY_SEPARATOR."data");
+		@mkdir(Linesia::getInstance()->getDataFolder().DIRECTORY_SEPARATOR."data".DIRECTORY_SEPARATOR."shop");
+	}
+
+
 //Getters
 
 	final public function getCommandManager(): CommandManager
@@ -89,6 +113,22 @@ trait LoaderTrait
 	final public function getKitManager(): KitManager
 	{
 		return $this->kitManager;
+	}
+
+	/**
+	 * @return ClearlagTask
+	 */
+	public function getClearlagManager(): ClearlagTask
+	{
+		return $this->ClearlagManager;
+	}
+
+	/**
+	 * @return ShopHandler
+	 */
+	final public function getShopHandler(): ShopHandler
+	{
+		return $this->shopHandler;
 	}
 
 }

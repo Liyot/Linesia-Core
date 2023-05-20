@@ -11,20 +11,24 @@ commands:
       set:
         description: "AAA"
         name: "money"
-        aliases: [ ]
+        aliases: []
       remove:
         description: "AAA"
         name: "money"
-        aliases: [ ]
+        aliases: []
       give:
         description: "AAA"
         name: "money"
-        aliases: [ ]
+        aliases: []
       see:
         description: "AAA"
         name: "money"
-        aliases: [ ]
+        aliases: []
   kit:
     description: "AAA"
     name: "kit"
-    aliases: [ ]
+    aliases: []
+  shop:
+    description: "AAA"
+    name: "shop"
+    aliases: []

@@ -47,7 +47,7 @@ final class MoneyPay extends BaseSubCommand
 				is_numeric(abs($args["montant"]))
 			)
 			{
-				$sender->getEconomyManager()->transfer($args["montant"], $target);
+				$sender->getEconomyManager()->transfer($args["montant"], $target, true);
 				return;
 			}
 		}
