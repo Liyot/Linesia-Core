@@ -5,6 +5,7 @@ namespace UnknowL\commands\shop;
 use pocketmine\command\CommandSender;
 use pocketmine\item\Item;
 use UnknowL\handlers\dataTypes\ShopData;
+use UnknowL\handlers\ShopHandler;
 use UnknowL\lib\commando\args\StringArgument;
 use UnknowL\lib\commando\BaseCommand;
 use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
@@ -41,7 +42,7 @@ class ShopCommand extends BaseCommand
      */
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
-		$this->sendMainForm($sender, (count($args) === 1) && ($args["sell"]));
+		$this->sendMainForm($sender, (count($args) === 1) && ($args["buy/sell"] === "sell"));
 	}
 
 	protected function sendMainForm(LinesiaPlayer $player, bool $sell = false): void
