@@ -1,10 +1,10 @@
 <?php
 
-namespace UnknowL\commands\shop;
+namespace UnknowL\handlers\dataTypes;
 
 use pocketmine\item\Item;
 use pocketmine\Server;
-use UnknowL\commands\shop\ShopHandler;
+use UnknowL\handlers\ShopHandler;
 use UnknowL\lib\forms\BaseForm;
 use UnknowL\lib\forms\CustomForm;
 use UnknowL\lib\forms\CustomFormResponse;

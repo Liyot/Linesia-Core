@@ -3,6 +3,7 @@
 namespace UnknowL;
 
 use pocketmine\plugin\PluginBase;
+use pocketmine\Server;
 use pocketmine\utils\SingletonTrait;
 use UnknowL\commands\CommandManager;
 use UnknowL\trait\LoaderTrait;

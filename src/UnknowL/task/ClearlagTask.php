@@ -4,6 +4,7 @@ namespace UnknowL\task;
 
 use pocketmine\entity\object\ItemEntity;
 use pocketmine\lang\Translatable;
+use pocketmine\scheduler\AsyncTask;
 use pocketmine\scheduler\Task;
 use pocketmine\Server;
 use UnknowL\Linesia;

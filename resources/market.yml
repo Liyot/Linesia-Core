@@ -1,0 +1,17 @@
+# catégorie: "id:meta" | enchant: "id:level"
+market:
+  categories:
+    all:
+      "50:0":
+        - price: 500
+        - description: ""
+        - enchant: "1:4"
+        - name: "e"
+        - image: "items\apple"
+    swords:
+      "50:0":
+        - price: 500
+        - description: ""
+        - enchant: "4:1"
+        - name: "ef"
+        - image: "items\boat"

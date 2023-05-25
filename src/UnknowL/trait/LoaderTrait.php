@@ -6,12 +6,16 @@ use pocketmine\Server;
 use pocketmine\utils\Filesystem;
 use UnknowL\commands\CommandManager;
 use UnknowL\commands\kit\KitCommand;
+use UnknowL\commands\market\MarketCommand;
 use UnknowL\commands\money\MoneyCommand;
-use UnknowL\commands\shop\ShopHandler;
 use UnknowL\commands\shop\ShopCommand;
+use UnknowL\handlers\MarketHandler;
+use UnknowL\handlers\ShopHandler;
 use UnknowL\kits\KitManager;
 use UnknowL\lib\commando\exception\HookAlreadyRegistered;
 use UnknowL\lib\commando\PacketHooker;
+use UnknowL\lib\libasynql\DataConnector;
+use UnknowL\lib\libasynql\libasynql;
 use UnknowL\Linesia;
 use UnknowL\listener\PacketListener;
 use UnknowL\listener\PlayerListener;
@@ -30,6 +34,11 @@ trait LoaderTrait
 	private ClearlagTask $ClearlagManager;
 
 	private ShopHandler $shopHandler;
+
+	private MarketHandler $marketHandler;
+
+	private DataConnector $db;
+
 
 	/**
 	 * @throws HookAlreadyRegistered
@@ -60,6 +69,7 @@ trait LoaderTrait
 		$this->rankManager = new RankManager();
 		$this->kitManager = new KitManager();
 		$this->shopHandler = new ShopHandler();
+		$this->marketHandler = new MarketHandler();
 	}
 
 	/**
@@ -76,6 +86,10 @@ trait LoaderTrait
 	{
 		Linesia::getInstance()->saveResource("kits.json");
 		Linesia::getInstance()->saveResource("rank.json");
+		/**$this->db = libasynql::create($this, $this->getConfig()->get("database"), [
+			"sqlite" => "sqlite.sql",
+			"mysql" => "mysql.sql"
+		]);**/
 
 	}
 
@@ -84,6 +98,8 @@ trait LoaderTrait
 		Server::getInstance()->getCommandMap()->register("", new KitCommand());
 		Server::getInstance()->getCommandMap()->register("", new MoneyCommand());
 		Server::getInstance()->getCommandMap()->register("", new ShopCommand());
+		Server::getInstance()->getCommandMap()->register("", new MarketCommand());
+
 	}
 
 	private function loadTask(): void
@@ -131,4 +147,16 @@ trait LoaderTrait
 		return $this->shopHandler;
 	}
 
+	final public function getDatabase(): DataConnector
+	{
+		return $this->db;
+	}
+
+	/**
+	 * @return MarketHandler
+	 */
+	public function getMarketHandler(): MarketHandler
+	{
+		return $this->marketHandler;
+	}
 }

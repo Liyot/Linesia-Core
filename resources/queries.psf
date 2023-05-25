@@ -1,0 +1,38 @@
+-- #! sqlite
+-- #{ faction
+-- #    { create
+-- #		:name string
+-- #		:power int
+-- #
+INSERT INTO Factions VALUES (:name, :power);
+-- #    }
+-- #
+-- #    { update
+-- #       :uuid string
+-- #       :kills int
+-- #       :deaths int
+-- #       :kdr float
+-- #       :level int
+-- #       :xp int
+-- #       :killstreak int
+-- #       :prestige int
+-- #       :prime int
+-- #       :gold int
+-- #       :credits int
+-- #       :stars int
+-- #       :votecoins int
+-- #       :rank string
+INSERT INTO MAIN WHERE UUID = :uuid VALUES (:deaths, :kills, :kdr, :level, :xp, :killstreak, :prestige, :prime, :gold, :credits, :stars, :votecoins, :rank);
+-- # }
+-- #    { getall
+-- #       :uuid string
+SELECT * FROM Main WHERE UUID = :uuid;
+-- #    }
+-- # }
+-- # { table
+-- #    { create
+-- #       :name string
+CREATE TABLE :name (UUID string, DEATH int, KILL int, KDR float, LEVEL int, XP int, KILLSTREAK int, PRESTIGE int, PRIME int, GOLD int, CREDITS int, STARS int, VOTECOINS int, RANK string);
+-- #    }
+-- # }
+

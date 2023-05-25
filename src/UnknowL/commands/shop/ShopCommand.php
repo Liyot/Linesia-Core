@@ -4,10 +4,7 @@ namespace UnknowL\commands\shop;
 
 use pocketmine\command\CommandSender;
 use pocketmine\item\Item;
-use pocketmine\plugin\Plugin;
-use UnknowL\commands\shop\ShopData;
-use UnknowL\lib\commando\args\BooleanArgument;
-use UnknowL\lib\commando\args\OptionArgument;
+use UnknowL\handlers\dataTypes\ShopData;
 use UnknowL\lib\commando\args\StringArgument;
 use UnknowL\lib\commando\BaseCommand;
 use UnknowL\lib\commando\constraint\InGameRequiredConstraint;

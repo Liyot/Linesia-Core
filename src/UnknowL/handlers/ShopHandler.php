@@ -1,9 +1,10 @@
 <?php
 
-namespace UnknowL\commands\shop;
+namespace UnknowL\handlers;
 
 use pocketmine\item\Item;
 use pocketmine\utils\Config;
+use UnknowL\handlers\dataTypes\ShopData;
 use UnknowL\lib\forms\CustomForm;
 use UnknowL\lib\forms\CustomFormResponse;
 use UnknowL\lib\forms\element\Label;
@@ -14,7 +15,7 @@ use UnknowL\lib\forms\MenuForm;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 
-final class ShopHandler
+final class ShopHandler extends Handler
 {
 
 	public const CATEGORY_ALL = "all";
@@ -37,7 +38,7 @@ final class ShopHandler
 		$this->loadData();
 	}
 
-	private function loadData(): void
+	protected function loadData(): void
 	{
 		foreach ($this->config->get("items") as $category => $data)
 		{
@@ -49,7 +50,7 @@ final class ShopHandler
 		}
 	}
 
-	private function saveData(): void
+	protected function saveData(): void
 	{
 		foreach ($this->items as $category => $data)
 		{
