@@ -26,6 +26,13 @@ final class LinesiaPlayer extends Player
 		$this->rank = Linesia::getInstance()->getRankManager()->getRank($this->properties->getProperties("rank"));
 	}
 
+	final public function addPermission(string $perm)
+	{
+		$permissions = $this->getPlayerProperties()->getProperties("permissions");
+		$permissions[] = $perm;
+		$this->getPlayerProperties()->setProperties("permissions", $perm);
+	}
+
 
 	final public function getEconomyManager(): EconomyManager
 	{
@@ -36,7 +43,6 @@ final class LinesiaPlayer extends Player
 	{
 		return $this->properties;
 	}
-
 	/**
 	 * @return Rank
 	 */

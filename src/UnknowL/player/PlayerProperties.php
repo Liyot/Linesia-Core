@@ -18,7 +18,13 @@ final class PlayerProperties
 	{
 		if(!($nbt = $this->player->saveNBT())->getCompoundTag('properties') || empty($nbt->getCompoundTag("properties")->getValue())){
 			$this->setBaseProperties([
-				"rank" => Linesia::getInstance()->getRankManager()->getDefaultRank()->getName()
+				"rank" => Linesia::getInstance()->getRankManager()->getDefaultRank()->getName(),
+				"kit" => [
+					"base" => [
+						"cooldown" => null
+					],
+				],
+				"permissions" => $this->player->getRank()->getPermissions()
 			]);
 		}else{
 			$this->setBaseProperties($this->TagtoArray($nbt->getCompoundTag("properties")));
@@ -36,7 +42,6 @@ final class PlayerProperties
 				self::TagtoArray($value, array_search($value, $nbt->getValue(), true));
 			}else{
 				$name === null ? $this->array[$key] = $value->getValue() : $this->array[$name][$key] = $value->getValue();
-
 			}
 		}
 		return $this->properties;
@@ -51,6 +56,7 @@ final class PlayerProperties
 				"string" => $nbt->setString($property, $value),
 				"boolean" => $nbt->setByte($property, $value),
 				"array" => $nbt->setTag($property, self::arrayToTag($value)),
+				"object" => $nbt->setString($property, $value->serialize())
 			};
 		}
 		return $nbt;

@@ -32,7 +32,7 @@ final class KitManager
 
 	/**
 	 * @param string $name
-	 * @param Rank[] $ranks
+	 * @param string[] $ranks
 	 * @param array $content
 	 * @param array $armorContent
 	 * @param array $contentDisplay

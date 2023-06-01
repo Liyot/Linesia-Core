@@ -2,13 +2,16 @@
 
 namespace UnknowL\trait;
 
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\Server;
 use pocketmine\utils\Filesystem;
 use UnknowL\commands\CommandManager;
 use UnknowL\commands\kit\KitCommand;
 use UnknowL\commands\market\MarketCommand;
 use UnknowL\commands\money\MoneyCommand;
+use UnknowL\commands\rank\RankCommand;
 use UnknowL\commands\shop\ShopCommand;
+use UnknowL\handlers\CooldownHandler;
 use UnknowL\handlers\MarketHandler;
 use UnknowL\handlers\ShopHandler;
 use UnknowL\kits\KitManager;
@@ -21,6 +24,7 @@ use UnknowL\listener\PacketListener;
 use UnknowL\listener\PlayerListener;
 use UnknowL\rank\RankManager;
 use UnknowL\task\ClearlagTask;
+use UnknowL\utils\Cooldown;
 
 trait LoaderTrait
 {
@@ -32,6 +36,8 @@ trait LoaderTrait
 	private KitManager $kitManager;
 
 	private ClearlagTask $ClearlagManager;
+
+	private CooldownHandler $cooldownHandler;
 
 	private ShopHandler $shopHandler;
 
@@ -46,14 +52,19 @@ trait LoaderTrait
 	final public function loadAll(): void
 	{
 		Linesia::getInstance()->getLogger()->notice("§b Chargement du core Faction");
-		$this->loadLib();
 		$this->loadManager();
+		$this->loadLib();
 		$this->loadResources();
 		$this->loadCommands();
 		$this->loadListeners();
 		$this->loadTask();
 		$this->loadFolder();
 		Linesia::getInstance()->getLogger()->notice("§a Activation du core Faction");
+	}
+
+	final public function saveAll(): void
+	{
+		$this->saveManager();
 	}
 	
 	private function loadListeners(): void 
@@ -65,11 +76,17 @@ trait LoaderTrait
 
 	private function loadManager(): void
 	{
+		$this->cooldownHandler = new CooldownHandler();
 		$this->commandManager = new CommandManager();
 		$this->rankManager = new RankManager();
 		$this->kitManager = new KitManager();
 		$this->shopHandler = new ShopHandler();
 		$this->marketHandler = new MarketHandler();
+	}
+
+	private function saveManager(): void
+	{
+		$this->rankManager->saveAll();
 	}
 
 	/**
@@ -99,7 +116,7 @@ trait LoaderTrait
 		Server::getInstance()->getCommandMap()->register("", new MoneyCommand());
 		Server::getInstance()->getCommandMap()->register("", new ShopCommand());
 		Server::getInstance()->getCommandMap()->register("", new MarketCommand());
-
+		Server::getInstance()->getCommandMap()->register("", new RankCommand());
 	}
 
 	private function loadTask(): void
@@ -129,6 +146,11 @@ trait LoaderTrait
 	final public function getKitManager(): KitManager
 	{
 		return $this->kitManager;
+	}
+
+	final public function getCooldownHandler(): CooldownHandler
+	{
+		return $this->cooldownHandler;
 	}
 
 	/**

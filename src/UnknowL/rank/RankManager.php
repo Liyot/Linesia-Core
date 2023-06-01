@@ -23,6 +23,11 @@ final class RankManager
 		$this->loadAll();
 	}
 
+	final public function getAll(): array
+	{
+		return $this->ranks;
+	}
+
 	final public function getRank(string $name): ?Rank
 	{
 		return $this->ranks[strtolower($name)] ?? null;
@@ -46,4 +51,8 @@ final class RankManager
 		$this->ranks[strtolower($name)] = new Rank($name, $chatFormat, $permissions, $isDefault);
 	}
 
+	final public function saveAll(): void
+	{
+		$this->config->set("ranks", $this->ranks);
+	}
 }

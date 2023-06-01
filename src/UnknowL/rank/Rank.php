@@ -8,6 +8,25 @@ final class Rank
 	{
 	}
 
+	final public function addPermission(string $perm): void
+	{
+		$this->permissions[] = $perm;
+	}
+
+	final public function handleMessage(string $message, array $args): string
+	{
+		foreach ($args as $name => $value)
+		{
+			str_replace(sprintf('{%s}', $name), $value, $message);
+		}
+		return $message;
+	}
+
+	final public function testPermission(string $perm): bool
+	{
+		return in_array(strtolower($perm), $this->permissions, true);
+	}
+
 	/**
 	 * @return string
 	 */
@@ -38,15 +57,6 @@ final class Rank
 	public function isDefault(): bool
 	{
 		return $this->default;
-	}
-
-	final public function handleMessage(string $message, array $args): string
-	{
-		foreach ($args as $name => $value)
-		{
-			str_replace(sprintf('{%s}', $name), $value, $message);
-		}
-		return $message;
 	}
 
 
