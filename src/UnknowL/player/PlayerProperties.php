@@ -4,6 +4,7 @@ namespace UnknowL\player;
 
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\StringTag;
 use UnknowL\Linesia;
 use UnknowL\trait\PropertiesTrait;
 
@@ -24,7 +25,6 @@ final class PlayerProperties
 						"cooldown" => null
 					],
 				],
-				"permissions" => $this->player->getRank()->getPermissions()
 			]);
 		}else{
 			$this->setBaseProperties($this->TagtoArray($nbt->getCompoundTag("properties")));
@@ -56,7 +56,8 @@ final class PlayerProperties
 				"string" => $nbt->setString($property, $value),
 				"boolean" => $nbt->setByte($property, $value),
 				"array" => $nbt->setTag($property, self::arrayToTag($value)),
-				"object" => $nbt->setString($property, $value->serialize())
+				"object" => $nbt->setString($property, $value->serialize()),
+				"NULL" =>  $nbt->setString($property, "'null'")
 			};
 		}
 		return $nbt;

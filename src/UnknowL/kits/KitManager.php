@@ -25,7 +25,7 @@ final class KitManager
 	{
 		foreach ($this->config->get("kits") as $name => $data)
 		{
-			$this->loadKit($data["displayName"], $data["rank"],
+			$this->loadKit($data["displayName"], $data["permissions"],
 				$data["contents"], $data["armorContents"], $data["contentDisplay"], $data["armorDisplay"], $data["cooldown"]);
 		}
 	}
@@ -40,7 +40,7 @@ final class KitManager
 	 * @param array $cooldown
 	 * @return void
 	 */
-	private function loadKit(string $name, array $ranks, array $content, array $armorContent, array $contentDisplay, array $armorDisplay, array $cooldown): void
+	private function loadKit(string $name, array $ranks, array $content, array $armorContent, array $contentDisplay, array $armorDisplay, string $cooldown): void
 	{
 		$this->kits[strtolower($name)] = new Kit($name, $ranks, $content, $contentDisplay, $armorContent, $armorDisplay, $cooldown);
 	}

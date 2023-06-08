@@ -2,7 +2,9 @@
 
 namespace UnknowL\handlers;
 
+use pocketmine\block\inventory\DoubleChestInventory;
 use pocketmine\item\Item;
+use pocketmine\item\VanillaItems;
 use pocketmine\utils\Config;
 use UnknowL\handlers\dataTypes\ShopData;
 use UnknowL\lib\forms\CustomForm;
@@ -12,6 +14,9 @@ use UnknowL\lib\forms\element\Slider;
 use UnknowL\lib\forms\element\StepSlider;
 use UnknowL\lib\forms\menu\Button;
 use UnknowL\lib\forms\MenuForm;
+use UnknowL\lib\inventoryapi\inventories\BaseInventoryCustom;
+use UnknowL\lib\inventoryapi\inventories\DoubleInventory;
+use UnknowL\lib\inventoryapi\InventoryAPI;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 
@@ -88,25 +93,68 @@ final class ShopHandler extends Handler
 		return $rand;
 	}
 
-	final public function categoriesForm(string $category): MenuForm
+	final public function categoriesForm(string $category): DoubleInventory
 	{
-		$form = MenuForm::withOptions(ucfirst($category), "", array_map(fn(ShopData $data) => $data->getName(), $this->items[$category]),
-			function(LinesiaPlayer $player, Button $selected) use ($category)
+		$form = InventoryAPI::createDoubleChest(true);
+		$form->setItem(0, VanillaItems::RED_DYE()->setCustomName("Page Précédente"));
+		$form->setItem(53, VanillaItems::GREEN_DYE()->setCustomName("Page suivante"));
+		$form->setName(ucfirst($category));
+
+		$count = 0;
+		$pageCount = 0;
+		$pages = [];
+		$actualPages = 0;
+
+		/**
+		 * @var ShopData $shopData
+		 */
+		foreach ($this->items[$category] as $id => $shopData)
+		{
+			if($count === 52) ++$pageCount;
+			$pages[$pageCount][] = $shopData->getItem();
+			++$count;
+		}
+
+		array_map(fn(Item $item) => $form->addItem($item), $pages[$actualPages]);
+		$form->setClickListener(function (LinesiaPlayer $player, BaseInventoryCustom $inventory, Item $sourceItem, Item $targetItem, int $slot) use ($category, $form, $pageCount, $pages, $actualPages) {
+			switch ($slot)
 			{
-				/**@var ShopData $data **/
-				$data = array_values(array_filter($this->items[$category], fn(ShopData $value) => $value->getName() === $selected->text))[0];
+				case 0:
+					if(!($actualPages === 0))
+					{
+						array_map(fn(Item $item) => $inventory->removeItem($item), $inventory->getContents());
+						$inventory->setItem(0, VanillaItems::RED_DYE()->setCustomName("Page Précédente"));
+						$inventory->setItem(53, VanillaItems::GREEN_DYE()->setCustomName("Page suivante"));
+					}
+					break;
+
+				case 53:
+					if (!($actualPages === count($pages)))
+					{
+						++$pageCount;
+						array_map(fn(Item $item) => $inventory->addItem($item), $pages[$pageCount]);
+					}
+					break;
+
+
+			}
+			$form->onClose($player);
+			/**@var ShopData $data **/
+			$data = array_values(array_filter($this->items[$category], fn(ShopData $value) => $targetItem === $value->getItem()));
+			if(isset($data[0])){
 				$form = new CustomForm($data->getName(),
 					[
-					new Label(sprintf("Item: %s \n Description: %s.\n Prix: %d$ !",$data->getItem()->getName(), $data->getDescription(), $data->getPrice())),
-					new Slider("Quantités", 1, $data->getQuantities()),
+						new Label(sprintf("Item: %s \n Description: %s.\n Prix: %d$ !",$data->getItem()->getName(), $data->getDescription(), $data->getPrice())),
+						new Slider("Quantités", 1, $data->getQuantities()),
 					],
-					function (LinesiaPlayer $player, CustomFormResponse $response) use ($data)
-				{
-					$data->buy($response->getSlider()->getValue(), $player);
-				});
+					function (LinesiaPlayer $player, CustomFormResponse $response) use ($form, $data)
+					{
+						$data->buy($response->getSlider()->getValue(), $player);
+						$form->send($player);
+					});
 				$player->sendForm($form);
-			});
-
+			}
+		});
 		return $form;
 	}
 

@@ -4,6 +4,8 @@ namespace UnknowL\commands\shop;
 
 use pocketmine\command\CommandSender;
 use pocketmine\item\Item;
+use pocketmine\item\VanillaItems;
+use pocketmine\scheduler\ClosureTask;
 use UnknowL\handlers\dataTypes\ShopData;
 use UnknowL\handlers\ShopHandler;
 use UnknowL\lib\commando\args\StringArgument;
@@ -17,6 +19,8 @@ use UnknowL\lib\forms\element\Label;
 use UnknowL\lib\forms\element\Slider;
 use UnknowL\lib\forms\menu\Button;
 use UnknowL\lib\forms\MenuForm;
+use UnknowL\lib\inventoryapi\inventories\BaseInventoryCustom;
+use UnknowL\lib\inventoryapi\InventoryAPI;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 
@@ -47,30 +51,43 @@ class ShopCommand extends BaseCommand
 
 	protected function sendMainForm(LinesiaPlayer $player, bool $sell = false): void
 	{
-		$this->setCategory($player, $sell);
+		$form = MenuForm::withOptions("Que souhaitez vous faire?", "", ["Vendre", "Acheter"],
+			fn (LinesiaPlayer $player, Button $selected) => $this->setCategory($player, $selected->text === "Vendre"));
+		$player->sendForm($form);
 	}
 
-	private function setCategory(LinesiaPlayer $player, bool $sell = false): void
+	private function setCategory(LinesiaPlayer $player, bool $sell): void
 	{
-		$form = MenuForm::withOptions("Catégories", "",["Générale", "Blocks", "Armures", "Epées", "Spécial", "Autres"], function (LinesiaPlayer $player, Button $selected) use ($sell) {
-			$this->category = match ($selected->text)
+		$form = InventoryAPI::createSimpleChest(true)
+			->setName("Catégories");
+		$form->addItem(
+			VanillaItems::SLIMEBALL()->setCustomName("Générale"),
+				VanillaItems::SLIMEBALL()->setCustomName("Blocks"),
+				VanillaItems::SLIMEBALL()->setCustomName("Armures"),
+				VanillaItems::SLIMEBALL()->setCustomName("Epées"),
+				VanillaItems::SLIMEBALL()->setCustomName("Spécial"),
+				VanillaItems::SLIMEBALL()->setCustomName("Autres"));
+		$form->setClickListener(function (LinesiaPlayer $player, BaseInventoryCustom $inventory, Item $sourceItem, Item $targetItem, int $slot) use ($form, $sell) {
+			$this->category = match ($targetItem->getCustomName())
 			{
-				"Générale" => ShopHandler::CATEGORY_ALL,
 				"Blocks" => ShopHandler::CATEGORY_BLOCKS,
 				"Armures" => ShopHandler::CATEGORY_ARMORS,
 				"Epées" => ShopHandler::CATEGORY_SWORDS,
 				"Spécial" => ShopHandler::CATEGORY_SPECIAL,
-				"Autres" => ShopHandler::CATEGORY_OTHER
+				"Autres" => ShopHandler::CATEGORY_OTHER,
+				default => ShopHandler::CATEGORY_ALL
 			};
-			$sell ? $player->sendForm(Linesia::getInstance()->getShopHandler()->categoriesForm($this->category)) : $this->sellForm($player, $this->category);
+			$form->onClose($player);
+			Linesia::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => ($sell ? $this->sellForm($player, $this->category) : Linesia::getInstance()->getShopHandler()->categoriesForm($this->category)->send($player))), 20);
+
 		});
-		$player->sendForm($form);
+		$form->send($player);
 	}
 
 	protected function sellForm(LinesiaPlayer $player, string $category): void
 	{
 		//REFAIS TA DISPOSITION STV
-		$options = array_map(fn($value) => $value->getName(), $player->getInventory()->getContents());
+		$options = array_map(fn($value) => $value->getName() , $player->getInventory()->getContents());
 		sort($options, SORT_NUMERIC);
 		$form = new CustomForm("Vendre vos objets", [
 			new Label("Renseignez les informations"), new Slider("Quantités", 1, 64),

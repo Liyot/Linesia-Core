@@ -69,6 +69,6 @@ trait PropertiesTrait
 	}
 
 	public function setBaseProperties(array $properties): void{
-		$this->properties  = $properties;
+		$this->properties = $properties;
 	}
 }

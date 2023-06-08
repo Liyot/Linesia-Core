@@ -24,7 +24,7 @@ use UnknowL\listener\PacketListener;
 use UnknowL\listener\PlayerListener;
 use UnknowL\rank\RankManager;
 use UnknowL\task\ClearlagTask;
-use UnknowL\utils\Cooldown;
+use UnknowL\handlers\dataTypes\Cooldown;
 
 trait LoaderTrait
 {
@@ -76,7 +76,7 @@ trait LoaderTrait
 
 	private function loadManager(): void
 	{
-		$this->cooldownHandler = new CooldownHandler();
+		//$this->cooldownHandler = new CooldownHandler();
 		$this->commandManager = new CommandManager();
 		$this->rankManager = new RankManager();
 		$this->kitManager = new KitManager();
@@ -87,6 +87,7 @@ trait LoaderTrait
 	private function saveManager(): void
 	{
 		$this->rankManager->saveAll();
+	//	$this->cooldownHandler->saveAll();
 	}
 
 	/**

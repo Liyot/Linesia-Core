@@ -2,15 +2,22 @@
 
 namespace UnknowL\kits;
 
+use Cassandra\Date;
+use DateTime;
+use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\event\player\PlayerItemUseEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\VanillaItems;
+use UnknowL\handlers\CooldownHandler;
+use UnknowL\handlers\dataTypes\PlayerCooldown;
 use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
 use UnknowL\lib\inventoryapi\InventoryAPI;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 use UnknowL\rank\Rank;
-use UnknowL\utils\Cooldown;
+use UnknowL\handlers\dataTypes\Cooldown;
+use UnknowL\utils\PathLoader;
 
 final class Kit
 {
@@ -22,33 +29,45 @@ final class Kit
 	 * @param array $contentDisplay
 	 * @param array $armorContent
 	 * @param array $armorDisplay
-	 * @param array $cooldownData
+	 * @param string $cooldownData
 	 */
-	public function __construct(protected string $name, private array $rank, private array $content = [], private array $contentDisplay = [], private array $armorContent = [], private array $armorDisplay = [], private array $cooldownData = [])
+	public function __construct(protected string $name, private array $rank, private array $content = [], private array $contentDisplay = [], private array $armorContent = [], private array $armorDisplay = [], private string $cooldownData = "")
 	{
 	}
 
 	final public function canClaim(LinesiaPlayer $player): bool
 	{
-		return
-			(count(array_filter($this->rank,fn($perm) => $player->getRank()->testPermission($perm))) >= 1)
-			&& $this->testCooldown($player);
-
+		$return = true;
+		if(!count(array_filter($this->rank,fn($perm) => $player->hasPermission($perm))) >= 1 )
+		{
+			$player->sendMessage("Vous n'avez pas la permission");
+			$return = false;
+		}
+		if(!$this->testCooldown($player))
+		{
+			$return =  false;
+		}
+		return $return;
 	}
 
 	private function testCooldown(LinesiaPlayer $player): bool
 	{
-		$cooldown = Linesia::getInstance()->getCooldownHandler()->unserizalize($player->getPlayerProperties()->getNestedProperties("kit.%s.cooldown"));
-		if(!$cooldown->end())
+		$cooldown = $player->getCooldown(PathLoader::PATH_KIT_COOLDOWN, strtolower($this->getName()));
+		if(!is_null($cooldown))
 		{
-			$player->sendPopup(sprintf("Il te reste %s à attendre", $cooldown->format()));
-			return true;
+			if(!$cooldown->end())
+			{
+				$player->sendPopup(sprintf("Il te reste %s à attendre", $cooldown->format()));
+				return false;
+			}
 		}
-		return false;
+
+		return true;
 	}
 
 	final public function send(LinesiaPlayer $player): void
 	{
+		$data = sprintf("kit.%s.cooldown", strtolower($this->name));
 		if($this->canClaim($player))
 		{
 			$func = function ($value) : Item
@@ -64,11 +83,10 @@ final class Kit
 				}
 			} , $this->armorContent);
 
-			array_map(fn($item) => $player->getInventory()->addItem($func($item)), $this->content);
-			$cooldown = new Cooldown(fn(LinesiaPlayer $player) => $player->getPlayerProperties()->setNestedProperties(sprintf("kit.%s.cooldown", strtolower($this->name)), null),
-				$this->cooldownData[0], $this->cooldownData[1], $this->cooldownData[2], $this->cooldownData[3], sprintf("kit.%s.cooldown", strtolower($this->name)), $player);
 
-			$player->getPlayerProperties()->setNestedProperties(sprintf("kit.%s.cooldown", strtolower($this->name)), $cooldown);
+			array_map(fn($item) => $player->getInventory()->addItem($func($item)), $this->content);
+			new PlayerCooldown(DateTime::createFromFormat("d:H:i:s", $this->cooldownData), $player, $data, (int)explode(":", $this->cooldownData)[0] === 0);
+			$player->sendPopup(sprintf("[+] %s", $this->getName()));
 		}
 	}
 

@@ -5,7 +5,7 @@ namespace refaltor\inventoryapi\events;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\Listener;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
-use refaltor\inventoryapi\inventories\SimpleChestInventory;
+use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
 
 class PacketListener implements Listener
 {

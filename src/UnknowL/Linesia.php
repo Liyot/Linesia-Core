@@ -8,7 +8,7 @@ use pocketmine\Server;
 use pocketmine\utils\SingletonTrait;
 use UnknowL\commands\CommandManager;
 use UnknowL\trait\LoaderTrait;
-use UnknowL\utils\Cooldown;
+use UnknowL\handlers\dataTypes\Cooldown;
 
 final class Linesia extends PluginBase
 {
