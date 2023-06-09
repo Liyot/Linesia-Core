@@ -14,6 +14,12 @@ use UnknowL\utils\CommandUtils;
 final class RankSet extends BaseSubCommand
 {
 
+	public function __construct()
+	{
+		$settings = Linesia::getInstance()->getCommandManager()->getSettings("rank")->getSubSettings("addperm");
+		parent::__construct($settings->getName(), $settings->getDescription(), $settings->getAliases());
+	}
+
 	protected function prepare(): void
 	{
 		$this->registerArgument(0, new TargetArgument("joueur"));

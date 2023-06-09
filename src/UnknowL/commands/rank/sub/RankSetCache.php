@@ -1,0 +1,50 @@
+<?php
+
+namespace UnknowL\commands\rank\sub;
+
+use pocketmine\command\CommandSender;
+use pocketmine\Server;
+use UnknowL\lib\commando\args\StringArgument;
+use UnknowL\lib\commando\args\TargetArgument;
+use UnknowL\Linesia;
+use UnknowL\utils\CommandUtils;
+
+class RankSetCache extends \UnknowL\lib\commando\BaseSubCommand
+{
+
+	public function __construct()
+	{
+		$settings = Linesia::getInstance()->getCommandManager()->getSettings("rank")->getSubSettings("addperm");
+		parent::__construct($settings->getName(), $settings->getDescription(), $settings->getAliases());
+	}
+
+
+	/**
+     * @inheritDoc
+     */
+    protected function prepare(): void
+    {
+		$this->registerArgument(0, new StringArgument("rank"));
+		$this->registerArgument(1, new TargetArgument("player"));
+	}
+
+    public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
+    {
+		if(count($args) === 2)
+		{
+			if (!is_null(($rank = Linesia::getInstance()->getRankManager()->getRank($args["rank"]))))
+			{
+				if(($player = CommandUtils::checkTarget($args["joueur"])))
+				{
+					foreach ($rank->getPermissions() as $permission)
+					{
+						$player->addPermission($permission);
+					}
+					$sender->sendMessage("Commande effectué avec succés");
+					return;
+				}
+			}
+		}
+		$sender->sendMessage($this->getUsageMessage());
+    }
+}
