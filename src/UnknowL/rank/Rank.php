@@ -2,10 +2,14 @@
 
 namespace UnknowL\rank;
 
+use pocketmine\permission\Permission;
+use pocketmine\permission\PermissionManager;
+
 final class Rank
 {
 	public function __construct(protected string $name, private string $chatFormat, private array $permissions, private bool $default)
 	{
+		array_map(fn(string $permission) => PermissionManager::getInstance()->addPermission(new Permission($permission)),$permissions);
 	}
 
 	final public function addPermission(string $perm): void

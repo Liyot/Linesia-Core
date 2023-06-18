@@ -2,17 +2,23 @@
 
 namespace UnknowL\handlers\dataTypes;
 
+use pocketmine\data\bedrock\item\SavedItemStackData;
 use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\Item;
 use UnknowL\player\LinesiaPlayer;
 
 class MarketData
 {
-	public function __construct(private Item $item, private EnchantmentInstance $enchantment, private int $price = 0,
-								private string $description = "", private string $image = "", private string $name = "", private int $quantities = 64)
-	{
-
-	}
+	public function __construct
+	(
+		private Item $item,
+		private EnchantmentInstance $enchantment,
+		private int $price = 0,
+		private string $description = "",
+		private string $image = "",
+		private string $name = "",
+		private int $quantities = 64
+	){}
 
 	final public function buy(LinesiaPlayer $player, MarketData $data, int $quantities): void
 	{

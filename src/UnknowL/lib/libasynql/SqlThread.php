@@ -54,9 +54,8 @@ interface SqlThread{
 	 * Handles the results that this query has completed
 	 *
 	 * @param callable[] $callbacks
-	 * @param int|null $expectedResults
 	 */
-	public function readResults(array &$callbacks, ?int $expectedResults) : void;
+	public function readResults(array &$callbacks) : void;
 
 	/**
 	 * Checks if the initial connection has been made, no matter successful or not.

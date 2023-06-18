@@ -3,6 +3,7 @@
 namespace UnknowL\commands\rank\sub;
 
 use pocketmine\command\CommandSender;
+use UnknowL\handlers\Handler;
 use UnknowL\lib\commando\args\StringArgument;
 use UnknowL\lib\commando\args\TargetArgument;
 use UnknowL\lib\commando\BaseSubCommand;
@@ -16,7 +17,7 @@ final class RankSet extends BaseSubCommand
 
 	public function __construct()
 	{
-		$settings = Linesia::getInstance()->getCommandManager()->getSettings("rank")->getSubSettings("addperm");
+		$settings = Linesia::getInstance()->getCommandManager()->getSettings("rank")->getSubSettings("set");
 		parent::__construct($settings->getName(), $settings->getDescription(), $settings->getAliases());
 	}
 
@@ -33,7 +34,7 @@ final class RankSet extends BaseSubCommand
 		{
 			if($this->testPermissionSilent($sender) && ($player = CommandUtils::checkTarget($args["joueur"])))
 			{
-				$rank = Linesia::getInstance()->getRankManager()->getRank($args["rank"]);
+				$rank = Handler::RANK()->getRank($args["rank"]);
 				is_null($rank) ? $sender->sendMessage("Ce grade n'éxiste pas") : $player->setRank($rank);
 			}
 			return;

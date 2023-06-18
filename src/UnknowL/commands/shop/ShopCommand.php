@@ -7,6 +7,7 @@ use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
 use pocketmine\scheduler\ClosureTask;
 use UnknowL\handlers\dataTypes\ShopData;
+use UnknowL\handlers\Handler;
 use UnknowL\handlers\ShopHandler;
 use UnknowL\lib\commando\args\StringArgument;
 use UnknowL\lib\commando\BaseCommand;
@@ -37,6 +38,7 @@ class ShopCommand extends BaseCommand
 
 	protected function prepare(): void
     {
+		$this->setPermission("pocketmine.group.user");
 		$this->addConstraint(new InGameRequiredConstraint($this));
 		$this->registerArgument(0, new StringArgument("buy/sell"));
 	}
@@ -68,17 +70,18 @@ class ShopCommand extends BaseCommand
 				VanillaItems::SLIMEBALL()->setCustomName("Spécial"),
 				VanillaItems::SLIMEBALL()->setCustomName("Autres"));
 		$form->setClickListener(function (LinesiaPlayer $player, BaseInventoryCustom $inventory, Item $sourceItem, Item $targetItem, int $slot) use ($form, $sell) {
-			$this->category = match ($targetItem->getCustomName())
+			$this->category = match ($sourceItem->getCustomName())
 			{
 				"Blocks" => ShopHandler::CATEGORY_BLOCKS,
 				"Armures" => ShopHandler::CATEGORY_ARMORS,
 				"Epées" => ShopHandler::CATEGORY_SWORDS,
 				"Spécial" => ShopHandler::CATEGORY_SPECIAL,
 				"Autres" => ShopHandler::CATEGORY_OTHER,
-				default => ShopHandler::CATEGORY_ALL
+				"Générale" => ShopHandler::CATEGORY_ALL,
+
 			};
 			$form->onClose($player);
-			Linesia::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(fn() => ($sell ? $this->sellForm($player, $this->category) : Linesia::getInstance()->getShopHandler()->categoriesForm($this->category)->send($player))), 20);
+			$sell ? $this->sellForm($player, $this->category) : Handler::SHOP()->categoriesForm($this->category)->send($player);
 
 		});
 		$form->send($player);
@@ -96,8 +99,7 @@ class ShopCommand extends BaseCommand
 			new Input("Prix", "0"),
 			new Input("Description", "")],
 		function (LinesiaPlayer $player, CustomFormResponse $response) use ($category) {
-			$handler = Linesia::getInstance()->getShopHandler();
-
+			$handler = Handler::SHOP();
 			$quantities = $response->getSlider()->getValue();
 			$itemName = $response->getDropdown()->getSelectedOption();
 			$name = $response->getInput()->getValue();

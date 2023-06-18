@@ -14,7 +14,7 @@ class Button implements \JsonSerializable{
     }
 
 	public function getValue() : int{
-		return $this->value ?? throw new \InvalidStateException("Trying to access an uninitialized value");
+		return $this->value ?? throw new \InvalidArgumentException("Trying to access an uninitialized value");
 	}
 
 	public function setValue(int $value) : self{

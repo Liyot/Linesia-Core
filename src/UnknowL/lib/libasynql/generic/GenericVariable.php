@@ -22,8 +22,8 @@ declare(strict_types=1);
 
 namespace UnknowL\lib\libasynql\generic;
 
+use Couchbase\InvalidStateException;
 use InvalidArgumentException;
-use InvalidStateException;
 use JsonSerializable;
 use function assert;
 use function in_array;

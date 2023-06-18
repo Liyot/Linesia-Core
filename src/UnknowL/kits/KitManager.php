@@ -3,10 +3,11 @@
 namespace UnknowL\kits;
 
 use pocketmine\utils\Config;
+use UnknowL\handlers\Handler;
 use UnknowL\Linesia;
 use UnknowL\rank\Rank;
 
-final class KitManager
+final class KitManager extends Handler
 {
 	/**
 	 * @var Kit[]
@@ -19,6 +20,7 @@ final class KitManager
 	{
 		$this->config = new Config(Linesia::getInstance()->getDataFolder()."kits.json");
 		$this->loadAll();
+		parent::__construct();
 	}
 
 	private function loadAll(): void
@@ -37,7 +39,7 @@ final class KitManager
 	 * @param array $armorContent
 	 * @param array $contentDisplay
 	 * @param array $armorDisplay
-	 * @param array $cooldown
+	 * @param string $cooldown
 	 * @return void
 	 */
 	private function loadKit(string $name, array $ranks, array $content, array $armorContent, array $contentDisplay, array $armorDisplay, string $cooldown): void
@@ -62,5 +64,14 @@ final class KitManager
 	public function getKits(): array
 	{
 		return $this->kits;
+	}
+
+	protected function loadData(): void {}
+
+	protected function saveData(): void {}
+
+	public function getName(): string
+	{
+		return "kit";
 	}
 }

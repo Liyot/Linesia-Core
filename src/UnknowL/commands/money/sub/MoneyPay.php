@@ -26,6 +26,7 @@ final class MoneyPay extends BaseSubCommand
 	 */
 	protected function prepare(): void
 	{
+		$this->setPermission("pocketmine.group.user");
 		$this->registerArgument(0, new TargetArgument("joueur"));
 		$this->registerArgument(1, new IntegerArgument("montant"));
 		$this->addConstraint(new InGameRequiredConstraint($this));

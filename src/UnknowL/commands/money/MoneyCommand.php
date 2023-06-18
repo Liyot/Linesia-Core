@@ -26,6 +26,7 @@ class MoneyCommand extends BaseCommand
      */
     protected function prepare(): void
     {
+		$this->setPermission("pocketmine.group.user");
 		$this->registerSubCommand(new MoneyPay());
 		$this->registerSubCommand(new MoneyGive());
 		$this->registerSubCommand(new MoneySet());

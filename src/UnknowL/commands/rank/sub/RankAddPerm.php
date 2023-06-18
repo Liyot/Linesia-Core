@@ -4,6 +4,7 @@ namespace UnknowL\commands\rank\sub;
 
 use pocketmine\command\CommandSender;
 use pocketmine\Server;
+use UnknowL\handlers\Handler;
 use UnknowL\lib\commando\args\StringArgument;
 use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
 use UnknowL\lib\forms\CustomForm;
@@ -28,6 +29,7 @@ class RankAddPerm extends \UnknowL\lib\commando\BaseSubCommand
      */
     protected function prepare(): void
     {
+		$this->setPermission("pocketmine.group.user");
 		$this->addConstraint(new InGameRequiredConstraint($this));
 	}
 
@@ -55,12 +57,12 @@ class RankAddPerm extends \UnknowL\lib\commando\BaseSubCommand
 					break;
 
 				case "Rank":
-					$options = array_keys(Linesia::getInstance()->getRankManager()->getAll());
+					$options = array_keys(Handler::RANK()->getRanks());
 
 					$form = new CustomForm("Ajouter une permission", [new Dropdown("Choississez le grade", $options), new Input("Entrez votre permission", "")],
 						function(LinesiaPlayer $player, CustomFormResponse $response)
 						{
-							$rank = Linesia::getInstance()->getRankManager()->getRank($response->getDropdown()->getSelectedOption());
+							$rank = Handler::RANK()->getRank($response->getDropdown()->getSelectedOption());
 							$perm = $response->getInput()->getValue();
 							$rank->addPermission($perm);
 							$player->sendPopup("La commande à été effectué avec succés");

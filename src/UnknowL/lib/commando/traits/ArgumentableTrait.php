@@ -95,7 +95,7 @@ trait ArgumentableTrait{
 		$offset = 0;
 		if(count($rawArgs) > 0) {
 			foreach($this->argumentList as $pos => $possibleArguments) {
-				// try the one that spans more first... before the others
+				// try the one that spans more first... before the specific
 				usort($possibleArguments, function (BaseArgument $a, BaseArgument $b): int {
 					if($a->getSpanLength() === PHP_INT_MAX) { // if it takes unlimited arguments, pull it down
 						return 1;

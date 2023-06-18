@@ -5,6 +5,7 @@ namespace UnknowL\handlers;
 use pocketmine\block\inventory\DoubleChestInventory;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\Config;
 use UnknowL\handlers\dataTypes\ShopData;
 use UnknowL\lib\forms\CustomForm;
@@ -16,6 +17,7 @@ use UnknowL\lib\forms\menu\Button;
 use UnknowL\lib\forms\MenuForm;
 use UnknowL\lib\inventoryapi\inventories\BaseInventoryCustom;
 use UnknowL\lib\inventoryapi\inventories\DoubleInventory;
+use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
 use UnknowL\lib\inventoryapi\InventoryAPI;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
@@ -41,6 +43,7 @@ final class ShopHandler extends Handler
 	{
 		$this->config = new Config(Linesia::getInstance()->getDataFolder()."data/shop/shop.json", Config::JSON);
 		$this->loadData();
+		parent::__construct();
 	}
 
 	protected function loadData(): void
@@ -50,7 +53,7 @@ final class ShopHandler extends Handler
 			array_walk($data, function($data, $id)
 			{
 				$this->items[$data["category"]][$id] = new ShopData($data["player"], $data["name"], $data["price"], $this,
-					Item::jsonDeserialize($data["item"]), $data["quantities"], $data["description"], $data["category"]);
+					Item::jsonDeserialize($data["item"]), $data["quantities"], $data["description"], $data["category"], $id);
 			});
 		}
 	}
@@ -61,9 +64,10 @@ final class ShopHandler extends Handler
 		{
 			if(!empty($category))
 			{
-				array_walk($this->items[$category], function(ShopData $value, int $id) use ($category) {
-					$this->config->setNested("items.".$category, [$id => $value->format()]);
-					$this->config->save();
+				$config = $this->config;
+				array_walk($this->items[$category], function(ShopData $value, int $id) use ($config, $category) {
+					$config->setNested("items.".$category, [$id => $value->format()]);
+					$config->save();
 				});
 				return;
 			}
@@ -79,7 +83,8 @@ final class ShopHandler extends Handler
 	{
 		foreach ($this->items as $category => $data)
 		{
-			unset($data[$id]);
+			var_dump($data, $id);
+			unset($this->items[$category][$id]);
 		}
 	}
 
@@ -93,7 +98,7 @@ final class ShopHandler extends Handler
 		return $rand;
 	}
 
-	final public function categoriesForm(string $category): DoubleInventory
+	final public function categoriesForm(string $category): SimpleChestInventory
 	{
 		$form = InventoryAPI::createDoubleChest(true);
 		$form->setItem(0, VanillaItems::RED_DYE()->setCustomName("Page Précédente"));
@@ -111,11 +116,13 @@ final class ShopHandler extends Handler
 		foreach ($this->items[$category] as $id => $shopData)
 		{
 			if($count === 52) ++$pageCount;
-			$pages[$pageCount][] = $shopData->getItem();
+			$pages[$pageCount][] = $shopData;
 			++$count;
 		}
 
-		array_map(fn(Item $item) => $form->addItem($item), $pages[$actualPages]);
+
+
+			array_map(fn(ShopData $data) => $form->addItem($data->getItem()), empty($pages) ? [] : $pages[$actualPages]);
 		$form->setClickListener(function (LinesiaPlayer $player, BaseInventoryCustom $inventory, Item $sourceItem, Item $targetItem, int $slot) use ($category, $form, $pageCount, $pages, $actualPages) {
 			switch ($slot)
 			{
@@ -125,23 +132,27 @@ final class ShopHandler extends Handler
 						array_map(fn(Item $item) => $inventory->removeItem($item), $inventory->getContents());
 						$inventory->setItem(0, VanillaItems::RED_DYE()->setCustomName("Page Précédente"));
 						$inventory->setItem(53, VanillaItems::GREEN_DYE()->setCustomName("Page suivante"));
+						$form->onClose($player);
+						$form->send($player);
 					}
 					break;
 
 				case 53:
-					if (!($actualPages === count($pages)))
+					if (($actualPages + 1) <=  $pageCount)
 					{
-						++$pageCount;
-						array_map(fn(Item $item) => $inventory->addItem($item), $pages[$pageCount]);
+						++$actualPages;
+						array_map(fn(Item $item) => $inventory->addItem($item), $pages[$actualPages]);
+						$form->onClose($player);
+						$form->send($player);
 					}
 					break;
-
-
 			}
 			$form->onClose($player);
 			/**@var ShopData $data **/
-			$data = array_values(array_filter($this->items[$category], fn(ShopData $value) => $targetItem === $value->getItem()));
+			var_dump(spl_object_id($sourceItem));
+			$data = array_values(array_filter(empty($pages) ? [] : $pages[$pageCount], fn(ShopData $value) => spl_object_id($sourceItem) === spl_object_id($value)));
 			if(isset($data[0])){
+				$data = $data[0];
 				$form = new CustomForm($data->getName(),
 					[
 						new Label(sprintf("Item: %s \n Description: %s.\n Prix: %d$ !",$data->getItem()->getName(), $data->getDescription(), $data->getPrice())),
@@ -150,7 +161,6 @@ final class ShopHandler extends Handler
 					function (LinesiaPlayer $player, CustomFormResponse $response) use ($form, $data)
 					{
 						$data->buy($response->getSlider()->getValue(), $player);
-						$form->send($player);
 					});
 				$player->sendForm($form);
 			}
@@ -161,5 +171,10 @@ final class ShopHandler extends Handler
 	public function __destruct()
 	{
 		$this->saveData();
+	}
+
+	public function getName(): string
+	{
+		return "Shop";
 	}
 }

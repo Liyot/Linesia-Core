@@ -5,6 +5,7 @@ namespace UnknowL\player;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
+use UnknowL\handlers\Handler;
 use UnknowL\Linesia;
 use UnknowL\trait\PropertiesTrait;
 
@@ -19,7 +20,7 @@ final class PlayerProperties
 	{
 		if(!($nbt = $this->player->saveNBT())->getCompoundTag('properties') || empty($nbt->getCompoundTag("properties")->getValue())){
 			$this->setBaseProperties([
-				"rank" => Linesia::getInstance()->getRankManager()->getDefaultRank()->getName(),
+				"rank" => Handler::RANK()->getDefaultRank()->getName(),
 				"kit" => [
 					"base" => [
 						"cooldown" => null

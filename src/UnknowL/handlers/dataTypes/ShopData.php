@@ -3,6 +3,7 @@
 namespace UnknowL\handlers\dataTypes;
 
 use pocketmine\item\Item;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\Server;
 use UnknowL\handlers\ShopHandler;
 use UnknowL\lib\forms\BaseForm;
@@ -16,11 +17,9 @@ use UnknowL\player\LinesiaPlayer;
 class ShopData
 {
 
-	protected int $id;
-
-	public function __construct(private string $player, private string $name, private int $price, private ShopHandler $handler, private Item $item, private int $quantities = 1, private string $description = "", private string $category = "all")
+	public function __construct(private string $player, private string $name, private int $price, private ShopHandler $handler, private Item $item, private int $quantities = 1, private string $description = "", private string $category = "all", protected int $id = 0)
 	{
-		$this->id = $handler->generateId($category);
+		!($this->id === 0) ?: $this->id = $handler->generateId($category);
 	}
 
 	final public function getForm(): BaseForm
@@ -46,12 +45,25 @@ class ShopData
 		 * @var LinesiaPlayer $player
 		 */
 		$player = Server::getInstance()->getPlayerExact($this->player);
-		if($player->getEconomyManager()->transfer($this->price * $quantities, $client))
+
+		if ($player === null)
+		{
+			$data = Server::getInstance()->getOfflinePlayerData($this->player)->safeClone();
+			$properties = $data->getCompoundTag("properties");
+			$properties->getCompoundTag("manager")->getCompoundTag("economy")
+				->setInt("money", $properties->getCompoundTag("manager")->getCompoundTag("economy")->getInt("money") + $this->price * $quantities);
+			Server::getInstance()->saveOfflinePlayerData("properties", $properties);
+
+			$client->getInventory()->addItem($this->getItem()->setCount($quantities));
+
+			$client->sendMessage("Votre achat à été effectué avec succés");
+		}
+
+		if(!is_null($player) && $player->getEconomyManager()->transfer($this->price * $quantities, $client))
 		{
 			$player->sendMessage(sprintf("Votre objet %s à été vendu %d fois pour un total de %d$", $this->name, $quantities, $quantities * $this->price));
 			$client->getInventory()->addItem($this->getItem()->setCount($quantities));
 		}
-
 		if ($this->quantities === $quantities)
 		{
 			$this->handler->removeSellable($this->id);

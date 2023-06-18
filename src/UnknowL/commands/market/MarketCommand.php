@@ -5,7 +5,9 @@ namespace UnknowL\commands\market;
 use pocketmine\command\CommandSender;
 use pocketmine\item\Item;
 use pocketmine\plugin\Plugin;
+use UnknowL\handlers\Handler;
 use UnknowL\handlers\ShopHandler;
+use UnknowL\lib\commando\BaseCommand;
 use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
 use UnknowL\lib\forms\CustomForm;
 use UnknowL\lib\forms\CustomFormResponse;
@@ -18,7 +20,7 @@ use UnknowL\lib\forms\MenuForm;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 
-class MarketCommand extends \UnknowL\lib\commando\BaseCommand
+class MarketCommand extends BaseCommand
 {
 
 	private string $category;
@@ -34,6 +36,7 @@ class MarketCommand extends \UnknowL\lib\commando\BaseCommand
      */
     protected function prepare(): void
     {
+		$this->setPermission("pocketmine.group.user");
 		$this->addConstraint(new InGameRequiredConstraint($this));
 	}
 
@@ -57,7 +60,7 @@ class MarketCommand extends \UnknowL\lib\commando\BaseCommand
 				"Spécial" => ShopHandler::CATEGORY_SPECIAL,
 				"Autres" => ShopHandler::CATEGORY_OTHER
 			};
-			$player->sendForm(Linesia::getInstance()->getMarketHandler()->getForm($this->category));
+			$player->sendForm(Handler::MARKET()->getForm($this->category));
 		});
 		$player->sendForm($form);
 	}

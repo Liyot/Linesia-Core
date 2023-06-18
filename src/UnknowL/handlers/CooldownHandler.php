@@ -3,15 +3,12 @@
 namespace UnknowL\handlers;
 
 use DateTime;
-use pocketmine\event\entity\ExplosionPrimeEvent;
-use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\Task;
-use pocketmine\utils\SingletonTrait;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 use UnknowL\handlers\dataTypes\Cooldown;
 
-final class CooldownHandler
+final class CooldownHandler extends Handler
 {
 	/**
 	 * @var Cooldown[]
@@ -20,11 +17,12 @@ final class CooldownHandler
 
 	public function __construct()
 	{
+		parent::__construct();
 		Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new class extends Task
 			{
 				public function onRun(): void
 				{
-					Linesia::getInstance()->getCooldownHandler()->update();
+					Handler::COOLDOWN()->update();
 				}
 			}, 20);
 	}
@@ -46,11 +44,12 @@ final class CooldownHandler
 		}
 	}
 
-	final public function saveAll(): void
+	protected function loadData(): void {}
+
+	protected function saveData(): void{}
+
+	public function getName(): string
 	{
-		foreach ($this->list as $cooldown)
-		{
-			$cooldown->save();
-		}
+		return "Cooldown";
 	}
 }

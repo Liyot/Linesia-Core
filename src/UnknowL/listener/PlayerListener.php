@@ -6,11 +6,8 @@ use pocketmine\block\VanillaBlocks;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerCreationEvent;
-use pocketmine\event\player\PlayerItemHeldEvent;
-use pocketmine\event\player\PlayerItemUseEvent;
-use pocketmine\event\world\WorldUnloadEvent;
-use pocketmine\item\ItemIds;
-use pocketmine\item\VanillaItems;
+use pocketmine\event\player\PlayerJoinEvent;
+use UnknowL\lib\forms\MenuForm;
 use UnknowL\player\LinesiaPlayer;
 
 final class PlayerListener implements Listener
@@ -19,6 +16,11 @@ final class PlayerListener implements Listener
 	public function onCreation(PlayerCreationEvent $event)
 	{
 		$event->setPlayerClass(LinesiaPlayer::class);
+	}
+
+	public function onJoin(PlayerJoinEvent $event)
+	{
+		$event->getPlayer()->sendForm(new MenuForm("test"));
 	}
 
 	public function onChat(PlayerChatEvent $event)

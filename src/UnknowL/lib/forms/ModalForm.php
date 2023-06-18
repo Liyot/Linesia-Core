@@ -49,6 +49,11 @@ class ModalForm extends BaseForm{
 		];
 	}
 
+	/**
+	 * @param LinesiaPlayer $player
+	 * @param mixed $data
+	 * @return void
+	 */
 	final public function handleResponse(Player $player, mixed $data) : void{
 		if(!is_bool($data)){
 			throw new FormValidationException("Expected bool, got " . gettype($data));

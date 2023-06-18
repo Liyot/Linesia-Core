@@ -3,14 +3,20 @@
 namespace UnknowL\handlers;
 
 use pocketmine\data\bedrock\EnchantmentIdMap;
-use pocketmine\data\bedrock\EnchantmentIds;
-use pocketmine\item\enchantment\Enchantment;
+use pocketmine\data\bedrock\item\upgrade\ItemDataUpgrader;
+use pocketmine\data\bedrock\item\upgrade\ItemIdMetaUpgrader;
+use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
 use pocketmine\item\enchantment\EnchantmentInstance;
-use pocketmine\item\ItemFactory;
-use pocketmine\network\mcpe\protocol\types\recipe\FurnaceRecipeBlockName;
+use pocketmine\item\Item;
+use pocketmine\item\ItemTypeIds;
+use pocketmine\item\LegacyStringToItemParser;
+use pocketmine\item\StringToItemParser;
+use pocketmine\item\VanillaItems;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\network\mcpe\ItemStackInfo;
 use pocketmine\utils\Config;
+use pocketmine\world\format\io\GlobalItemDataHandlers;
 use UnknowL\handlers\dataTypes\MarketData;
-use UnknowL\handlers\dataTypes\ShopData;
 use UnknowL\lib\forms\CustomForm;
 use UnknowL\lib\forms\CustomFormResponse;
 use UnknowL\lib\forms\element\Label;
@@ -33,6 +39,7 @@ class MarketHandler extends Handler
 
 	public function __construct()
 	{
+		parent::__construct();
 		$this->db = new Config(Linesia::getInstance()->getDataFolder()."data/market/market.yml", Config::YAML);
 		$this->loadData();
 	}
@@ -44,7 +51,8 @@ class MarketHandler extends Handler
 		{
 			$name = array_keys($name)[0];
 			$value = $this->db->getNested("market.categories")[$category][$name];
-			$item = ItemFactory::getInstance()->get(($str = explode(":", $value["id"]))[0], $str[1]);
+			$data = explode(":", $value["id"]);
+			$item = StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($data[0]));
 			$enchant = new EnchantmentInstance(EnchantmentIdMap::getInstance()->fromId(($str = $value["enchant"])[0]), (int)$str[1]);
 			$this->categories[$category][$name] = new MarketData($item, $enchant, $value["price"], $value["description"],
 				$value["image"], $name, $value["quantities"]);
@@ -65,7 +73,6 @@ class MarketHandler extends Handler
 			return new Button($data->getName(), Image::path($data->getImage()));
 		}, $this->categories[$category]));
 
-		var_dump($buttons);
 		$form = new MenuForm(ucfirst($category), "", $buttons,
 			function(LinesiaPlayer $player, Button $selected) use ($category)
 			{
@@ -84,5 +91,10 @@ class MarketHandler extends Handler
 			});
 
 		return $form;
+	}
+
+	public function getName(): string
+	{
+		return "Market";
 	}
 }

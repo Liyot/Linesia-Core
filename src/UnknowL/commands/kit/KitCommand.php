@@ -3,6 +3,7 @@
 namespace UnknowL\commands\kit;
 
 use pocketmine\command\CommandSender;
+use UnknowL\handlers\Handler;
 use UnknowL\kits\Kit;
 use UnknowL\kits\KitManager;
 use UnknowL\lib\commando\BaseCommand;
@@ -23,6 +24,7 @@ final class KitCommand extends BaseCommand
 
 	protected function prepare(): void
 	{
+		$this->setPermission("pocketmine.group.user");
 		$this->addConstraint(new InGameRequiredConstraint($this));
 	}
 
@@ -34,11 +36,11 @@ final class KitCommand extends BaseCommand
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
 	{
-		$options = array_map(fn(Kit $value) => $value->getName(), Linesia::getInstance()->getKitManager()->getKits());
+		$options = array_map(fn(Kit $value) => $value->getName(), Handler::KIT()->getKits());
 		$sender->sendForm(MenuForm::withOptions("Kit", "", $options, function (LinesiaPlayer $player, Button $button){
 			$form = MenuForm::withOptions($button->text, "", ["Obtenir", "Prévisualiser"], function (LinesiaPlayer $player, Button $selected) use ($button)
 			{
-				$kit = Linesia::getInstance()->getKitManager()->getKit($button->text);
+				$kit = Handler::KIT()->getKit($button->text);
 				match ($selected->text) {
 					"Obtenir" => $kit->send($player),
 					"Prévisualiser" => $kit->previsualize()->send($player)

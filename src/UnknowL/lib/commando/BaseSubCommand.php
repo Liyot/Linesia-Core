@@ -30,6 +30,7 @@ declare(strict_types=1);
 namespace UnknowL\lib\commando;
 
 
+use pocketmine\permission\PermissionManager;
 use UnknowL\lib\commando\constraint\BaseConstraint;
 use UnknowL\lib\commando\traits\ArgumentableTrait;
 use UnknowL\lib\commando\traits\IArgumentable;
@@ -48,8 +49,8 @@ abstract class BaseSubCommand implements IArgumentable, IRunnable {
 	private string $description;
 	/** @var string */
 	protected string $usageMessage;
-	/** @var string|null */
-	private ?string $permission = null;
+	/** @var string[] */
+	private array $permission = [];
 	/** @var CommandSender */
 	protected CommandSender $currentSender;
 	/** @var BaseCommand */
@@ -98,29 +99,37 @@ abstract class BaseSubCommand implements IArgumentable, IRunnable {
 	}
 
 	/**
-	 * @return string|null
+	 * @return string[]
 	 */
-	public function getPermission(): ?string {
+	public function getPermissions(): array {
 		return $this->permission;
 	}
 
 	/**
-	 * @param string $permission
+	 * @param string[] $permissions
 	 */
-	public function setPermission(string $permission): void {
-		$this->permission = $permission;
+	public function setPermissions(array $permissions) : void{
+		$permissionManager = PermissionManager::getInstance();
+		foreach($permissions as $perm){
+			if($permissionManager->getPermission($perm) === null){
+				throw new \InvalidArgumentException("Cannot use non-existing permission \"$perm\"");
+			}
+		}
+		$this->permission = $permissions;
 	}
 
-	public function testPermissionSilent(CommandSender $sender): bool {
-		if(empty($this->permission)) {
-			return true;
-		}
-		foreach(explode(";", $this->permission) as $permission) {
-			if($sender->hasPermission($permission)) {
+	public function setPermission(?string $permission) : void{
+		$this->setPermissions($permission === null ? [] : explode(";", $permission));
+	}
+
+	public function testPermissionSilent(CommandSender $target, ?string $permission = null) : bool{
+		$list = $permission !== null ? [$permission] : $this->permission;
+		foreach($list as $p){
+			if($target->hasPermission($p)){
 				return true;
 			}
 		}
-		$sender->sendMessage(CommandUtils::PERMISSION_ERROR_MESSAGE);
+		$target->sendMessage(CommandUtils::PERMISSION_ERROR_MESSAGE);
 		return false;
 	}
 

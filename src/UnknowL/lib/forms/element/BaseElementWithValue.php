@@ -14,7 +14,7 @@ abstract class BaseElementWithValue extends BaseElement{
 
 	/** @phpstan-return TValue */
 	public function getValue() : mixed{
-		return $this->value ?? throw new \InvalidStateException("Trying to access an uninitialized value");
+		return $this->value ?? throw new \InvalidArgumentException("Trying to access an uninitialized value");
 	}
 
 	/** @phpstan-param TValue $value */

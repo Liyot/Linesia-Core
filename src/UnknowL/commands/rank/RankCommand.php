@@ -21,6 +21,7 @@ final class RankCommand extends BaseCommand
 
 	protected function prepare(): void
 	{
+		$this->setPermission("pocketmine.group.user");
 		$this->registerSubCommand(new RankAddPerm());
 		$this->registerSubCommand(new RankSet());
 		$this->registerSubCommand(new RankSetCache());

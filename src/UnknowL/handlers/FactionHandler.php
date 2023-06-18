@@ -5,7 +5,12 @@ namespace UnknowL\handlers;
 class FactionHandler extends Handler
 {
 
-    protected function loadData(): void
+	public function __construct()
+	{
+		parent::__construct();
+	}
+
+	protected function loadData(): void
     {
 
 	}
@@ -14,4 +19,9 @@ class FactionHandler extends Handler
     {
         // TODO: Implement saveData() method.
     }
+
+	public function getName(): string
+	{
+		return "Faction";
+	}
 }

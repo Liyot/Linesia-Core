@@ -25,6 +25,7 @@ final class MoneySee extends BaseSubCommand
 	 */
 	protected function prepare(): void
 	{
+		$this->setPermission("pocketmine.group.user");
 		$this->registerArgument(0, new TargetArgument("joueur", true));
 		$this->addConstraint(new InGameRequiredConstraint($this));
 	}

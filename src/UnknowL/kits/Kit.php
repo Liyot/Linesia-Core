@@ -4,12 +4,11 @@ namespace UnknowL\kits;
 
 use Cassandra\Date;
 use DateTime;
+use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
+use pocketmine\data\bedrock\LegacyBiomeIdToStringIdMap;
 use pocketmine\event\player\PlayerInteractEvent;
-use pocketmine\event\player\PlayerItemUseEvent;
 use pocketmine\item\Item;
-use pocketmine\item\ItemFactory;
-use pocketmine\item\VanillaItems;
-use UnknowL\handlers\CooldownHandler;
+use pocketmine\item\StringToItemParser;
 use UnknowL\handlers\dataTypes\PlayerCooldown;
 use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
 use UnknowL\lib\inventoryapi\InventoryAPI;
@@ -61,7 +60,6 @@ final class Kit
 				return false;
 			}
 		}
-
 		return true;
 	}
 
@@ -73,7 +71,7 @@ final class Kit
 			$func = function ($value) : Item
 			{
 				$ex = explode(":", $value);
-				return ItemFactory::getInstance()->get($ex[0], $ex[1]);
+				return StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($ex[0]));
 			};
 
 			array_map(function($item) use ($func, $player) {
@@ -82,7 +80,6 @@ final class Kit
 					$player->getArmorInventory()->addItem($func($item));
 				}
 			} , $this->armorContent);
-
 
 			array_map(fn($item) => $player->getInventory()->addItem($func($item)), $this->content);
 			new PlayerCooldown(DateTime::createFromFormat("d:H:i:s", $this->cooldownData), $player, $data, (int)explode(":", $this->cooldownData)[0] === 0);
@@ -93,29 +90,22 @@ final class Kit
 	final public function previsualize(): SimpleChestInventory
 	{
 		$form = InventoryAPI::createDoubleChest(true);
-		//$armorIndex =
+
 		for ($i = 0 ; $i < count($this->armorDisplay) ; $i++)
 		{
 			$ex = explode(":", $this->armorContent[$i]);
-			$item = ItemFactory::getInstance()->get($ex[0], $ex[1]);
+			$item = StringToItemParser::getInstance()->parse(LegacyBiomeIdToStringIdMap::getInstance()->legacyToString($ex[0]));
 			$form->setItem($this->armorDisplay[$i], $item);
 		}
 
 		for ($i = 0 ; $i < count($this->contentDisplay) ; $i++)
 		{
 			$ex = explode(":", $this->content[$i]);
-			$item = ItemFactory::getInstance()->get($ex[0], $ex[1]);
+			$item = StringToItemParser::getInstance()->parse(LegacyBiomeIdToStringIdMap::getInstance()->legacyToString($ex[0]));
 			$form->setItem($this->contentDisplay[$i], $item);
 		}
-
 		return $form;
 	}
-
-	final public function getCooldown(): Cooldown
-	{
-		return $this->cooldown;
-	}
-
 
 	/**
 	 * @return array

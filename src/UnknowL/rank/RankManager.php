@@ -4,10 +4,11 @@ namespace UnknowL\rank;
 
 use pocketmine\utils\Config;
 use pocketmine\utils\SingletonTrait;
+use UnknowL\handlers\Handler;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 
-final class RankManager
+final class RankManager extends Handler
 {
 
 	protected Config $config;
@@ -21,9 +22,10 @@ final class RankManager
 	{
 		$this->config = new Config(Linesia::getInstance()->getDataFolder()."rank.json");
 		$this->loadAll();
+		parent::__construct();
 	}
 
-	final public function getAll(): array
+	final public function getRanks(): array
 	{
 		return $this->ranks;
 	}
@@ -54,5 +56,14 @@ final class RankManager
 	final public function saveAll(): void
 	{
 		$this->config->set("ranks", $this->ranks);
+	}
+
+	protected function loadData(): void {}
+
+	protected function saveData(): void {}
+
+	public function getName(): string
+	{
+		return "rank";
 	}
 }
