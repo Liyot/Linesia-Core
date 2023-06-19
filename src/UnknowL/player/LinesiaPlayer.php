@@ -2,8 +2,10 @@
 
 namespace UnknowL\player;
 
+use pocketmine\entity\Entity;
 use pocketmine\form\Form;
 use pocketmine\lang\Translatable;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\player\Player;
@@ -11,7 +13,7 @@ use pocketmine\scheduler\ClosureTask;
 use UnknowL\handlers\dataTypes\PlayerCooldown;
 use UnknowL\handlers\Handler;
 use UnknowL\Linesia;
-use UnknowL\player\PlayerProperties;
+use UnknowL\player\manager\StatManager;
 use UnknowL\player\manager\EconomyManager;
 use UnknowL\rank\Rank;
 use UnknowL\handlers\dataTypes\Cooldown;
@@ -22,6 +24,8 @@ final class LinesiaPlayer extends Player
 	private PlayerProperties $properties;
 
 	private EconomyManager $economyManager;
+
+	private StatManager $statManager;
 
 	/***
 	 * @var Cooldown[]
@@ -35,6 +39,7 @@ final class LinesiaPlayer extends Player
 		parent::initEntity($nbt);
 		$this->properties = new PlayerProperties($this);
 		$this->economyManager = new EconomyManager($this);
+		$this->statManager = new StatManager($this);
 		$this->rank = Handler::RANK()->getRank($this->properties->getProperties("rank"));
 		array_map(fn($value) => $this->setBasePermission($value, true), $this->rank->getPermissions());
 		$this->properties->setProperties("permissions" ,$this->getRank()->getPermissions());
@@ -47,6 +52,29 @@ final class LinesiaPlayer extends Player
 		!isset($this->properties) ?: $this->properties->save($nbt);
 
 		return $nbt;
+	}
+
+	final public function kill(): void
+	{
+		$this->getStatManager()->handleEvents(StatManager::TYPE_DEATH);
+		parent::kill();
+	}
+
+	final public function attackEntity(Entity $entity): bool
+	{
+		$result = parent::attackEntity($entity);
+		if ($entity instanceof LinesiaPlayer && !$entity->isAlive())
+		{
+			$this->getStatManager()->handleEvents(StatManager::TYPE_KILL);
+		}
+		return $result;
+	}
+
+	final public function breakBlock(Vector3 $pos): bool
+	{
+		$result = parent::breakBlock($pos);
+		if ($result) $this->getStatManager()->handleEvents(StatManager::TYPE_BLOCK_MINED);
+		return $result;
 	}
 
 	final public function hasPermission($name): bool
@@ -129,6 +157,12 @@ final class LinesiaPlayer extends Player
 	{
 		return $this->properties;
 	}
+
+	final public function getStatManager(): StatManager
+	{
+		return $this->statManager;
+	}
+
 	/**
 	 * @return Rank
 	 */
