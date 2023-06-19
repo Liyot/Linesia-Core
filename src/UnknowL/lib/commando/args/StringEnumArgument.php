@@ -39,7 +39,6 @@ use function preg_match;
 use function strtolower;
 
 abstract class StringEnumArgument extends BaseArgument {
-
 	protected const VALUES = [];
 
 	public function __construct(string $name, bool $optional = false) {
@@ -49,6 +48,7 @@ abstract class StringEnumArgument extends BaseArgument {
 	}
 
 	public function getNetworkType(): int {
+		// this will be disregarded by PM anyways because this will be considered as a string enum
 		return -1;
 	}
 

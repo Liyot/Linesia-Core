@@ -30,13 +30,12 @@ declare(strict_types=1);
 namespace UnknowL\lib\commando;
 
 
-use pocketmine\permission\PermissionManager;
 use UnknowL\lib\commando\constraint\BaseConstraint;
 use UnknowL\lib\commando\traits\ArgumentableTrait;
 use UnknowL\lib\commando\traits\IArgumentable;
 use pocketmine\command\CommandSender;
+use pocketmine\permission\PermissionManager;
 use pocketmine\plugin\Plugin;
-use UnknowL\utils\CommandUtils;
 use function explode;
 
 abstract class BaseSubCommand implements IArgumentable, IRunnable {
@@ -129,14 +128,14 @@ abstract class BaseSubCommand implements IArgumentable, IRunnable {
 				return true;
 			}
 		}
-		$target->sendMessage(CommandUtils::PERMISSION_ERROR_MESSAGE);
+
 		return false;
 	}
 
 	/**
 	 * @param CommandSender $currentSender
 	 *
-	 * @internal Used to pass the current sender from the parent command
+	 * @internal Used to pass the current sender from the parent commands
 	 */
 	public function setCurrentSender(CommandSender $currentSender): void {
 		$this->currentSender = $currentSender;
@@ -145,7 +144,7 @@ abstract class BaseSubCommand implements IArgumentable, IRunnable {
 	/**
 	 * @param BaseCommand $parent
 	 *
-	 * @internal Used to pass the parent context from the parent command
+	 * @internal Used to pass the parent context from the parent commands
 	 */
 	public function setParent(BaseCommand $parent): void {
 		$this->parent = $parent;

@@ -40,11 +40,14 @@ abstract class CasinoGame implements IGame
 						$form = new CustomForm("Choississez votre mise", [new Input("Mise:", "")],
 							function (LinesiaPlayer $player, CustomFormResponse $response)
 							{
-								$mise = $response->getInput()->getValue();
-								if(is_int((int)$mise))
+								(int)$mise = $response->getInput()->getValue();
+								if($mise > 0)
 								{
-									$this->start($player, $mise);
-									return;
+									if($player->getEconomyManager()->reduce($mise))
+									{
+										$this->start($player, $mise);
+										return;
+									}
 								}
 								$player->sendMessage("Vérifiez les informations");
 							});

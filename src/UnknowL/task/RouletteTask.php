@@ -2,7 +2,7 @@
 
 namespace UnknowL\task;
 
-use pocketmine\block\BlockTypeIds;
+use pocketmine\block\GlazedTerracotta;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\item\Item;
@@ -18,51 +18,45 @@ final class RouletteTask extends Task
 	{
 		$array = range(0, 26);
 		array_walk($array, fn($value, $key) => $inventory->setItem($key,VanillaBlocks::GLASS_PANE()->asItem()));
-		for ($i = 9 ; $i < 17 ; $i++)
-		{
-			$this->inventory->setItem($i, $this->next());
-		}
-		for ($i = random_int(9, 37) ; $i < 0 ; $i--)
+		for ($i = random_int(9, 37) ; $i > 0 ; $i--)
 		{
 			$this->next();
 		}
+		for ($i = 9 ; $i < 18 ; $i++)
+		{
+			$this->inventory->setItem($i, $this->next());
+		}
+
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function onRun(): void
 	{
 		if ($this->cooldown <= 0)
 		{
-			foreach ($this->inventory->getContents() as $slot =>  $content)
+			foreach ($this->inventory->getContents() as $slot => $item)
 			{
 				if($slot >= 9 && $slot <= 17)
 				{
 					if ($slot === 9)
 					{
-						$this->inventory->removeItem($content);
+						$this->inventory->removeItem($item);
 					}
 
 					if($slot === 17)
 					{
 						$this->inventory->setItem(17, $this->next());
 					}
-					$this->inventory->setItem($slot - 1 === 8 ? 9 : $slot - 1, $content);
+					$this->inventory->setItem(($slot - 1 === 8) ? 9 : $slot - 1, $item);
 				}
 			}
-			$progression = 0;
-
-			$this->key = $progression;
 
 			if($this->times >= 37) $this->cooldown = 3;
 
-			$this->first = false;
-			$this->times++;
 			if($this->times >= 42)
 			{
 				$this->getHandler()->cancel();
 			}
+			$this->times++;
 		}
 		$this->cooldown--;
 	}
@@ -70,19 +64,22 @@ final class RouletteTask extends Task
 	public function onCancel(): void
 	{
 		$final = $this->inventory->getItem(14);
-		if($final->getVanillaName() === $this->color->getVanillaName())
+		if ($this->player->isConnected())
 		{
-			$gain = match ($final)
+			if($final->getBlock()->getColor()->name() === $this->color->getBlock()->getColor()->name())
 			{
-				VanillaBlocks::GLAZED_TERRACOTTA()->setColor(DyeColor::GREEN())->asItem() => $this->mise * 14,
-				default => $this->mise * 2
-			};
-			!$this->player->isConnected() ?: $this->player->sendMessage("Vous avez gagné ". $gain);
+				$gain = match ($final)
+				{
+					VanillaBlocks::CONCRETE()->setColor(DyeColor::GREEN())->asItem() => $this->mise * 14,
+					default => $this->mise * 2
+				};
+				$this->player->sendMessage("Vous avez gagné ". $gain);
+				$this->inventory->onClose($this->player);
+				return;
+			}
+			$this->player->sendMessage("Vous n'avez rien gagner");
 			$this->inventory->onClose($this->player);
-			return;
 		}
-		$this->player->sendMessage("Vous n'avez rien gagner");
-		$this->inventory->onClose($this->player);
 	}
 
 	private function next() : ItemBlock
@@ -91,7 +88,7 @@ final class RouletteTask extends Task
 		if(!$return)
 		{
 			reset($this->roulette);
-			return $this->next();
+			return current($this->roulette);
 		}
 		return $return;
 	}

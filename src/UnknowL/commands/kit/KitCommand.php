@@ -4,8 +4,7 @@ namespace UnknowL\commands\kit;
 
 use pocketmine\command\CommandSender;
 use UnknowL\handlers\Handler;
-use UnknowL\kits\Kit;
-use UnknowL\kits\KitManager;
+use UnknowL\handlers\dataTypes\Kit;
 use UnknowL\lib\commando\BaseCommand;
 use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
 use UnknowL\lib\forms\menu\Button;

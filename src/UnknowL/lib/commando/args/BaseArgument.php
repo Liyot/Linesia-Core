@@ -86,7 +86,7 @@ abstract class BaseArgument {
 	}
 
 	/**
-	 * Returns how much command arguments
+	 * Returns how much commands arguments
 	 * it takes to build the full argument
 	 *
 	 * @return int

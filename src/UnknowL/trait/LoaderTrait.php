@@ -41,7 +41,6 @@ trait LoaderTrait
 		$this->loadCommands();
 		$this->loadListeners();
 		$this->loadTask();
-		$this->loadCommands();
 		$this->loadFolder();
 		Linesia::getInstance()->getLogger()->notice("§a Activation du core Faction");
 	}
@@ -115,7 +114,7 @@ trait LoaderTrait
 	/**
 	 * @return ClearlagTask
 	 */
-	public function getClearlagManager(): ClearlagTask
+	final public function getClearlagManager(): ClearlagTask
 	{
 		return $this->ClearlagManager;
 	}

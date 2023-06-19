@@ -38,14 +38,4 @@ final class PacketListener implements Listener
 			}
 		}
 	}
-
-//	public function onReceive(DataPacketReceiveEvent $event)
-//	{
-//		$packet = $event->getPacket();
-//		$player = $event->getOrigin()->getPlayer();
-//		if($packet instanceof PlayerAuthInputPacket)
-//		{
-//			if (!is_null($packet->getBlockActions())) var_dump($packet);
-//		}
-//	}
 }

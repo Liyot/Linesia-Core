@@ -3,13 +3,12 @@
 namespace UnknowL\handlers;
 use pocketmine\utils\EnumTrait;
 use UnknowL\casino\CasinoHandler;
-use UnknowL\kits\KitManager;
 use UnknowL\rank\RankManager;
 
 /**
  * @method static CooldownHandler COOLDOWN()
  * @method static RankManager RANK()
- * @method static KitManager KIT()
+ * @method static KitHandler KIT()
  * @method static MarketHandler MARKET()
  * @method static ShopHandler SHOP()
  * @method static CasinoHandler CASINO()
@@ -40,7 +39,7 @@ abstract class Handler
 			new ShopHandler(),
 			new CasinoHandler(),
 			new FactionHandler(),
-			new KitManager(),
+			new KitHandler(),
 			new RankManager(),
 		];
 	}

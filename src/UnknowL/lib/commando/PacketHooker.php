@@ -33,7 +33,6 @@ namespace UnknowL\lib\commando;
 use UnknowL\lib\commando\exception\HookAlreadyRegistered;
 use UnknowL\lib\commando\store\SoftEnumStore;
 use UnknowL\lib\commando\traits\IArgumentable;
-use UnknowL\lib\simplepackethandler\SimplePacketHandler;
 use pocketmine\command\CommandSender;
 use pocketmine\event\EventPriority;
 use pocketmine\event\Listener;
@@ -44,6 +43,7 @@ use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 use ReflectionClass;
+use UnknowL\lib\simplepackethandler\SimplePacketHandler;
 use function array_unshift;
 
 class PacketHooker implements Listener {
@@ -56,8 +56,7 @@ class PacketHooker implements Listener {
 		return self::$isRegistered;
 	}
 
-    /* @throws HookAlreadyRegistered */
-    public static function register(Plugin $registrant): void {
+	public static function register(Plugin $registrant): void {
 		if(self::$isRegistered) {
 			throw new HookAlreadyRegistered("Event listener is already registered by another plugin.");
 		}
@@ -83,7 +82,7 @@ class PacketHooker implements Listener {
 			self::$isIntercepting = false;
 			return false;
 		});
-
+		
 		self::$isRegistered = true;
 	}
 

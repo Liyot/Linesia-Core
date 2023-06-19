@@ -1,6 +1,6 @@
 <?php
 
-namespace UnknowL\kits;
+namespace UnknowL\handlers\dataTypes;
 
 use Cassandra\Date;
 use DateTime;
@@ -30,9 +30,16 @@ final class Kit
 	 * @param array $armorDisplay
 	 * @param string $cooldownData
 	 */
-	public function __construct(protected string $name, private array $rank, private array $content = [], private array $contentDisplay = [], private array $armorContent = [], private array $armorDisplay = [], private string $cooldownData = "")
-	{
-	}
+	public function __construct
+	(
+		protected string $name,
+		private array $rank,
+		private array $content = [],
+		private array $contentDisplay = [],
+		private array $armorContent = [],
+		private array $armorDisplay = [],
+		private string $cooldownData = ""
+	){}
 
 	final public function canClaim(LinesiaPlayer $player): bool
 	{
@@ -65,7 +72,7 @@ final class Kit
 
 	final public function send(LinesiaPlayer $player): void
 	{
-		$data = sprintf("kit.%s.cooldown", strtolower($this->name));
+		$data = sprintf(PathLoader::PATH_KIT_COOLDOWN, strtolower($this->name));
 		if($this->canClaim($player))
 		{
 			$func = function ($value) : Item

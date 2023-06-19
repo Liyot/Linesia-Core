@@ -40,7 +40,7 @@ abstract class BaseConstraint {
     /**
      * BaseConstraint constructor.
      *
-     * "Context" is required so that this new-constraint-system doesn't hinder getting command info
+     * "Context" is required so that this new-constraint-system doesn't hinder getting commands info
      *
      * @param IRunnable $context
      */

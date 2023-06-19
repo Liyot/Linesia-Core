@@ -5,7 +5,7 @@ namespace UnknowL\lib\commando\args;
 use pocketmine\command\CommandSender;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 
-class TargetArgument extends BaseArgument {
+class MemberArguement extends BaseArgument {
 
     public function getNetworkType(): int {
         return AvailableCommandsPacket::ARG_TYPE_TARGET;

@@ -36,9 +36,9 @@ use UnknowL\lib\commando\constraint\BaseConstraint;
  * Interface IRunnable
  *
  * An interface which is declares the minimum required information
- * to get background information for a command and/or a sub-command
+ * to get background information for a commands and/or a sub-commands
  *
- * @package CortexPE\Commando
+ * @package UnknowL\lib\commando
  */
 interface IRunnable {
     public function getName(): string;
@@ -53,7 +53,7 @@ interface IRunnable {
 	/**
 	 * @return string[]
 	 */
-	public function getPermissions() : array;
+    public function getPermissions() : array;
 
     /**
      * @return BaseConstraint[]

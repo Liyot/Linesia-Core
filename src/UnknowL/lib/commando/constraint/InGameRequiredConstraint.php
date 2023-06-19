@@ -31,8 +31,8 @@ namespace UnknowL\lib\commando\constraint;
 
 
 use pocketmine\command\CommandSender;
+use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
-use UnknowL\player\LinesiaPlayer;
 
 class InGameRequiredConstraint extends BaseConstraint {
 
@@ -41,10 +41,10 @@ class InGameRequiredConstraint extends BaseConstraint {
     }
 
     public function onFailure(CommandSender $sender, string $aliasUsed, array $args): void {
-        $sender->sendMessage(TextFormat::RED . "Cette commande doit être éxecuter en jeu.");
+        $sender->sendMessage(TextFormat::RED . "This commands must be executed in-game."); // f*ck off grammar police
     }
 
     public function isVisibleTo(CommandSender $sender): bool {
-		return $sender instanceof LinesiaPlayer;
+		return $sender instanceof Player;
 	}
 }

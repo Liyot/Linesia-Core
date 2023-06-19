@@ -3,6 +3,7 @@
 namespace UnknowL\handlers;
 
 use pocketmine\block\inventory\DoubleChestInventory;
+use pocketmine\block\utils\DyeColor;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
 use pocketmine\scheduler\ClosureTask;
@@ -130,8 +131,8 @@ final class ShopHandler extends Handler
 					if(!($actualPages === 0))
 					{
 						array_map(fn(Item $item) => $inventory->removeItem($item), $inventory->getContents());
-						$inventory->setItem(0, VanillaItems::RED_DYE()->setCustomName("Page Précédente"));
-						$inventory->setItem(53, VanillaItems::GREEN_DYE()->setCustomName("Page suivante"));
+						$inventory->setItem(0, VanillaItems::DYE()->setColor(DyeColor::RED())->setCustomName("Page Précédente"));
+						$inventory->setItem(53, VanillaItems::DYE()->setColor(DyeColor::GREEN())->setCustomName("Page suivante"));
 						$form->onClose($player);
 						$form->send($player);
 					}

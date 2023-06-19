@@ -26,8 +26,8 @@ class RankSetCache extends \UnknowL\lib\commando\BaseSubCommand
     protected function prepare(): void
     {
 		$this->setPermission("pocketmine.group.user");
-		$this->registerArgument(0, new StringArgument("rank"));
-		$this->registerArgument(1, new TargetArgument("player"));
+		$this->registerArgument(0, new TargetArgument("player"));
+		$this->registerArgument(1, new StringArgument("rank"));
 	}
 
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void

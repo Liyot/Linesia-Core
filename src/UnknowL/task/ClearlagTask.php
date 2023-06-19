@@ -20,8 +20,11 @@ class ClearlagTask extends Task
 		$array = [];
 		foreach (Server::getInstance()->getWorldManager()->getWorldByName($this->world)->getEntities() as $entity)
 		{
-			if($entity instanceof ItemEntity) $entity->flagForDespawn();
-			yield $count++;
+			if($entity instanceof ItemEntity)
+			{
+				$entity->flagForDespawn();
+				yield $count++;
+			}
 		}
 	}
 

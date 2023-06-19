@@ -24,10 +24,16 @@ final class EconomyManager extends PlayerManager
 		$this->money = $this->player->getPlayerProperties()->getNestedProperties("manager.economy.money") ?? 5000000000000;
 	}
 
-	final public function reduce(int $amount): void
+	final public function reduce(int $amount): bool
 	{
-		$this->money + $amount < 0 ? $this->money = 0 : $this->money -= $amount;
-		$this->player->sendMessage("Votre $ à été réduite de $amount $");
+		if ($this->money >= $amount)
+		{
+			$this->money -= $amount;
+			$this->player->sendMessage("Votre $ à été réduite de $amount $");
+			return true;
+		}
+		$this->player->sendMessage("Vous n'avez pas assez de monnaie!");
+		return false;
 	}
 
 	final public function add(int $amount): void

@@ -35,10 +35,10 @@ class Roulette extends CasinoGame
 	{
 		$roulette = [];
 		for($i = 0; $i <= 36; $i++){
-			$color = !$i ? VanillaBlocks::GLAZED_TERRACOTTA()->setColor(DyeColor::GREEN()): match ($i % 2)
+			$color = !$i ? VanillaBlocks::CONCRETE()->setColor(DyeColor::GREEN()) : match ($i % 2)
 			{
-				0 => VanillaBlocks::GLAZED_TERRACOTTA(),
-				default => VanillaBlocks::GLAZED_TERRACOTTA()->setColor(DyeColor::RED())
+				0 => VanillaBlocks::CONCRETE()->setColor(DyeColor::BLACK()),
+				default => VanillaBlocks::CONCRETE()->setColor(DyeColor::RED())
 			};
 			$roulette[] = $color->asItem();
 		}
@@ -51,9 +51,9 @@ class Roulette extends CasinoGame
 			$inventory->send($player);
 			$block = match ($dropdown->getSelectedOption())
 			{
-				"Rouge" => VanillaBlocks::GLAZED_TERRACOTTA()->setColor(DyeColor::RED())->asItem(),
-				'Noir' => VanillaBlocks::GLAZED_TERRACOTTA()->asItem(),
-				'Vert' => VanillaBlocks::GLAZED_TERRACOTTA()->setColor(DyeColor::GREEN())->asItem()
+				"Rouge" => VanillaBlocks::CONCRETE()->setColor(DyeColor::RED())->asItem(),
+				'Noir' => VanillaBlocks::CONCRETE()->setColor(DyeColor::BLACK())->asItem(),
+				'Vert' => VanillaBlocks::CONCRETE()->setColor(DyeColor::GREEN())->asItem()
 			};
 			Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new RouletteTask($inventory,$input->getValue(), $roulette, $block, $player), 5);
 		});

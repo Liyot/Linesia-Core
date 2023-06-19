@@ -1,13 +1,12 @@
 <?php
 
-namespace UnknowL\kits;
+namespace UnknowL\handlers;
 
 use pocketmine\utils\Config;
-use UnknowL\handlers\Handler;
+use UnknowL\handlers\dataTypes\Kit;
 use UnknowL\Linesia;
-use UnknowL\rank\Rank;
 
-final class KitManager extends Handler
+final class KitHandler extends Handler
 {
 	/**
 	 * @var Kit[]
