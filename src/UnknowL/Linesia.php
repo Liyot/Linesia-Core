@@ -4,8 +4,10 @@ namespace UnknowL;
 
 use pocketmine\item\VanillaItems;
 use pocketmine\plugin\PluginBase;
+use pocketmine\scheduler\BulkCurlTask;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\Server;
+use pocketmine\utils\Internet;
 use pocketmine\utils\SingletonTrait;
 use UnknowL\casino\CasinoHandler;
 use UnknowL\casino\types\CasinoGame;
@@ -23,8 +25,7 @@ final class Linesia extends PluginBase
 	public function onEnable(): void
 	{
 		self::setInstance($this);
-		$this->loadAll();
-		CasinoHandler::ROULETTE();
+        $this->loadAll();
 	}
 
 	public function onDisable(): void

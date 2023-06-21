@@ -46,6 +46,8 @@ final class MoneyPay extends BaseSubCommand
 				(!is_null(($target = CommandUtils::checkTarget($args["joueur"]))))
 				&&
 				is_numeric(abs($args["montant"]))
+                &&
+                $target->getUniqueId()->toString() !== $sender->getUniqueId()->toString()
 			)
 			{
 				$sender->getEconomyManager()->transfer($args["montant"], $target, true);

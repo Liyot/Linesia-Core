@@ -33,7 +33,6 @@ class PlayerCooldown extends Cooldown
 	{
 		if(($this->initialTime->getTimestamp() + $this->cooldownTime->getTimestamp()) < time())
 		{
-			var_dump(time(), $this->cooldownTime->getTimestamp() );
 			$this->save($this->player);
 			return true;
 		}
@@ -50,4 +49,9 @@ class PlayerCooldown extends Cooldown
 	{
 		return (sprintf("%s;%s;%s", $this->cooldownTime->format("d:H:i:s"), $this->path, $this->initialTime->format("d:H:i:s")));
 	}
+
+    final public function getPath(): string
+    {
+        return $this->path;
+    }
 }

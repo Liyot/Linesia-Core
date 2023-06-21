@@ -10,6 +10,8 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
+use pocketmine\Server;
+use UnknowL\events\CooldownExpireEvent;
 use UnknowL\handlers\dataTypes\PlayerCooldown;
 use UnknowL\handlers\Handler;
 use UnknowL\Linesia;
@@ -17,6 +19,7 @@ use UnknowL\player\manager\StatManager;
 use UnknowL\player\manager\EconomyManager;
 use UnknowL\rank\Rank;
 use UnknowL\handlers\dataTypes\Cooldown;
+use UnknowL\utils\PathLoader;
 
 final class LinesiaPlayer extends Player
 {
@@ -79,7 +82,9 @@ final class LinesiaPlayer extends Player
 
 	final public function hasPermission($name): bool
 	{
-		return in_array($name, $this->getRank()->getPermissions(), true) || parent::hasPermission($name);
+		return in_array($name, $this->getRank()->getPermissions(), true)
+            || parent::hasPermission($name)
+            || Server::getInstance()->isOp($this->getName());
 	}
 
 	final public function addPermission(string $perm)
@@ -109,6 +114,7 @@ final class LinesiaPlayer extends Player
 				$cooldown = new PlayerCooldown(\DateTime::createFromFormat("d:H:i:s", $data[0]), $this, $data[1], true,
 					\DateTime::createFromFormat("d:H:i:s",$data[2]));
 				$this->addCooldown($cooldown,empty($path) ? $key : $path);
+                $this->testCooldown(empty($path) ? $key : $path);
 				return;
 			}
 
@@ -118,6 +124,22 @@ final class LinesiaPlayer extends Player
 			}
 		}
 	}
+
+    protected function testCooldown(string $path): bool
+    {
+        $cooldown = $this->getCooldown($path, strtolower($this->getName()));
+        if(!is_null($cooldown))
+        {
+            if($cooldown->end())
+            {
+                $event = new CooldownExpireEvent($cooldown, $this);
+                $event->call();
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
 
 	final public function sendForm(Form $form): void
 	{

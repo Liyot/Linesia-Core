@@ -69,28 +69,32 @@ class MarketHandler extends Handler
 
 	final public function getForm(string $category): MenuForm
 	{
-		$buttons = array_values(array_map(function(MarketData $data) {
-			return new Button($data->getName(), Image::path($data->getImage()));
-		}, $this->categories[$category]));
+        return MenuForm::withOptions("Acheter ou vendre", "", ["Acheter", "Vendre"], function (LinesiaPlayer $player, Button $selected) use ($category) {
+            $buy = $selected->text === "Acheter";
 
-		$form = new MenuForm(ucfirst($category), "", $buttons,
-			function(LinesiaPlayer $player, Button $selected) use ($category)
-			{
-				/**@var MarketData $data **/
-				$data = array_values(array_filter($this->categories[$category], fn(MarketData $value) => $value->getName() === $selected->text))[0];
-				$form = new CustomForm($data->getName(),
-					[
-						new Label(sprintf("Item: %s \n Description: %s.\n Prix: %d$ !",$data->getName(), $data->getDescription(), $data->getPrice())),
-						new Slider("Quantités", 1, $data->getQuantities()),
-					],
-					function (LinesiaPlayer $player, CustomFormResponse $response) use ($data)
-					{
-						$data->buy($player, $data, $response->getSlider()->getValue());
-					});
-				$player->sendForm($form);
-			});
+            $buttons = array_values(array_map(function(MarketData $data) {
+            return new Button($data->getName(), Image::path($data->getImage()));
+            }, $this->categories[$category]));
 
-		return $form;
+            $form = new MenuForm(ucfirst($category), "", $buttons,
+                function(LinesiaPlayer $player, Button $selected) use ($buy, $category)
+                {
+                    /**@var MarketData $data **/
+                    $data = array_values(array_filter($this->categories[$category], fn(MarketData $value) => $value->getName() === $selected->text))[0];
+                    $form = new CustomForm($data->getName(),
+                        [
+                            new Label(sprintf("Item: %s \n Description: %s.\n Prix: %d$ !",$data->getName(), $data->getDescription(), $data->getPrice())),
+                            new Slider("Quantités", 1, $data->getQuantities()),
+                        ],
+                        function (LinesiaPlayer $player, CustomFormResponse $response) use ($buy, $data)
+                        {
+                            $quantities = $response->getSlider()->getValue();
+                          $buy ? $data->buy($player, $quantities) : $data->sell($player, $quantities);
+                        });
+                    $player->sendForm($form);
+                });
+            $player->sendForm($form);
+        });
 	}
 
 	public function getName(): string

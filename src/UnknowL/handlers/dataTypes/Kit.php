@@ -8,6 +8,7 @@ use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
 use pocketmine\data\bedrock\LegacyBiomeIdToStringIdMap;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\item\Item;
+use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
 use UnknowL\handlers\dataTypes\PlayerCooldown;
 use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
@@ -101,7 +102,7 @@ final class Kit
 		for ($i = 0 ; $i < count($this->armorDisplay) ; $i++)
 		{
 			$ex = explode(":", $this->armorContent[$i]);
-			$item = StringToItemParser::getInstance()->parse(LegacyBiomeIdToStringIdMap::getInstance()->legacyToString($ex[0]));
+			$item = StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($ex[0]));
 			$form->setItem($this->armorDisplay[$i], $item);
 		}
 

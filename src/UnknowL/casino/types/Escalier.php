@@ -51,15 +51,14 @@ final class Escalier extends CasinoGame
 					{
 						if($sourceItem->getNamedTag()->getInt("InvCount") === $rand)
 						{
-							/**@var $items Concrete[]*/
-							$items = array_filter($line[1], fn(Item $item) => $item->getTypeId() === VanillaBlocks::CONCRETE()->asItem()->getTypeId());
-							$contents = $inventory->getContents();
 							$inventory->setItem($slot, VanillaBlocks::TNT()->asItem()->setCustomName("Perdu !"));
 							$this->loose($player);
-							$inventory->onClose($player);
 							$inventory->setClickListener(null);
 							return;
 						}
+                        $inventory->setItem(53, VanillaItems::DYE()
+                            ->setColor(DyeColor::GREEN())
+                            ->setCustomName(sprintf("Récupérez vos gains (%d)", round(count($this->getItems(VanillaItems::EMERALD(), $inventory))  * $this->mise * 1.20))));
 						$inventory->setItem($slot, VanillaItems::EMERALD()->setCustomName("Au suivant !"));
 						$this->nextLine($player, $inventory);
 					}

@@ -8,6 +8,7 @@ use pocketmine\nbt\tag\StringTag;
 use UnknowL\handlers\Handler;
 use UnknowL\Linesia;
 use UnknowL\trait\PropertiesTrait;
+use UnknowL\utils\PathLoader;
 
 final class PlayerProperties
 {
@@ -21,6 +22,8 @@ final class PlayerProperties
 		if(!($nbt = $this->player->saveNBT())->getCompoundTag('properties') || empty($nbt->getCompoundTag("properties")->getValue())){
 			$this->setBaseProperties([
 				"rank" => Handler::RANK()->getDefaultRank()->getName(),
+                PathLoader::PATH_RANK_ADD_PERM => null,
+                PathLoader::PATH_RANK_CACHE => null,
 				"kit" => [
 					"base" => [
 						"cooldown" => null

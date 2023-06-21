@@ -40,7 +40,6 @@ class ShopCommand extends BaseCommand
     {
 		$this->setPermission("pocketmine.group.user");
 		$this->addConstraint(new InGameRequiredConstraint($this));
-		$this->registerArgument(0, new StringArgument("buy/sell"));
 	}
 
     /**

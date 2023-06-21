@@ -54,7 +54,7 @@ final class ShopHandler extends Handler
 			array_walk($data, function($data, $id)
 			{
 				$this->items[$data["category"]][$id] = new ShopData($data["player"], $data["name"], $data["price"], $this,
-					Item::jsonDeserialize($data["item"]), $data["quantities"], $data["description"], $data["category"], $id);
+					Item::legacyJsonDeserialize($data["item"]), $data["quantities"], $data["description"], $data["category"], $id);
 			});
 		}
 	}
@@ -102,8 +102,8 @@ final class ShopHandler extends Handler
 	final public function categoriesForm(string $category): SimpleChestInventory
 	{
 		$form = InventoryAPI::createDoubleChest(true);
-		$form->setItem(0, VanillaItems::RED_DYE()->setCustomName("Page Précédente"));
-		$form->setItem(53, VanillaItems::GREEN_DYE()->setCustomName("Page suivante"));
+		$form->setItem(0, VanillaItems::DYE()->setColor(DyeColor::RED())->setCustomName("Page Précédente"));
+		$form->setItem(53, VanillaItems::DYE()->setColor(DyeColor::GREEN())->setCustomName("Page suivante"));
 		$form->setName(ucfirst($category));
 
 		$count = 0;
@@ -150,7 +150,6 @@ final class ShopHandler extends Handler
 			}
 			$form->onClose($player);
 			/**@var ShopData $data **/
-			var_dump(spl_object_id($sourceItem));
 			$data = array_values(array_filter(empty($pages) ? [] : $pages[$pageCount], fn(ShopData $value) => spl_object_id($sourceItem) === spl_object_id($value)));
 			if(isset($data[0])){
 				$data = $data[0];

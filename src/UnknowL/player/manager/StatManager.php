@@ -2,6 +2,7 @@
 
 namespace UnknowL\player\manager;
 
+use DateTimeInterface;
 use JetBrains\PhpStorm\ArrayShape;
 
 final class StatManager extends PlayerManager
@@ -95,7 +96,10 @@ final class StatManager extends PlayerManager
 
 	protected function recalculateGameTime(): void
 	{
-
+        $gametime = \DateTime::createFromFormat(\DateTimeInterface::ATOM,$this->statistics["gametime"]);
+        $lastConnexion = \DateTime::createFromFormat(DateTimeInterface::ATOM, $this->statistics["lastconnexion"]);
+        $interval = $lastConnexion->diff($gametime);
+        var_dump($interval);
 	}
 
 	final protected function recalculateRatio(): void
@@ -107,8 +111,7 @@ final class StatManager extends PlayerManager
 	{
 		$date = new \DateTime('now');
 		$date->setTimezone(new \DateTimeZone(\DateTimeZone::EUROPE));
-		$this->statistics["lastconnexion"] = $date->format("Y-m-d H:i:s");
-		//\IntlDateFormatter::create()
+		$this->statistics["lastconnexion"] = $date->format(DateTimeInterface::ATOM);
 	}
 
 }

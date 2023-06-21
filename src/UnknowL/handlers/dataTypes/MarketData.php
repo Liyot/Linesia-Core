@@ -20,11 +20,18 @@ class MarketData
 		private int $quantities = 64
 	){}
 
-	final public function buy(LinesiaPlayer $player, MarketData $data, int $quantities): void
+	final public function buy(LinesiaPlayer $player, int $quantities): void
 	{
-		$player->getEconomyManager()->reduce($data->getPrice() * $quantities);
-		$player->getInventory()->addItem($data->getItem()->setCount($quantities));
+		$player->getEconomyManager()->reduce($this->getPrice() * $quantities);
+		$player->getInventory()->addItem($this->getItem()->setCount($quantities));
 	}
+
+    final public function sell(LinesiaPlayer $player, int $quantities)
+    {
+        $player->getEconomyManager()->add($quantities * $this->getPrice());
+        $player->getInventory()->remove($this->getItem()->setCount($quantities));
+        $player->sendMessage("Vous avez vendu votre item avec succés");
+    }
 
 	/**
 	 * @return Item
