@@ -48,7 +48,7 @@ final class PlayerListener implements Listener
             switch ($cooldown->getPath())
             {
                 case PathLoader::PATH_RANK_CACHE:
-                    CompoundTag::
+
             }
         }
     }

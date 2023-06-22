@@ -41,17 +41,17 @@ final class StatManager extends PlayerManager
 
 	private function deserialize(): array
 	{
-		return  [];
+		return $this->getPlayer()->getPlayerProperties()->getProperties("statistics");
 	}
 
-    public function getAll(): mixed
+    public function getAll(): array
     {
 		return $this->statistics;
 	}
 
     public function getName(): string
     {
-		return "Stat";
+		return "statistics";
 	}
 
 	public function handleEvents(int $types): void
@@ -94,7 +94,7 @@ final class StatManager extends PlayerManager
 		$this->statistics["blockposed"] += 1;
 	}
 
-	protected function recalculateGameTime(): void
+	final public function recalculateGameTime(): void
 	{
         $gametime = \DateTime::createFromFormat(\DateTimeInterface::ATOM,$this->statistics["gametime"]);
         $lastConnexion = \DateTime::createFromFormat(DateTimeInterface::ATOM, $this->statistics["lastconnexion"]);
@@ -102,9 +102,16 @@ final class StatManager extends PlayerManager
         var_dump($interval);
 	}
 
+    final public function formatGameTime(): string
+    {
+        $data = explode(':', $this->statistics["gametime"]);
+        return sprintf("%d mois %d jours %d et %d heures ", $data[0], $data[1], $data[2], $data[3]);
+    }
+
 	final protected function recalculateRatio(): void
 	{
-
+        $kd = round($this->statistics['kill'] / $this->statistics['death'], 2);
+        $this->statistics["kd"] = $kd;
 	}
 
 	private function setLastConnexion(): void
@@ -113,5 +120,4 @@ final class StatManager extends PlayerManager
 		$date->setTimezone(new \DateTimeZone(\DateTimeZone::EUROPE));
 		$this->statistics["lastconnexion"] = $date->format(DateTimeInterface::ATOM);
 	}
-
 }
