@@ -41,7 +41,7 @@ final class StatManager extends PlayerManager
 
 	private function deserialize(): array
 	{
-		return $this->getPlayer()->getPlayerProperties()->getProperties("statistics");
+		return $this->getPlayer()->getPlayerProperties()->getProperties("statistics") ?? [];
 	}
 
     public function getAll(): array
@@ -96,7 +96,7 @@ final class StatManager extends PlayerManager
 
 	final public function recalculateGameTime(): void
 	{
-        $gametime = \DateTime::createFromFormat(\DateTimeInterface::ATOM,$this->statistics["gametime"]);
+        $gametime = \DateTime::createFromFormat(\DateTimeInterface::ATOM,$this->statistics["gametime"]) ?? new \DateTime('now');
         $lastConnexion = \DateTime::createFromFormat(DateTimeInterface::ATOM, $this->statistics["lastconnexion"]);
         $interval = $lastConnexion->diff($gametime);
         var_dump($interval);

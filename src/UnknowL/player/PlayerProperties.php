@@ -29,6 +29,17 @@ final class PlayerProperties
 						"cooldown" => null
 					],
 				],
+				"statistics" => [
+					'death' => 0,
+					'kill' => 0,
+					'kd' => 0.0,
+					'gametime' => '',
+					'blockmined' => 0,
+					'blockposed' => 0,
+					'firstconnexion' => '',
+					'lastconnexion' => '',
+					'dualwon' => 0
+				]
 			]);
 		}else{
 			$this->setBaseProperties($this->TagtoArray($nbt->getCompoundTag("properties")));

@@ -4,8 +4,8 @@ namespace UnknowL\handlers\dataTypes;
 
 use Cassandra\Date;
 use DateTime;
-use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
 use pocketmine\data\bedrock\LegacyBiomeIdToStringIdMap;
+use pocketmine\data\bedrock\LegacyItemIdToStringIdMap;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;

@@ -17,7 +17,6 @@ class ClearlagTask extends Task
 	final public function clear(): \Generator
 	{
 		$count = 0;
-		$array = [];
 		foreach (Server::getInstance()->getWorldManager()->getWorldByName($this->world)->getEntities() as $entity)
 		{
 			if($entity instanceof ItemEntity)

@@ -4,18 +4,14 @@ namespace UnknowL\listener;
 
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\Listener;
-use pocketmine\event\server\DataPacketReceiveEvent;
-use pocketmine\inventory\PlayerOffHandInventory;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
-use pocketmine\network\mcpe\protocol\PlayerActionPacket;
-use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
-use pocketmine\network\mcpe\protocol\types\inventory\UseItemTransactionData;
-use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
-use pocketmine\network\mcpe\protocol\types\PlayerBlockActionWithBlockInfo;
 use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
 
 final class PacketListener implements Listener 
 {
+
+	private int $count = 0;
+
 	public function onInventoryTransaction(InventoryTransactionEvent $event) : void {
 		$transaction = $event->getTransaction();
 		$player = $transaction->getSource();

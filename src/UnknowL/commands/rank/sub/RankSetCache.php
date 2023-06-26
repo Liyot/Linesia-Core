@@ -47,7 +47,6 @@ class RankSetCache extends \UnknowL\lib\commando\BaseSubCommand
 					}
                     if (isset($args[2]) && $args[2] > 0)
                     {
-                        pack()
                         $path = PathLoader::PATH_RANK_CACHE;
                         $cooldown = new PlayerCooldown(\DateTime::createFromFormat("d:H:i:s", "0:0:0:0")->setDate(0, $args[2], 0), $player, $path);
                         $player->addCooldown($cooldown, $path);

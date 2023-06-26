@@ -67,7 +67,7 @@ trait ArgumentableTrait{
 		}
 		foreach($this->argumentList[$position - 1] ?? [] as $arg) {
 			if($arg instanceof StringArgument) {
-				throw new ArgumentOrderException("No other arguments can be registered after a StringArgument");
+			//	throw new ArgumentOrderException("No other arguments can be registered after a StringArgument");
 			}
 			if($arg->isOptional() && !$argument->isOptional()){
 				throw new ArgumentOrderException("You cannot register a required argument after an optional argument");
