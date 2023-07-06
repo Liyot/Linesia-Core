@@ -8,7 +8,7 @@ use UnknowL\player\LinesiaPlayer;
 abstract class CommandUtils
 {
 
-	const PERMISSION_ERROR_MESSAGE = "Vous n'avez pas les permissions pour éxécuter cette commande";
+	const PERMISSION_ERROR_MESSAGE = "§cVous n'avez pas les permissions pour éxécuter cette commande !";
 
 	final public static function checkTarget(string $name): ?LinesiaPlayer
 	{

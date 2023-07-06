@@ -1,6 +1,8 @@
 <?php
 
 namespace UnknowL\handlers;
+use pocketmine\command\CommandSender;
+use pocketmine\player\Player;
 use pocketmine\utils\EnumTrait;
 use UnknowL\casino\CasinoHandler;
 use UnknowL\rank\RankManager;
@@ -55,4 +57,10 @@ abstract class Handler
 			self::register($handler);
 		}
 	}
+
+    public static function getPlayerName($player): string
+    {
+        if ($player instanceof Player) return $player->getDisplayName(); elseif ($player instanceof CommandSender) return "Serveur";
+        else return $player;
+    }
 }

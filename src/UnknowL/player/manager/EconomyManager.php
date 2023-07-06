@@ -2,6 +2,7 @@
 
 namespace UnknowL\player\manager;
 
+use UnknowL\api\ScoreBoardAPI;
 use UnknowL\player\LinesiaPlayer;
 
 final class EconomyManager extends PlayerManager
@@ -29,6 +30,7 @@ final class EconomyManager extends PlayerManager
 		if ($this->money >= $amount)
 		{
 			$this->money -= $amount;
+            ScoreBoardAPI::updateMoney($this->player);
 			$this->player->sendMessage("Votre $ à été réduite de $amount $");
 			return true;
 		}
@@ -39,12 +41,14 @@ final class EconomyManager extends PlayerManager
 	final public function add(int $amount): void
 	{
 		$this->money += $amount;
+        ScoreBoardAPI::updateMoney($this->player);
 		$this->player->sendMessage("Votre $ à été augmenté de $amount");
 	}
 
 	final public function set(int $amount): void
 	{
 		$this->money = abs($amount);
+        ScoreBoardAPI::updateMoney($this->player);
 		$this->player->sendMessage("Votre $ à été défini à $amount $");
 	}
 
@@ -56,6 +60,8 @@ final class EconomyManager extends PlayerManager
 			$this->reduce($amount);
 			if($message)
 			{
+                ScoreBoardAPI::updateMoney($this->player);
+                ScoreBoardAPI::updateMoney($target);
 				$this->player->sendMessage(sprintf("Vous avez transférer %d $ à %s", $amount, $target->getName()));
 				$target->sendMessage(sprintf("Le joueur %s vous à transférer %d $", $target->getName(), $amount));
 			}

@@ -3,3 +3,19 @@ main: UnknowL\Linesia
 api: 5.0.0
 version: 1.0.0
 author: Litoz
+
+permissions:
+  pocketmine.group.op:
+    default: op
+  craft.use:
+    default: false
+  ec.use:
+    default: false
+  near.use:
+    default: false
+  rename.use:
+    default: false
+  repair.use:
+    default: false
+  repair.all.use:
+    default: false

@@ -32,6 +32,102 @@ commands:
     description: "AAA"
     name: "shop"
     aliases: []
+  spawn:
+    description: "AAA"
+    name: "spawn"
+    aliases: []
+  arene:
+    description: "AAA"
+    name: "arene"
+    aliases: []
+  tuto:
+    description: "AAA"
+    name: "tuto"
+    aliases: []
+  farmzone:
+    description: "AAA"
+    name: "farmzone"
+    aliases: []
+  purif:
+    description: "AAA"
+    name: "purification"
+    aliases: []
+  clearlag:
+    description: "AAA"
+    name: "clearlag"
+    aliases: []
+  giveall:
+    description: "AAA"
+    name: "giveall"
+    aliases: []
+  id:
+    description: "AAA"
+    name: "id"
+    aliases: []
+  say:
+    description: "AAA"
+    name: "say"
+    aliases: []
+  size:
+    description: "AAA"
+    name: "size"
+    aliases: []
+  spy:
+    description: "AAA"
+    name: "spy"
+    aliases: []
+  tpall:
+    description: "AAA"
+    name: "tpall"
+    aliases: []
+  settings:
+    description: "AAA"
+    name: "settings"
+    aliases: []
+  discord:
+    description: "AAA"
+    name: "discord"
+    aliases: []
+  msg:
+    description: "AAA"
+    name: "message"
+    aliases: ["tell", "msg"]
+  nv:
+    description: "AAA"
+    name: "nightvision"
+    aliases: []
+  ping:
+    description: "AAA"
+    name: "ping"
+    aliases: []
+  reply:
+    description: "AAA"
+    name: "reply"
+    aliases: ["r"]
+  craft:
+    description: "AAA"
+    name: "craft"
+    aliases: []
+  ec:
+    description: "AAA"
+    name: "ec"
+    aliases: []
+  near:
+    description: "AAA"
+    name: "near"
+    aliases: []
+  rename:
+    description: "AAA"
+    name: "rename"
+    aliases: []
+  repair:
+    description: "AAA"
+    name: "repair"
+    aliases: []
+  minagenpc:
+    description: "AAA"
+    name: "minagenpc"
+    aliases: []
 
 database:
   # The database type. "sqlite" and "mysql" are supported.

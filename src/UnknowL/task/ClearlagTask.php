@@ -29,6 +29,7 @@ class ClearlagTask extends Task
 
 	public function onRun(): void
 	{
-		Server::getInstance()->broadcastMessage(new Translatable(count(iterator_to_array($this->clear())). " entitées ont été clear") );
+        $count = count(iterator_to_array($this->clear()));
+		Server::getInstance()->broadcastMessage(new Translatable("§d§l» §r§fIl y a eu un total de§d $count §fentitée(s) supprimé !"));
 	}
 }

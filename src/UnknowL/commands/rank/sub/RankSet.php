@@ -3,6 +3,8 @@
 namespace UnknowL\commands\rank\sub;
 
 use pocketmine\command\CommandSender;
+use pocketmine\Server;
+use UnknowL\api\ScoreBoardAPI;
 use UnknowL\handlers\Handler;
 use UnknowL\lib\commando\args\StringArgument;
 use UnknowL\lib\commando\args\TargetArgument;
@@ -36,6 +38,11 @@ final class RankSet extends BaseSubCommand
 			{
 				$rank = Handler::RANK()->getRank($args["rank"]);
 				is_null($rank) ? $sender->sendMessage("Ce grade n'éxiste pas") : $player->setRank($rank);
+
+                $co = Server::getInstance()->getPlayerExact($player);
+                if ($co !== null) {
+                    ScoreBoardAPI::updateRank($player);
+                }
 			}
 			return;
 		}
