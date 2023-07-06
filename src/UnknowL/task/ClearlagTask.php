@@ -14,8 +14,11 @@ class ClearlagTask extends Task
 
 	private string $world = "world";
 
+	private int $time = 300 * 20;
+
 	final public function clear(): \Generator
 	{
+		$this->time = 300 * 20;
 		$count = 0;
 		foreach (Server::getInstance()->getWorldManager()->getWorldByName($this->world)->getEntities() as $entity)
 		{
@@ -29,7 +32,17 @@ class ClearlagTask extends Task
 
 	public function onRun(): void
 	{
-        $count = count(iterator_to_array($this->clear()));
-		Server::getInstance()->broadcastMessage(new Translatable("§d§l» §r§fIl y a eu un total de§d $count §fentitée(s) supprimé !"));
+		$this->time === 0 ? $message = match ($this->time)
+		{
+			30 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d30 §fseconde(s) !",
+			10 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d10 §fseconde(s) !",
+			3 =>"§d§l» §r§fLe prochain clearlagg aura lieu dans §d$3 §fseconde(s) !",
+			2 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d2 §fseconde(s) !",
+			1 =>"§d§l» §r§fLe prochain clearlagg aura lieu dans §d1 §fseconde(s) !"
+
+
+		} : $message = count(iterator_to_array($this->clear())). " entitées ont été clear";
+		$this->time--;
+		Server::getInstance()->broadcastMessage(new Translatable($message));
 	}
 }

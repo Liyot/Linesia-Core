@@ -5,6 +5,7 @@ namespace UnknowL\task;
 use pocketmine\player\Player;
 use pocketmine\scheduler\Task;
 use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
+use UnknowL\Linesia;
 
 class DelayTask extends Task {
 

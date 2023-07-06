@@ -7,6 +7,8 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\VanillaItems;
 use pocketmine\scheduler\Task;
+use pocketmine\Server;
+use UnknowL\handlers\dataTypes\Kit;
 use UnknowL\lib\inventoryapi\inventories\BaseInventoryCustom;
 use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
 use UnknowL\lib\inventoryapi\InventoryAPI;
@@ -20,7 +22,7 @@ class Pyramides extends CasinoGame
 {
 	use InventoryContainerTrait;
 
-    public function getName(): string
+	public function getName(): string
     {
 		return "Pyramides";
 	}

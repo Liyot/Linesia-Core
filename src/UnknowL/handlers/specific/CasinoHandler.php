@@ -10,7 +10,7 @@ final class CasinoHandler
 	use EnumTrait;
 	public function __construct()
 	{
-		VanillaBlocks::AIR();
+		VanillaBlocks::
 	}
 
 	protected static function setup(): void

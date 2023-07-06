@@ -4,19 +4,13 @@ namespace UnknowL\handlers\dataTypes;
 
 use Cassandra\Date;
 use DateTime;
-use pocketmine\data\bedrock\LegacyBiomeIdToStringIdMap;
-use pocketmine\data\bedrock\LegacyItemIdToStringIdMap;
-use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
 use pocketmine\item\Item;
-use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
-use UnknowL\handlers\dataTypes\PlayerCooldown;
 use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
 use UnknowL\lib\inventoryapi\InventoryAPI;
-use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 use UnknowL\rank\Rank;
-use UnknowL\handlers\dataTypes\Cooldown;
 use UnknowL\utils\PathLoader;
 
 final class Kit
@@ -109,7 +103,7 @@ final class Kit
 		for ($i = 0 ; $i < count($this->contentDisplay) ; $i++)
 		{
 			$ex = explode(":", $this->content[$i]);
-			$item = StringToItemParser::getInstance()->parse(LegacyBiomeIdToStringIdMap::getInstance()->legacyToString($ex[0]));
+			$item = StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($ex[0]));
 			$form->setItem($this->contentDisplay[$i], $item);
 		}
 		return $form;

@@ -98,8 +98,8 @@ final class StatManager extends PlayerManager
 	{
         $gametime = \DateTime::createFromFormat(\DateTimeInterface::ATOM,$this->statistics["gametime"]) ?? new \DateTime('now');
         $lastConnexion = \DateTime::createFromFormat(DateTimeInterface::ATOM, $this->statistics["lastconnexion"]);
-        $interval = $lastConnexion->diff($gametime);
-        var_dump($interval);
+     //   $interval = $lastConnexion->diff($gametime);
+     //   var_dump($interval);
 	}
 
     final public function formatGameTime(): string

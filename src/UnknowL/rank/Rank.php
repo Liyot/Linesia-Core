@@ -4,6 +4,7 @@ namespace UnknowL\rank;
 
 use pocketmine\permission\Permission;
 use pocketmine\permission\PermissionManager;
+use UnknowL\player\LinesiaPlayer;
 
 final class Rank
 {
@@ -17,8 +18,21 @@ final class Rank
 		$this->permissions[] = $perm;
 	}
 
-	final public function handleMessage(string $message, array $args): string
+	final public function handleMessage(string $message, LinesiaPlayer $player): string
 	{
+		$args = [];
+		foreach (explode("{", $message) as $argument)
+		{
+			$name = substr($argument, 0, stripos($argument, "}"));
+			!str_contains('&', $name) ?: $name = substr($name, stripos('&', 1));
+			$args[] = match (true) {
+				str_contains($name, 'faction') => 'dont exist',
+				str_contains($name,'prefix') => $this->chatFormat,
+				str_contains($name,'role') => ucfirst($this->getName()),
+				str_contains($name,'playerName') => $player->getName(),
+				str_contains($name, 'message') => $message
+			};
+		}
 		foreach ($args as $name => $value)
 		{
 			str_replace(sprintf('{%s}', $name), $value, $message);

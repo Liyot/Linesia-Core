@@ -1,10 +1,9 @@
 <?php
 
 namespace UnknowL\handlers;
-use pocketmine\command\CommandSender;
-use pocketmine\player\Player;
 use pocketmine\utils\EnumTrait;
 use UnknowL\casino\CasinoHandler;
+use UnknowL\Linesia;
 use UnknowL\rank\RankManager;
 
 /**
@@ -15,6 +14,8 @@ use UnknowL\rank\RankManager;
  * @method static ShopHandler SHOP()
  * @method static CasinoHandler CASINO()
  * @method static FactionHandler FACTION()
+ * @method static RequestHandler REQUEST()
+ * @method static BoxHandler BOX()
  */
 abstract class Handler
 {
@@ -39,16 +40,26 @@ abstract class Handler
 			new CooldownHandler(),
 			new MarketHandler(),
 			new ShopHandler(),
-			new CasinoHandler(),
 			new FactionHandler(),
 			new KitHandler(),
 			new RankManager(),
+			new RequestHandler(),
+			new BoxHandler()
 		];
 	}
 
 	public static function init(): void
 	{
 		self::setup();
+		self::_registryRegister("Casino", new CasinoHandler());
+	}
+
+	public static function saveHandler(): void
+	{
+		foreach (self::getHandlers() as $handler) {
+			Linesia::getInstance()->getLogger()->notice(sprintf("Saving [%s]...", $handler->getName()));
+            $handler->saveData();
+        }
 	}
 
 	protected static function setup(): void
@@ -57,10 +68,4 @@ abstract class Handler
 			self::register($handler);
 		}
 	}
-
-    public static function getPlayerName($player): string
-    {
-        if ($player instanceof Player) return $player->getDisplayName(); elseif ($player instanceof CommandSender) return "Serveur";
-        else return $player;
-    }
 }

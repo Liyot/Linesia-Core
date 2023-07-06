@@ -2,15 +2,18 @@
 
 namespace UnknowL\casino\types;
 
+use pocketmine\block\Concrete;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\block\VanillaBlocks;
 use UnknowL\lib\forms\CustomForm;
 use UnknowL\lib\forms\CustomFormResponse;
 use UnknowL\lib\forms\element\Dropdown;
 use UnknowL\lib\forms\element\Input;
+use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
 use UnknowL\lib\inventoryapi\InventoryAPI;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
+use UnknowL\task\InventoryAnimationTask;
 use UnknowL\task\RouletteTask;
 
 class Roulette extends CasinoGame
@@ -55,7 +58,41 @@ class Roulette extends CasinoGame
 				'Noir' => VanillaBlocks::CONCRETE()->setColor(DyeColor::BLACK())->asItem(),
 				'Vert' => VanillaBlocks::CONCRETE()->setColor(DyeColor::GREEN())->asItem()
 			};
-			Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new RouletteTask($inventory,$input->getValue(), $roulette, $block, $player), 5);
+			if(!is_int((int)$input->getValue())) return;
+			Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new class($roulette, $inventory, $block, (int)$input->getValue()) extends InventoryAnimationTask
+			{
+
+				public function __construct(array $items, SimpleChestInventory $inventory, LinesiaPlayer $player, private Concrete $misedColor, private int $mise = 1)
+				{
+					$this->items = $items;
+					$this->inventory = $inventory;
+					$this->player = $player;
+					parent::__construct($items, $inventory, $player);
+				}
+
+				public function onCancel(): void
+				{
+					/**@var Concrete $final*/
+					$final = $this->getResult();
+					if ($this->player->isConnected())
+					{
+						if($final->getColor()->name() === $this->misedColor->getColor()->name())
+						{
+							$gain = match ($final)
+							{
+								VanillaBlocks::CONCRETE()->setColor(DyeColor::GREEN())->asItem() => $this->mise * 14,
+								default => $this->mise * 2
+							};
+							$this->player->sendMessage("Vous avez gagné ". $gain);
+							$this->inventory->onClose($this->player);
+							return;
+						}
+						$this->player->sendMessage("Vous n'avez rien gagner");
+						$this->inventory->onClose($this->player);
+						parent::onCancel();
+					}
+				}
+			}, 5);
 		});
 		$player->sendForm($form);
 	}

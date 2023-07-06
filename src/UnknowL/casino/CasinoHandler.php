@@ -25,7 +25,6 @@ final class CasinoHandler extends Handler
 	public function __construct()
 	{
 		self::setup();
-		parent::__construct();
 	}
 
 	protected static function setup(): void

@@ -39,7 +39,11 @@ final class PlayerProperties
 					'firstconnexion' => '',
 					'lastconnexion' => '',
 					'dualwon' => 0
-				]
+				],
+				"keys" => [
+					"firstkey" => 0,
+					"secondkey" => 0
+					]
 			]);
 		}else{
 			$this->setBaseProperties($this->TagtoArray($nbt->getCompoundTag("properties")));
@@ -48,6 +52,7 @@ final class PlayerProperties
 
 	public function save(CompoundTag $tag): void
 	{
+		if (isset($this->properties['roll'])) unset($this->properties['roll']);
 		$tag->setTag("properties", $this->arraytoTag($this->getPropertiesList()));
 	}
 
