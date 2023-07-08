@@ -5,6 +5,7 @@ namespace UnknowL\lib\inventoryapi\inventories;
 use pocketmine\block\inventory\BlockInventory;
 use pocketmine\block\inventory\BlockInventoryTrait;
 use pocketmine\inventory\SimpleInventory;
+use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\player\Player;
@@ -75,7 +76,15 @@ abstract class BaseInventoryCustom extends SimpleInventory implements BlockInven
 
     public function onClose(Player $who) : void {
         parent::onClose($who);
-        $who->getNetworkSession()->sendDataPacket(UpdateBlockPacket::create(BlockPosition::fromVector3($this->holder), $who->getWorld()->getBlock($this->holder)->getTypeId(), UpdateBlockPacket::FLAG_NETWORK, UpdateBlockPacket::DATA_LAYER_NORMAL));
+
+        $who->getNetworkSession()->sendDataPacket(UpdateBlockPacket::create
+		(
+			BlockPosition::fromVector3($this->holder),
+			TypeConverter::getInstance()->getBlockTranslator()->internalIdToNetworkId($who->getWorld()->getBlock($this->holder)->getStateId()),
+			UpdateBlockPacket::FLAG_NETWORK,
+			UpdateBlockPacket::DATA_LAYER_NORMAL)
+		);
+
         $closeListener = $this->getCloseListener();
         if ($closeListener !== null){
             $closeListener($who, $this);

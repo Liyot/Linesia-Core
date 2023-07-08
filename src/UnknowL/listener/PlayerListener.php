@@ -30,9 +30,12 @@ use pocketmine\item\StringToItemParser;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\Vector3;
 use pocketmine\permission\DefaultPermissions;
+use pocketmine\player\chat\StandardChatFormatter;
 use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\Server;
+use pocketmine\world\format\io\GlobalItemDataHandlers;
+use pocketmine\world\Position;
 use UnknowL\api\CombatLoggerManager;
 use UnknowL\api\ElevatorAPI;
 use UnknowL\api\KillDeathManager;
@@ -44,8 +47,10 @@ use UnknowL\commands\admin\SpyCommand;
 use UnknowL\events\CooldownExpireEvent;
 use UnknowL\form\EnderChestForm;
 use UnknowL\handlers\dataTypes\PlayerCooldown;
+use UnknowL\handlers\Handler;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
+use UnknowL\task\ChatGameTask;
 use UnknowL\utils\PathLoader;
 
 final class PlayerListener implements Listener
@@ -58,6 +63,14 @@ final class PlayerListener implements Listener
 
     private const EFFECT_MAX_DURATION = 2147483647;
 
+	/**@var SimpleSharedListener[] $sharedListeners*/
+	private array $sharedListeners = [];
+
+	public function __construct()
+	{
+		$this->sharedListeners[] = new SimpleSharedListener($this, new ChatGameTask());
+	}
+
     public function onCreation(PlayerCreationEvent $event)
     {
         $event->setPlayerClass(LinesiaPlayer::class);
@@ -65,6 +78,7 @@ final class PlayerListener implements Listener
 
     public function onJoin(PlayerJoinEvent $event): void {
 
+		/**@var LinesiaPlayer $sender*/
         $sender = $event->getPlayer();
         $name = $sender->getName();
 
@@ -252,7 +266,7 @@ final class PlayerListener implements Listener
                             foreach ($index as $i){
                                 $player->getInventory()->setItem($i,VanillaItems::AIR());
                             }
-                            $player->getInventory()->addItem(StringToItemParser::getInstance()->get($itemData["id"])->setCount($itemData["max"]));
+                            $player->getInventory()->addItem(GlobalItemDataHandlers::getUpgrader()->upgradeItemTypeDataInt($itemData["id"], $itemData["meta"], $itemData["max"], null));
                         }
                     }
                 }
@@ -344,6 +358,7 @@ final class PlayerListener implements Listener
 
     public function onMsg(PlayerChatEvent $event)
     {
+		/**@var LinesiaPlayer $player*/
         $player = $event->getPlayer();
         $message = $event->getMessage();
         $playerName = $player->getName();
@@ -369,8 +384,7 @@ final class PlayerListener implements Listener
             }
         }
 
-        if ($player->hasPermission(DefaultPermissions::ROOT_OPERATOR))
-            return;
+       // mdr non if ($player->hasPermission(DefaultPermissions::ROOT_OPERATOR)) return;
 
         //MINIMUM LETTRE MSG
         if (strlen($message) < 2) {
@@ -414,8 +428,10 @@ final class PlayerListener implements Listener
             $event->cancel();
             return;
         }
+
+		$event->setMessage($player->getRank()->handleMessage($message, $player));
         self::$cooldown[$playerName] = microtime(true) + 1;
-    }
+	}
 
     //NO HUNGER
     public function NoHunger(PlayerExhaustEvent $event)
@@ -479,7 +495,7 @@ final class PlayerListener implements Listener
     }
 
     public function onBlockPlace(BlockPlaceEvent $event){
-
+		/**@var LinesiaPlayer $player*/
         $player = $event->getPlayer();
 
         //STATS
@@ -490,10 +506,16 @@ final class PlayerListener implements Listener
         if ($item->getTypeId() === VanillaBlocks::MELON()->getTypeId() or $item->getTypeId() === VanillaBlocks::PUMPKIN()->getTypeId()) {
             $event->cancel();
         }
+
+		if ($item->getNamedTag()->getTag('box', null) !== null)
+		{
+			Handler::BOX()->getBox($item->getNamedTag()->getString('box'))
+				->place(Position::fromObject($event->getBlockAgainst()->getPosition()->add(0, 1, 0), $player->getWorld()), $player);
+		}
     }
 
     public function onInteract(PlayerInteractEvent $event) {
-
+		/**@var LinesiaPlayer $player*/
         $player = $event->getPlayer();
         $block = $event->getBlock();
 
@@ -546,6 +568,10 @@ final class PlayerListener implements Listener
             }
         }
 
+		if (Handler::BOX()->testPosition($event->getBlock()->getPosition(), $player))
+		{
+			$event->cancel();
+		}
     }
 
     //ELEVATOR

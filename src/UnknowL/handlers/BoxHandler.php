@@ -53,7 +53,7 @@ class BoxHandler extends Handler
 		var_dump($config);*/
 	}
 
-		final public function saveBox(Box $box, )
+		final public function saveBox(Box $box)
 		{
 			$config = new Config(Linesia::getInstance()->getDataFolder(). 'data/box/BoxTileData.json');
 			$config->set($box->getName(), $box->serialize());
@@ -62,10 +62,16 @@ class BoxHandler extends Handler
 
 	private function loadBox(string $name, array $itemData, array $posData)
 	{
-		$items = array_map(fn(array $tag) => Item::legacyJsonDeserialize($tag), $itemData);
+		$items = array_map(fn(array $tag) => Item::nbtDeserialize((new LittleEndianNbtSerializer())->read($tag['item'])->mustGetCompoundTag()), $itemData);
 		$pos = new Position($posData[0], $posData[1], $posData[2], ($world = Server::getInstance()->getWorldManager()->getWorldByName($posData[3])));
-		$this->boxs[$name] = new Box($name, $items, $pos);
+
+		$box = new Box($name, $items);
+		$box->setPosition($pos);
+		$this->boxs[$name] = $box;
+
+		$world->setBlock($pos, VanillaBlocks::AIR());
 		$world->setBlock($pos, VanillaBlocks::CHEST());
+		$world->getTile($pos)->getCleanedNBT()->setString('box', $name);
 	}
 
 	final public function getBox(string $name): ?Box

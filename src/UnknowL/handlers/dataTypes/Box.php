@@ -7,12 +7,15 @@ use pocketmine\data\bedrock\block\upgrade\BlockDataUpgrader;
 use pocketmine\data\bedrock\block\upgrade\LegacyBlockIdToStringIdMap;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
+use pocketmine\entity\Location;
 use pocketmine\item\Item;
+use pocketmine\math\AxisAlignedBB;
 use pocketmine\nbt\LittleEndianNbtSerializer;
 use pocketmine\nbt\TreeRoot;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use pocketmine\world\Position;
+use UnknowL\entities\FloatingText;
 use UnknowL\handlers\Handler;
 use UnknowL\lib\forms\menu\Button;
 use UnknowL\lib\forms\MenuForm;
@@ -68,37 +71,11 @@ final class Box
 
 	final protected function jsonSerialiezeItems(): array
 	{
-		$findIdentifier = function (int $typeId): ?string {
-			$deserializers = new \ReflectionProperty(GlobalItemDataHandlers::getDeserializer(), 'deserializers');
-			$deserializers->setAccessible(true);
-			foreach ($deserializers->getValue(GlobalItemDataHandlers::getDeserializer()) as $identifier => $deserializer){
-				$item = $deserializer(new SavedItemData($identifier));
-				if($item->getTypeId() === $typeId)
-				{
-					foreach (LegacyItemIdToStringIdMap::getInstance()->getLegacyToStringMap() as $legacyId => $stringId)
-					{
-						if ($stringId === $identifier) return $legacyId;
 
-					}
-					foreach (LegacyBlockIdToStringIdMap::getInstance()->getLegacyToStringMap() as $legacyBlockId => $stringId)
-					{
-						if ($stringId === $identifier) return $legacyBlockId;
-
-					}
-				}
-			}
-			return null;
-		};
-
-		return array_map(fn(Item $item) =>
+		return array_map(fn(Item $item, int $slot) =>
 		[
-			"id" => $findIdentifier($item->getTypeId()),
-			"damage" => $item->getStateId(),
-            "count" => $item->getCount(),
-            "name" => $item->getName(),
-            "nbt_b64" => base64_encode((new LittleEndianNbtSerializer())->write(new TreeRoot($item->getNamedTag()))),
-			"percentage" => $item->getNamedTag()->getInt('percentage')
-		], $this->items);
+			"item" => (new LittleEndianNbtSerializer())->write(new TreeRoot($item->nbtSerialize($slot)))
+		], $this->items, array_keys($this->items));
 	}
 
 	final public function asItem(): Item
@@ -137,7 +114,11 @@ final class Box
 		$inventory->send($player);
 		Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new class($this->sortByPercentage(), $inventory, $player) extends InventoryAnimationTask
 		{
-
+			public function onCancel(): void
+			{
+				parent::onCancel();
+				$this->player->getInventory()->addItem($this->getResult());
+			}
 		}, 5);
 	}
 
@@ -155,6 +136,10 @@ final class Box
 	{
 		$this->position = $position;
 		$this->worldName = $position->getWorld()->getDisplayName();
+		$pos = $position->floor();
+		$entity = new FloatingText(Location::fromObject($pos->add(0.5, 1, 0.5), $position->getWorld()));
+		$entity->setText($this->getName());
+		$entity->spawnToAll();
 	}
 
 	/**

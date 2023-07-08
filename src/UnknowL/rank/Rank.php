@@ -10,6 +10,7 @@ final class Rank
 {
 	public function __construct(protected string $name, private string $chatFormat, private array $permissions, private bool $default)
 	{
+		var_dump($this->chatFormat);
 		array_map(fn(string $permission) => PermissionManager::getInstance()->addPermission(new Permission($permission)),$permissions);
 	}
 
@@ -20,24 +21,45 @@ final class Rank
 
 	final public function handleMessage(string $message, LinesiaPlayer $player): string
 	{
-		$args = [];
-		foreach (explode("{", $message) as $argument)
+		$chatFormat = $this->chatFormat;
+
+		$toReplace = ["faction" => 'dont exist ', 'prefix' => 'prefix', 'rank' => ucfirst($this->getName()), 'playerName' => $player->getName(), 'message' => $message, 'tag' => 'no tag'];
+
+		for ($i = self::countCharOccurences($chatFormat, '{'); $i >= 0 ; $i--)
 		{
-			$name = substr($argument, 0, stripos($argument, "}"));
-			!str_contains('&', $name) ?: $name = substr($name, stripos('&', 1));
-			$args[] = match (true) {
-				str_contains($name, 'faction') => 'dont exist',
-				str_contains($name,'prefix') => $this->chatFormat,
-				str_contains($name,'role') => ucfirst($this->getName()),
-				str_contains($name,'playerName') => $player->getName(),
-				str_contains($name, 'message') => $message
-			};
+			$fullName = substr($chatFormat, stripos($chatFormat, '{'), (stripos($chatFormat, '}') + 1) - stripos($chatFormat, '{'));
+
+			$name = preg_replace('/[{}]/', '', $fullName);
+			$name = str_replace('&', '',$name);
+			foreach ($toReplace as $key => $value)
+			{
+				if (str_contains($name, $key))
+				{
+					$chatFormat = str_replace($fullName, str_replace($fullName, $value, $fullName), $chatFormat);
+				}
+			}
 		}
-		foreach ($args as $name => $value)
-		{
-			str_replace(sprintf('{%s}', $name), $value, $message);
+//			$args[] = match (true) {
+//				str_contains($name, 'faction') => 'dont exist',
+//				str_contains($name,'prefix') => 'prefix',
+//				str_contains($name,'rank') => ucfirst($this->getName()),
+//				str_contains($name,'playerName') => $player->getName(),
+//				str_contains($name, 'message') => $message
+//			};
+		return $chatFormat;
+	}
+
+	public static function countCharOccurences(string $string, string $char): int
+	{
+		$count = 0;
+		$lenght = strlen($string);
+
+		for ($i = 0; $i < $lenght; $i++) {
+			if ($string[$i] === $char) {
+				$count++;
+			}
 		}
-		return $message;
+		return $count;
 	}
 
 	final public function testPermission(string $perm): bool

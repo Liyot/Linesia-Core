@@ -32,17 +32,17 @@ class ClearlagTask extends Task
 
 	public function onRun(): void
 	{
-		$this->time === 0 ? $message = match ($this->time)
+		$this->time !== 0 ? $message = match ($this->time)
 		{
-			30 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d30 §fseconde(s) !",
-			10 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d10 §fseconde(s) !",
-			3 =>"§d§l» §r§fLe prochain clearlagg aura lieu dans §d$3 §fseconde(s) !",
-			2 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d2 §fseconde(s) !",
-			1 =>"§d§l» §r§fLe prochain clearlagg aura lieu dans §d1 §fseconde(s) !"
-
+			30 * 20 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d30 §fseconde(s) !",
+			10 * 20 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d10 §fseconde(s) !",
+			3 * 20 =>"§d§l» §r§fLe prochain clearlagg aura lieu dans §d3 §fseconde(s) !",
+			2 * 20=> "§d§l» §r§fLe prochain clearlagg aura lieu dans §d2 §fseconde(s) !",
+			20 =>"§d§l» §r§fLe prochain clearlagg aura lieu dans §d1 §fseconde(s) !",
+			default => ''
 
 		} : $message = count(iterator_to_array($this->clear())). " entitées ont été clear";
 		$this->time--;
-		Server::getInstance()->broadcastMessage(new Translatable($message));
+		$message === '' ?: Server::getInstance()->broadcastMessage(new Translatable($message));
 	}
 }

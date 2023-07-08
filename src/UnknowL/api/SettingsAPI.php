@@ -22,7 +22,7 @@ class SettingsAPI
     public static function createPlayer($player): void
     {
         if (!self::existPlayer($player)) {
-            self::$data->set(Handler::getPlayerName($player), ["scoreboard" => true, "msg" => true, "cps" => false, "coordonnees" => true]);
+            self::$data->set(self::getPlayerName($player), ["scoreboard" => true, "msg" => true, "cps" => false, "coordonnees" => true]);
             self::$data->save();
         }
         $coord = new CoordonneesAPI();
@@ -31,19 +31,25 @@ class SettingsAPI
 
     public static function existPlayer($player): bool
     {
-        return self::$data->exists(Handler::getPlayerName($player));
+        return self::$data->exists(self::getPlayerName($player));
     }
 
     public static function isEnableSettings($player, string $settings): bool
     {
-        return self::$data->get(Handler::getPlayerName($player))[$settings];
+        return self::$data->get(self::getPlayerName($player))[$settings];
     }
 
     public static function setSettings($player, string $settings, bool $bool): void
     {
-        self::$data->setNested(Handler::getPlayerName($player) . ".$settings", $bool);
+        self::$data->setNested(self::getPlayerName($player) . ".$settings", $bool);
         self::$data->save();
         $coord = new CoordonneesAPI();
         $coord->coordonnees($player);
     }
+
+	public static function getPlayerName($player): string
+	{
+		if ($player instanceof Player) return $player->getDisplayName(); elseif ($player instanceof CommandSender) return "Serveur";
+		else return $player;
+	}
 }

@@ -52,7 +52,6 @@ final class PlayerProperties
 
 	public function save(CompoundTag $tag): void
 	{
-		if (isset($this->properties['roll'])) unset($this->properties['roll']);
 		$tag->setTag("properties", $this->arraytoTag($this->getPropertiesList()));
 	}
 

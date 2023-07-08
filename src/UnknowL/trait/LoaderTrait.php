@@ -6,9 +6,12 @@ use pocketmine\command\defaults\SayCommand;
 use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\EntityFactory;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 use pocketmine\Server;
 use pocketmine\world\World;
 use UnknowL\api\MineAPI;
+use UnknowL\api\SettingsAPI;
+use UnknowL\blocks\BounceBlock;
 use UnknowL\commands\admin\ClearLaggCommand;
 use UnknowL\commands\admin\GiveAllCommand;
 use UnknowL\commands\admin\IdCommand;
@@ -16,8 +19,10 @@ use UnknowL\commands\admin\MinageNPCCommand;
 use UnknowL\commands\admin\SizeCommand;
 use UnknowL\commands\admin\SpyCommand;
 use UnknowL\commands\admin\TpAllCommand;
+use UnknowL\commands\box\BoxCommand;
 use UnknowL\commands\casino\CasinoCommand;
 use UnknowL\commands\CommandManager;
+use UnknowL\commands\dual\DualCommand;
 use UnknowL\commands\kit\KitCommand;
 use UnknowL\commands\market\MarketCommand;
 use UnknowL\commands\money\MoneyCommand;
@@ -35,8 +40,8 @@ use UnknowL\commands\warps\LobbyCommand;
 use UnknowL\commands\warps\PurifCommand;
 use UnknowL\commands\warps\SpawnCommand;
 use UnknowL\commands\warps\TutoCommand;
+use UnknowL\entities\FloatingText;
 use UnknowL\entities\MinageNPC;
-use UnknowL\events\BounceBlock;
 use UnknowL\handlers\Handler;
 use UnknowL\items\ArcPunch;
 use UnknowL\items\Gapple;
@@ -75,6 +80,7 @@ trait LoaderTrait
 		$this->loadTask();
 		$this->loadFolder();
         $this->worlds();
+		$this->loadApi();
         $this->loadEntities();
 
         Server::getInstance()->getNetwork()->setName("§dLinesia §5V8");
@@ -84,6 +90,7 @@ trait LoaderTrait
 
 	final public function saveAll(): void
 	{
+		$this->clearEntities();
 	}
 	
 	private function loadListeners(): void 
@@ -147,6 +154,7 @@ trait LoaderTrait
 		Server::getInstance()->getCommandMap()->register("", new MoneyCommand());
 		Server::getInstance()->getCommandMap()->register("", new ShopCommand());
 		Server::getInstance()->getCommandMap()->register("", new MarketCommand());
+		Server::getInstance()->getCommandMap()->register('', new DualCommand());
 		Server::getInstance()->getCommandMap()->register("", new RankCommand());
         Server::getInstance()->getCommandMap()->register("", new SettingsCommand());
 
@@ -171,6 +179,7 @@ trait LoaderTrait
         Server::getInstance()->getCommandMap()->register("", new TpAllCommand());
         Server::getInstance()->getCommandMap()->register("", new IdCommand());
         Server::getInstance()->getCommandMap()->register("", new SayCommand());
+		Server::getInstance()->getCommandMap()->register('', new BoxCommand());
         Server::getInstance()->getCommandMap()->register("", new SizeCommand());
         Server::getInstance()->getCommandMap()->register("", new SpyCommand());
         Server::getInstance()->getCommandMap()->register("", new MinageNPCCommand());
@@ -179,7 +188,7 @@ trait LoaderTrait
 
 	private function loadTask(): void
 	{
-		Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new ClearlagTask(), 20 * 60 * 5);
+		Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new ClearlagTask(), 1);
         Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new PurifTask(), 20 * 30);
 	}
 
@@ -188,12 +197,37 @@ trait LoaderTrait
         EntityFactory::getInstance()->register(MinageNPC::class, function (World $world, CompoundTag $nbt): MinageNPC {
             return new MinageNPC(EntityDataHelper::parseLocation($nbt, $world), $nbt);
         }, ['MinageNPC']);
-    }
+
+		EntityFactory::getInstance()->register(FloatingText::class, function(World $world, CompoundTag $nbt) : FloatingText{
+			return new FloatingText(EntityDataHelper::parseLocation($nbt, $world), $nbt);
+		}, [EntityIds::FALLING_BLOCK]);
+
+	}
 
 	private function loadFolder(): void
 	{
 		@mkdir(Linesia::getInstance()->getDataFolder().DIRECTORY_SEPARATOR."data");
 		@mkdir(Linesia::getInstance()->getDataFolder().DIRECTORY_SEPARATOR."data".DIRECTORY_SEPARATOR."shop");
+	}
+
+	private function loadApi(): void
+	{
+		new SettingsAPI();
+	}
+
+	private function clearEntities(): void
+	{
+		foreach (Server::getInstance()->getWorldManager()->getWorlds() as $world)
+		{
+			foreach ($world->getEntities() as $entity)
+			{
+				if ($entity instanceof FloatingText)
+				{
+					$entity->flagForDespawn();
+					var_dump("clearing entities of type" . $entity->getId());
+				}
+			}
+		}
 	}
 
 //Getters
