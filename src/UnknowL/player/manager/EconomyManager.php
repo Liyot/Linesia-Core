@@ -8,7 +8,7 @@ use UnknowL\player\LinesiaPlayer;
 final class EconomyManager extends PlayerManager
 {
 
-	private int $money = 5000000000000;
+	private int $money = 500000;
 
 	public function __construct(protected LinesiaPlayer $player)
 	{
@@ -22,7 +22,7 @@ final class EconomyManager extends PlayerManager
 
 	protected final function load(): void
 	{
-		$this->money = $this->player->getPlayerProperties()->getNestedProperties("manager.economy.money") ?? 5000000000000;
+		$this->money = $this->player->getPlayerProperties()->getNestedProperties("economy.money") ?? 500000;
 	}
 
 	final public function reduce(int $amount): bool

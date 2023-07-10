@@ -5,6 +5,7 @@ namespace UnknowL\player;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\Server;
 use UnknowL\handlers\Handler;
 use UnknowL\Linesia;
 use UnknowL\trait\PropertiesTrait;
@@ -14,12 +15,11 @@ final class PlayerProperties
 {
 	use PropertiesTrait;
 
-	protected array $array = [];
-
-
-	public function __construct(private LinesiaPlayer $player)
+	public function __construct(CompoundTag $nbt)
 	{
-		if(!($nbt = $this->player->saveNBT())->getCompoundTag('properties') || empty($nbt->getCompoundTag("properties")->getValue())){
+		if($nbt->getCompoundTag('properties') === null || empty($nbt->getCompoundTag("properties")->getValue()))
+		{
+			var_dump('fff');
 			$this->setBaseProperties([
 				"rank" => Handler::RANK()->getDefaultRank()->getName(),
                 PathLoader::PATH_RANK_ADD_PERM => null,
@@ -29,17 +29,19 @@ final class PlayerProperties
 						"cooldown" => null
 					],
 				],
-				"statistics" => [
-					'death' => 0,
-					'kill' => 0,
-					'kd' => 0.0,
-					'gametime' => '',
-					'blockmined' => 0,
-					'blockposed' => 0,
-					'firstconnexion' => '',
-					'lastconnexion' => '',
-					'dualwon' => 0
-				],
+				"manager" => [
+						"statistics" => [
+							'death' => 0,
+							'kill' => 0,
+							'kd' => 0.0,
+							'gametime' => 0,
+							'blockmined' => 0,
+							'blockposed' => 0,
+							'firstconnexion' => 0,
+							'lastconnexion' => 0,
+							'dualwon' => 0
+						],
+					],
 				"keys" => [
 					"firstkey" => 0,
 					"secondkey" => 0
@@ -60,7 +62,7 @@ final class PlayerProperties
 			if($value instanceof CompoundTag || $value instanceof ListTag){
 				self::TagtoArray($value, array_search($value, $nbt->getValue(), true));
 			}else{
-				$name === null ? $this->array[$key] = $value->getValue() : $this->array[$name][$key] = $value->getValue();
+				$name === null ? $this->properties[$key] = $value->getValue() : $this->properties[$name][$key] = $value->getValue();
 			}
 		}
 		return $this->properties;

@@ -20,7 +20,7 @@ abstract class PlayerManager
 	final public function save(): void
 	{
 		$properties = $this->player->getPlayerProperties();
-		$properties->setNestedProperties("maganer.".strtolower($this->getName()), $this->getAll());
+		$properties->setProperties(strtolower($this->getName()), $this->getAll());
 	}
 
 	abstract protected function load(): void;
@@ -29,4 +29,8 @@ abstract class PlayerManager
 
 	abstract public function getName(): string;
 
+	public function __destruct()
+	{
+		$this->save();
+	}
 }

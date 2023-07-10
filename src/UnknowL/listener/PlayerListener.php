@@ -13,6 +13,7 @@ use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityTrampleFarmlandEvent;
 use pocketmine\event\entity\ItemSpawnEvent;
+use pocketmine\event\Event;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
@@ -64,11 +65,16 @@ final class PlayerListener implements Listener
     private const EFFECT_MAX_DURATION = 2147483647;
 
 	/**@var SimpleSharedListener[] $sharedListeners*/
-	private array $sharedListeners = [];
+	public array $sharedListeners = [];
 
 	public function __construct()
 	{
 		$this->sharedListeners[] = new SimpleSharedListener($this, new ChatGameTask());
+	}
+
+	private function sharedExecution(Event $event): void
+	{
+		array_map(fn(SimpleSharedListener $sharedListener) => $sharedListener->onSharedEvent($event), $this->sharedListeners);
 	}
 
     public function onCreation(PlayerCreationEvent $event)
@@ -87,8 +93,10 @@ final class PlayerListener implements Listener
 
         if($sender->hasPlayedBefore()) {
             $event->setJoinMessage("§a[+] $name");
+			$sender->getStatManager()->onConnexion();
         } else {
             $event->setJoinMessage("§d$name §fnous a rejoints pour la première fois, bienvenue à lui !");
+			$sender->getStatManager()->onFirstConnexion();
             //$sender->teleport(new Position(300.5, 6, 305.5, $sender->getServer()->getWorldManager()->getWorldByName("tuto")));
         }
 
@@ -362,6 +370,8 @@ final class PlayerListener implements Listener
         $player = $event->getPlayer();
         $message = $event->getMessage();
         $playerName = $player->getName();
+
+		$this->sharedExecution($event);
 
         //COMBAT LOGGER
         if ($event->getMessage()[0] === "/") {

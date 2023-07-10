@@ -29,6 +29,7 @@ use UnknowL\commands\money\MoneyCommand;
 use UnknowL\commands\rank\RankCommand;
 use UnknowL\commands\settings\SettingsCommand;
 use UnknowL\commands\shop\ShopCommand;
+use UnknowL\commands\stat\StatCommand;
 use UnknowL\commands\vip\CraftCommand;
 use UnknowL\commands\vip\EcCommand;
 use UnknowL\commands\vip\NearCommand;
@@ -150,13 +151,14 @@ trait LoaderTrait
 	private function loadCommands(): void
 	{
 		Server::getInstance()->getCommandMap()->register("", new CasinoCommand());
+		Server::getInstance()->getCommandMap()->register("", new DualCommand());
 		Server::getInstance()->getCommandMap()->register("", new KitCommand());
-		Server::getInstance()->getCommandMap()->register("", new MoneyCommand());
-		Server::getInstance()->getCommandMap()->register("", new ShopCommand());
 		Server::getInstance()->getCommandMap()->register("", new MarketCommand());
-		Server::getInstance()->getCommandMap()->register('', new DualCommand());
+		Server::getInstance()->getCommandMap()->register("", new MoneyCommand());
 		Server::getInstance()->getCommandMap()->register("", new RankCommand());
-        Server::getInstance()->getCommandMap()->register("", new SettingsCommand());
+		Server::getInstance()->getCommandMap()->register("", new SettingsCommand());
+		Server::getInstance()->getCommandMap()->register("", new ShopCommand());
+		Server::getInstance()->getCommandMap()->register("", new StatCommand());
 
         //Warps
         Server::getInstance()->getCommandMap()->register("", new AreneCommand());

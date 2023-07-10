@@ -5,29 +5,80 @@ namespace UnknowL\task;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\scheduler\Task;
+use pocketmine\Server;
 use UnknowL\listener\ISharedListener;
+use UnknowL\player\LinesiaPlayer;
 
+/*Maybe add a random gain*/
 class ChatGameTask extends Task implements ISharedListener
 {
 
-	private static string $expectedResponse = "";
+	const GAME_MIXED_WORDS = 0;
+	const GAME_CALC = 1;
+	const GAME_FASTEST = 2;
+
+	private string $expectedResponse = "";
+
+
+	private array $words = [];
+
     /**
      * @inheritDoc
      */
     public function onRun(): void
     {
-
+		$this->createGame();
 	}
 
-	public static function expectedResponse(): string
+	public function getExpectedResponse(): string
 	{
-		return self::$expectedResponse;
+		return $this->expectedResponse;
 	}
 
 	/**@var PlayerChatEvent $event*/
 	public function onEvent(Event $event): void
 	{
+		/**@var LinesiaPlayer $player*/
+		$player = $event->getPlayer();
+		$message = $event->getMessage();
 
+		if ($message === $this->getExpectedResponse())
+		{
+			$player->getEconomyManager()->add(500);
+			Server::getInstance()->broadcastMessage(sprintf("[Linesia] Le joueur %s à gagner 500$ en répondant correctement", $player->getName()));
+		}
+	}
+
+	private function createGame(): void
+	{
+		switch (mt_rand(0, 2))
+		{
+			case 0:
+				$word = str_shuffle($this->words[array_rand($this->words)]);
+				Server::getInstance()->broadcastMessage(sprintf("[Linesia] Retrouvez le mot suivant %s pour gagner 500$", $word));
+				$this->expectedResponse = $word;
+				break;
+
+			case 1:
+				$number1 = random_int(1, 100);
+				$number2 = random_int(1, 100);
+				$rand = random_int(0, 3);
+				$array = ['+', '-', '*', '/'];
+				Server::getInstance()->broadcastMessage(sprintf("[Linesia] Effectuez le calcul %s %s %s pour gagner 500$", $number1, $array[$rand], $number2));
+				$this->expectedResponse = match ($rand)
+				{
+					0 => $number1 + $number2,
+                    1 => $number1 - $number2,
+                    2 => $number1 * $number2,
+                    3 => $number1 / $number2,
+				};
+				break;
+
+            case 2:
+				$word = $this->words[array_rand($this->words)];
+				Server::getInstance()->broadcastMessage(sprintf("[Linesia] Ecrivez le mot %s le plus rapidement pour gagner 500$", $word));
+				$this->expectedResponse = $word;
+		}
 	}
 
 	public function getEventName(): string
