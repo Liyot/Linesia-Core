@@ -76,7 +76,7 @@ class ScoreBoardAPI {
     public static function updateServer($removeOne = false): void
     {
         $online = $removeOne ? count(Server::getInstance()->getOnlinePlayers()) - 1 : count(Server::getInstance()->getOnlinePlayers());
-        /** @var Player $player */
+        /** @var LinesiaPlayer $player */
         foreach (Server::getInstance()->getOnlinePlayers() as $player) {
             self::lineRemove($player, 5);
             self::lineCreate($player, 5, " Connectés: §d$online");

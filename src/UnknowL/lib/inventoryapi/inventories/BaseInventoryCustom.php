@@ -16,6 +16,7 @@ abstract class BaseInventoryCustom extends SimpleInventory implements BlockInven
     protected string $name = "Chest";
     protected bool $hasViewOnly = false;
     protected $clickListener = null;
+	protected $previousClickListener = null;
     protected $closeListener = null;
     private bool $transactionCancel = false;
 
@@ -61,9 +62,16 @@ abstract class BaseInventoryCustom extends SimpleInventory implements BlockInven
     }
 
     public function setClickListener(?callable $callable): self {
+		if (!is_null($this->clickListener)) $this->previousClickListener = $this->clickListener;
         $this->clickListener = $callable;
         return $this;
     }
+
+	public function rewindClickListener(): void
+	{
+		$this->clickListener = $this->previousClickListener;
+        $this->previousClickListener = null;
+	}
 
     public function getCloseListener(){
         return $this->closeListener;

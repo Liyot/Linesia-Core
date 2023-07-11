@@ -4,7 +4,10 @@ namespace UnknowL\handlers\dataTypes;
 
 use Cassandra\Date;
 use DateTime;
+use pocketmine\data\bedrock\EnchantmentIdMap;
 use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
+use pocketmine\item\enchantment\Enchantment;
+use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\Item;
 use pocketmine\item\StringToItemParser;
 use UnknowL\lib\inventoryapi\inventories\SimpleChestInventory;
@@ -24,6 +27,8 @@ final class Kit
 	 * @param array $armorContent
 	 * @param array $armorDisplay
 	 * @param string $cooldownData
+	 * @param array $armorEnchantData
+	 * @param array $contentArmorEnchant
 	 */
 	public function __construct
 	(
@@ -33,7 +38,9 @@ final class Kit
 		private array $contentDisplay = [],
 		private array $armorContent = [],
 		private array $armorDisplay = [],
-		private string $cooldownData = ""
+		private string $cooldownData = "",
+		private array $armorEnchantData = [],
+		private array $contentEnchant = []
 	){}
 
 	final public function canClaim(LinesiaPlayer $player): bool
@@ -70,20 +77,27 @@ final class Kit
 		$data = sprintf(PathLoader::PATH_KIT_COOLDOWN, strtolower($this->name));
 		if($this->canClaim($player))
 		{
-			$func = function ($value) : Item
+			$func = function ($value, array &$array, array &$enchant) : Item
 			{
-				$ex = explode(":", $value);
-				return StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($ex[0]));
+				$exp = explode(":", $value);
+				$key = array_search($value, $array, true);
+				$item = StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($exp[0]))->setCount($exp[1]);
+				if (isset($enchant[$key]))
+				{
+					$ex = explode(":", $enchant[$key]);
+					$item->addEnchantment(new EnchantmentInstance(EnchantmentIdMap::getInstance()->fromId($ex[0]), $ex[1]));
+				}
+				return $item;
 			};
 
 			array_map(function($item) use ($func, $player) {
-				if ($player->getArmorInventory()->canAddItem($func($item)))
+				if ($player->getArmorInventory()->canAddItem($func($item, $this->armorContent, $this->armorEnchantData)))
 				{
-					$player->getArmorInventory()->addItem($func($item));
+					$player->getArmorInventory()->addItem($func($item, $this->armorContent, $this->armorEnchantData));
 				}
 			} , $this->armorContent);
 
-			array_map(fn($item) => $player->getInventory()->addItem($func($item)), $this->content);
+			array_map(fn($item) => $player->getInventory()->addItem($func($item, $this->content, $this->contentEnchant)), $this->content);
 			new PlayerCooldown(DateTime::createFromFormat("d:H:i:s", $this->cooldownData), $player, $data, (int)explode(":", $this->cooldownData)[0] === 0);
 			$player->sendPopup(sprintf("[+] %s", $this->getName()));
 		}
@@ -97,6 +111,13 @@ final class Kit
 		{
 			$ex = explode(":", $this->armorContent[$i]);
 			$item = StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($ex[0]));
+
+			if (isset($this->armorEnchantData[$i]))
+			{
+				$enchant = explode(":", $this->armorEnchantData[$i]);
+				$item->addEnchantment(new EnchantmentInstance(EnchantmentIdMap::getInstance()->fromId($enchant[0]), $enchant[1]));
+			}
+
 			$form->setItem($this->armorDisplay[$i], $item);
 		}
 
@@ -104,6 +125,13 @@ final class Kit
 		{
 			$ex = explode(":", $this->content[$i]);
 			$item = StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($ex[0]));
+
+			if (isset($this->contentArmorEnchant[$i]))
+			{
+				$enchant = explode(":", $this->contentArmorEnchant[$i]);
+				$item->addEnchantment(new EnchantmentInstance(EnchantmentIdMap::getInstance()->fromId($enchant[0]), $enchant[1]));
+			}
+
 			$form->setItem($this->contentDisplay[$i], $item);
 		}
 		return $form;

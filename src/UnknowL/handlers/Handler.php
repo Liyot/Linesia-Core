@@ -16,6 +16,8 @@ use UnknowL\rank\RankManager;
  * @method static FactionHandler FACTION()
  * @method static RequestHandler REQUEST()
  * @method static BoxHandler BOX()
+ * @method static ChunkHandler CHUNK()
+ * @method static TagHandler TAG()
  */
 abstract class Handler
 {
@@ -44,7 +46,9 @@ abstract class Handler
 			new KitHandler(),
 			new RankManager(),
 			new RequestHandler(),
-			new BoxHandler()
+			new BoxHandler(),
+			new ChunkHandler(),
+			new TagHandler()
 		];
 	}
 
@@ -66,6 +70,7 @@ abstract class Handler
 	{
 		foreach (self::getHandlers() as $handler) {
 			self::register($handler);
+			!$handler instanceof ShopHandler ?: $handler->loadData();
 		}
 	}
 }

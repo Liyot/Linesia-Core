@@ -23,7 +23,14 @@ final class Rank
 	{
 		$chatFormat = $this->chatFormat;
 
-		$toReplace = ["faction" => 'dont exist ', 'prefix' => 'prefix', 'rank' => ucfirst($this->getName()), 'playerName' => $player->getName(), 'message' => $message, 'tag' => 'no tag'];
+		$toReplace = [
+			"faction" => 'dont exist ',
+			'prefix' => 'prefix',
+			'rank' => ucfirst($this->getName()),
+			'playerName' => $player->getName(),
+			'message' => $message,
+			'tag' => $player->getTag()->getFormat()
+		];
 
 		for ($i = self::countCharOccurences($chatFormat, '{'); $i >= 0 ; $i--)
 		{
@@ -39,13 +46,6 @@ final class Rank
 				}
 			}
 		}
-//			$args[] = match (true) {
-//				str_contains($name, 'faction') => 'dont exist',
-//				str_contains($name,'prefix') => 'prefix',
-//				str_contains($name,'rank') => ucfirst($this->getName()),
-//				str_contains($name,'playerName') => $player->getName(),
-//				str_contains($name, 'message') => $message
-//			};
 		return $chatFormat;
 	}
 
@@ -98,6 +98,4 @@ final class Rank
 	{
 		return $this->default;
 	}
-
-
 }

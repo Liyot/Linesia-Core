@@ -26,8 +26,17 @@ final class KitHandler extends Handler
 	{
 		foreach ($this->config->get("kits") as $name => $data)
 		{
-			$this->loadKit($data["displayName"], $data["permissions"],
-				$data["contents"], $data["armorContents"], $data["contentDisplay"], $data["armorDisplay"], $data["cooldown"]);
+			$this->loadKit
+			($data["displayName"],
+				$data["permissions"],
+				$data["contents"],
+				$data["armorContents"],
+				$data["contentDisplay"],
+				$data["armorDisplay"],
+				$data["cooldown"],
+				$data["armorEnchant"],
+				$data["contentEnchant"]
+			);
 		}
 	}
 
@@ -39,11 +48,24 @@ final class KitHandler extends Handler
 	 * @param array $contentDisplay
 	 * @param array $armorDisplay
 	 * @param string $cooldown
+	 * @param array $armorEnchant
+	 * @param array $contentEnchant
 	 * @return void
 	 */
-	private function loadKit(string $name, array $ranks, array $content, array $armorContent, array $contentDisplay, array $armorDisplay, string $cooldown): void
+	private function loadKit(string $name, array $ranks, array $content, array $armorContent, array $contentDisplay, array $armorDisplay, string $cooldown, array $armorEnchant, array $contentEnchant): void
 	{
-		$this->kits[strtolower($name)] = new Kit($name, $ranks, $content, $contentDisplay, $armorContent, $armorDisplay, $cooldown);
+		$this->kits[strtolower($name)] = new Kit
+		(
+			$name,
+			$ranks,
+			$content,
+			$contentDisplay,
+			$armorContent,
+			$armorDisplay,
+			$cooldown,
+			$armorEnchant,
+			$contentEnchant
+		);
 	}
 
 	final public function create(string $name, array $ranks, array $content, array $armorContent, array $contentDisplay, array $armorDisplay): void

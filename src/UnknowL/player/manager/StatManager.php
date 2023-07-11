@@ -165,6 +165,7 @@ final class StatManager extends PlayerManager
 		$seconds -= $days * 24 * 60 * 60;
 
 		$hours = floor($seconds / (60 * 60));
+		$seconds -=  $hours * 60 * 60;
 
 		$minutes = floor($seconds / 60);
 

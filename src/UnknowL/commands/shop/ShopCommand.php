@@ -5,11 +5,11 @@ namespace UnknowL\commands\shop;
 use pocketmine\command\CommandSender;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
-use pocketmine\scheduler\ClosureTask;
+use UnknowL\commands\shop\sub\ShopBuyCommand;
+use UnknowL\commands\shop\sub\ShopSellCommand;
 use UnknowL\handlers\dataTypes\ShopData;
 use UnknowL\handlers\Handler;
 use UnknowL\handlers\ShopHandler;
-use UnknowL\lib\commando\args\StringArgument;
 use UnknowL\lib\commando\BaseCommand;
 use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
 use UnknowL\lib\forms\CustomForm;
@@ -39,6 +39,8 @@ class ShopCommand extends BaseCommand
 	protected function prepare(): void
     {
 		$this->setPermission("pocketmine.group.user");
+		$this->registerSubCommand(new ShopSellCommand());
+		$this->registerSubCommand(new ShopBuyCommand());
 		$this->addConstraint(new InGameRequiredConstraint($this));
 	}
 
@@ -47,42 +49,24 @@ class ShopCommand extends BaseCommand
      */
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
-		$this->sendMainForm($sender, (count($args) === 1) && ($args["buy/sell"] === "sell"));
+		Handler::SHOP()->getForm()->send($sender);
+		//$this->sendMainForm($sender, (count($args) === 1) && ($args["buy/sell"] === "sell"));
 	}
 
 	protected function sendMainForm(LinesiaPlayer $player, bool $sell = false): void
 	{
-		$form = MenuForm::withOptions("Que souhaitez vous faire?", "", ["Vendre", "Acheter"],
+		/*$form = MenuForm::withOptions("Que souhaitez vous faire?", "", ["Vendre", "Acheter"],
 			fn (LinesiaPlayer $player, Button $selected) => $this->setCategory($player, $selected->text === "Vendre"));
-		$player->sendForm($form);
+		$player->sendForm($form);*/
 	}
 
 	private function setCategory(LinesiaPlayer $player, bool $sell): void
 	{
 		$form = InventoryAPI::createSimpleChest(true)
 			->setName("Catégories");
-		$form->addItem(
-			VanillaItems::SLIMEBALL()->setCustomName("Générale"),
-				VanillaItems::SLIMEBALL()->setCustomName("Blocks"),
-				VanillaItems::SLIMEBALL()->setCustomName("Armures"),
-				VanillaItems::SLIMEBALL()->setCustomName("Epées"),
-				VanillaItems::SLIMEBALL()->setCustomName("Spécial"),
-				VanillaItems::SLIMEBALL()->setCustomName("Autres"));
-		$form->setClickListener(function (LinesiaPlayer $player, BaseInventoryCustom $inventory, Item $sourceItem, Item $targetItem, int $slot) use ($form, $sell) {
-			$this->category = match ($sourceItem->getCustomName())
-			{
-				"Blocks" => ShopHandler::CATEGORY_BLOCKS,
-				"Armures" => ShopHandler::CATEGORY_ARMORS,
-				"Epées" => ShopHandler::CATEGORY_SWORDS,
-				"Spécial" => ShopHandler::CATEGORY_SPECIAL,
-				"Autres" => ShopHandler::CATEGORY_OTHER,
-				"Générale" => ShopHandler::CATEGORY_ALL,
 
-			};
-			$form->onClose($player);
-			$sell ? $this->sellForm($player, $this->category) : Handler::SHOP()->categoriesForm($this->category)->send($player);
-
-		});
+		$form->onClose($player);
+		$sell ? $this->sellForm($player, $this->category) : Handler::SHOP()->categoriesForm($this->category)->send($player);
 		$form->send($player);
 	}
 

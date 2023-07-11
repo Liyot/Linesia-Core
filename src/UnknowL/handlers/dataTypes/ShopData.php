@@ -3,8 +3,11 @@
 namespace UnknowL\handlers\dataTypes;
 
 use pocketmine\item\Item;
+use pocketmine\nbt\LittleEndianNbtSerializer;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\TreeRoot;
 use pocketmine\Server;
+use UnknowL\handlers\Handler;
 use UnknowL\handlers\ShopHandler;
 use UnknowL\lib\forms\BaseForm;
 use UnknowL\lib\forms\CustomForm;
@@ -16,23 +19,25 @@ use UnknowL\player\LinesiaPlayer;
 
 class ShopData
 {
-
-	public function __construct(private string $player, private string $name, private int $price, private ShopHandler $handler, private Item $item, private int $quantities = 1, private string $description = "", private string $category = "all", protected int $id = 0)
+	private int $quantities;
+	private int $id ;
+	public function __construct(private string $player, private int $price, private ShopHandler $handler, private Item $item, private int $duration)
 	{
-		!($this->id === 0) ?: $this->id = $handler->generateId($category);
+		$this->id = Handler::SHOP()->generateId();
+		$this->quantities = $this->item->getCount();
 	}
 
-	final public function getForm(): BaseForm
-	{
-		$form = new CustomForm(sprintf("%s de %s", $this->item->getName(), $this->player),
-			[new Label($this->description), new Slider("Quantités", 1, $this->quantities), new Button("Retour")], function (LinesiaPlayer $player, CustomFormResponse $response)
-			{
-				$this->buy($response->getSlider()->getValue(), $player);
-			}
-		);
-
-		return $form;
-	}
+//	final public function getForm(): BaseForm
+//	{
+//		$form = new CustomForm(sprintf("%s de %s", $this->item->getName(), $this->player),
+//			[new Label($this->description), new Slider("Quantités", 1, $this->quantities), new Button("Retour")], function (LinesiaPlayer $player, CustomFormResponse $response)
+//			{
+//				$this->buy($response->getSlider()->getValue(), $player);
+//			}
+//		);
+//
+//		return $form;
+//	}
 
 	/**
 	 * @param int $quantities
@@ -61,7 +66,7 @@ class ShopData
 
 		if(!is_null($player) && $player->getEconomyManager()->transfer($this->price * $quantities, $client))
 		{
-			$player->sendMessage(sprintf("Votre objet %s à été vendu %d fois pour un total de %d$", $this->name, $quantities, $quantities * $this->price));
+			$player->sendMessage(sprintf("Votre objet %s à été vendu %d fois pour un total de %d$", $this->item->getName(), $quantities, $quantities * $this->price));
 			$client->getInventory()->addItem($this->getItem()->setCount($quantities));
 		}
 		if ($this->quantities === $quantities)
@@ -77,25 +82,16 @@ class ShopData
 	{
 		return [
 			"id" => $this->id,
-			"name" => $this->name,
 			"player" => $this->player,
 			"price" => $this->price,
-			"item" => $this->item->jsonSerialize(),
+			"item" => (new LittleEndianNbtSerializer())->write(new TreeRoot($this->item->nbtSerialize())),
 			"quantities" => $this->quantities,
-			"description" => $this->description,
-			"category" => $this->category
+			"duration" => $this->duration
 		];
 	}
 
 
 
-	/**
-	 * @return string
-	 */
-	public function getName(): string
-	{
-		return $this->name;
-	}
 
 	/**
 	 * @return ShopHandler
@@ -129,13 +125,6 @@ class ShopData
 		return $this->item;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getDescription(): string
-	{
-		return $this->description;
-	}
 
 	/**
 	 * @return int
@@ -143,14 +132,6 @@ class ShopData
 	public function getId(): int
 	{
 		return $this->id;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getCategory(): string
-	{
-		return $this->category;
 	}
 
 	/**

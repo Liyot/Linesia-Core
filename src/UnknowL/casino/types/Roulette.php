@@ -58,7 +58,7 @@ class Roulette extends CasinoGame
 				'Vert' => VanillaBlocks::CONCRETE()->setColor(DyeColor::GREEN())->asItem()
 			};
 			if(!is_int((int)$input->getValue())) return;
-			Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new class($roulette, $inventory, $block, (int)$input->getValue()) extends InventoryAnimationTask
+			Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new class($roulette, $inventory, $player, $block, (int)$input->getValue()) extends InventoryAnimationTask
 			{
 
 				public function __construct(array $items, SimpleChestInventory $inventory, LinesiaPlayer $player, private Concrete $misedColor, private int $mise = 1)

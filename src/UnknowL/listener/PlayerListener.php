@@ -29,8 +29,11 @@ use pocketmine\inventory\PlayerOffHandInventory;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\item\StringToItemParser;
 use pocketmine\item\VanillaItems;
+use pocketmine\lang\Translatable;
 use pocketmine\math\Vector3;
 use pocketmine\permission\DefaultPermissions;
+use pocketmine\player\chat\ChatFormatter;
+use pocketmine\player\chat\LegacyRawChatFormatter;
 use pocketmine\player\chat\StandardChatFormatter;
 use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
@@ -440,6 +443,12 @@ final class PlayerListener implements Listener
         }
 
 		$event->setMessage($player->getRank()->handleMessage($message, $player));
+		$event->setFormatter(new class implements ChatFormatter {
+			public function format(string $username, string $message): Translatable|string
+			{
+				return $message;
+			}
+		});
         self::$cooldown[$playerName] = microtime(true) + 1;
 	}
 
