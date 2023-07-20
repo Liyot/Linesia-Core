@@ -69,6 +69,7 @@ abstract class BaseInventoryCustom extends SimpleInventory implements BlockInven
 
 	public function rewindClickListener(): void
 	{
+		if (is_null($this->previousClickListener)) return;
 		$this->clickListener = $this->previousClickListener;
         $this->previousClickListener = null;
 	}

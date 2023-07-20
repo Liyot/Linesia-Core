@@ -8,7 +8,7 @@ use UnknowL\player\LinesiaPlayer;
 final class EconomyManager extends PlayerManager
 {
 
-	private int $money = 500000;
+	private int|float $money = 0;
 
 	public function __construct(protected LinesiaPlayer $player)
 	{
@@ -22,37 +22,37 @@ final class EconomyManager extends PlayerManager
 
 	protected final function load(): void
 	{
-		$this->money = $this->player->getPlayerProperties()->getNestedProperties("economy.money") ?? 500000;
+		$this->money = $this->player->getPlayerProperties()->getNestedProperties("economy.money") ?? 0;
 	}
 
-	final public function reduce(int $amount): bool
+	final public function reduce(int|float $amount): bool
 	{
 		if ($this->money >= $amount)
 		{
 			$this->money -= $amount;
             ScoreBoardAPI::updateMoney($this->player);
-			$this->player->sendMessage("Votre $ à été réduite de $amount $");
+			$this->player->sendMessage("§cVous avez perdu $amount $");
 			return true;
 		}
-		$this->player->sendMessage("Vous n'avez pas assez de monnaie!");
+		$this->player->sendMessage("§cVous n'avez pas assez de monnaie!");
 		return false;
 	}
 
-	final public function add(int $amount): void
+	final public function add(int|float $amount): void
 	{
 		$this->money += $amount;
         ScoreBoardAPI::updateMoney($this->player);
-		$this->player->sendMessage("Votre $ à été augmenté de $amount");
+		$this->player->sendMessage("§aVous avez gagné $amount $");
 	}
 
-	final public function set(int $amount): void
+	final public function set(int|float $amount): void
 	{
 		$this->money = abs($amount);
         ScoreBoardAPI::updateMoney($this->player);
-		$this->player->sendMessage("Votre $ à été défini à $amount $");
+		$this->player->sendMessage("§cVotre monnaie a été set à $amount $");
 	}
 
-	final public function transfer(int $amount, LinesiaPlayer $target, bool $message = false): bool
+	final public function transfer(int|float $amount, LinesiaPlayer $target, bool $message = false): bool
 	{
 		if($this->money >= $amount)
 		{
@@ -62,16 +62,16 @@ final class EconomyManager extends PlayerManager
 			{
                 ScoreBoardAPI::updateMoney($this->player);
                 ScoreBoardAPI::updateMoney($target);
-				$this->player->sendMessage(sprintf("Vous avez transférer %d $ à %s", $amount, $target->getName()));
-				$target->sendMessage(sprintf("Le joueur %s vous à transférer %d $", $target->getName(), $amount));
+				$this->player->sendMessage(sprintf("§aVous avez transférer %d $ à %s", $amount, $target->getName()));
+				$target->sendMessage(sprintf("§aLe joueur %s vous à transférer %d $", $target->getName(), $amount));
 			}
 			return true;
 		}
-		$this->player->sendMessage("La transaction à échouée");
+		$this->player->sendMessage("§cLa transaction à échouée");
 		return false;
 	}
 
-	final public function getMoney(): int
+	final public function getMoney(): int|float
 	{
 		return $this->money;
 	}

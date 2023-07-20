@@ -4,11 +4,12 @@ namespace UnknowL\handlers;
 
 use pocketmine\block\VanillaBlocks;
 use pocketmine\item\Item;
+use pocketmine\math\AxisAlignedBB;
 use pocketmine\nbt\LittleEndianNbtSerializer;
 use pocketmine\Server;
 use pocketmine\utils\Config;
 use pocketmine\world\Position;
-use UnknowL\block\tiles\BoxTile;
+use UnknowL\entities\FloatingText;
 use UnknowL\handlers\dataTypes\Box;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
@@ -18,7 +19,6 @@ class BoxHandler extends Handler
 
 	public function __construct()
 	{
-		$this->loadData();
 		parent::__construct();
 	}
 
@@ -32,25 +32,35 @@ class BoxHandler extends Handler
 		$this->boxs[$box->getName()] ??= $box;
 	}
 
+	final public function removeBox(Box $box)
+	{
+		if (isset($this->boxs[$box->getName()]))
+		{
+			if (!is_null($box->getPosition()))
+			{
+				$world = $box->getPosition()->getWorld();
+				$entity = $world->getNearestEntity($box->getPosition()->add(0.5, 1, 0.5), 1);
+				if ($entity instanceof FloatingText)
+				{
+					$entity->flagForDespawn();
+				}
+				unset($this->boxs[$box->getName()]);
+			}
+		}
+	}
+
     protected function loadData(): void
     {
 		$config = new Config(Linesia::getInstance()->getDataFolder() . 'data/box/BoxTileData.json');
 		foreach ($config->getAll() as $name => $data)
 		{
-			$this->loadBox($data["name"], $data["content"], $data["position"]);
+			$this->loadBox($data["name"], $data["content"], $data["position"], $data["key"]);
 		}
 	}
 
     protected function saveData(): void
     {
-		/*$config = new Config(Linesia::getInstance()->getDataFolder() . 'data/box/BoxTileData.json');
-		foreach ($this->boxs as $name => $box)
-		{
-			$config->set($name, $box->serialize());
-			var_dump("ee");
-			$config->save();
-		}
-		var_dump($config);*/
+
 	}
 
 		final public function saveBox(Box $box)
@@ -60,13 +70,16 @@ class BoxHandler extends Handler
 			$config->save();
 		}
 
-	private function loadBox(string $name, array $itemData, array $posData)
+	private function loadBox(string $name, array $itemData, array $posData, string $keyBuffer)
 	{
 		$items = array_map(fn(array $tag) => Item::nbtDeserialize((new LittleEndianNbtSerializer())->read($tag['item'])->mustGetCompoundTag()), $itemData);
 		$pos = new Position($posData[0], $posData[1], $posData[2], ($world = Server::getInstance()->getWorldManager()->getWorldByName($posData[3])));
 
 		$box = new Box($name, $items);
 		$box->setPosition($pos);
+
+		$buffer = Item::nbtDeserialize((new LittleEndianNbtSerializer())->read($keyBuffer)->mustGetCompoundTag());
+		$box->setKey($buffer);
 		$this->boxs[$name] = $box;
 
 		$world->setBlock($pos, VanillaBlocks::AIR());
@@ -79,7 +92,20 @@ class BoxHandler extends Handler
 		return $this->boxs[$name] ?? null;
 	}
 
-	final public function testPosition(Position $position, LinesiaPlayer $player): bool
+	final public function getBoxByPosition(Position $pos):?Box
+	{
+		foreach ($this->boxs as $box)
+        {
+            if ($box->getPosition()->equals($pos))
+            {
+                return $box;
+            }
+        }
+        return null;
+	}
+
+
+	final public function testPosition(Position $position, ?LinesiaPlayer $player = null): bool
 	{
 		$return = false;
 		foreach ($this->boxs as $box)
@@ -89,7 +115,10 @@ class BoxHandler extends Handler
 				if ($box->getPosition()->equals($position))
 				{
 					$return = true;
-					$box->open($player);
+					if (!is_null($player))
+					{
+						$box->open($player);
+					}
 				}
             }
         }

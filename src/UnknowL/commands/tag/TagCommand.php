@@ -3,22 +3,33 @@
 namespace UnknowL\commands\tag;
 
 use pocketmine\command\CommandSender;
+use pocketmine\lang\Translatable;
+use pocketmine\plugin\Plugin;
+use UnknowL\commands\CommandManager;
 use UnknowL\handlers\Handler;
 use UnknowL\lib\commando\BaseCommand;
 use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
 use UnknowL\lib\forms\menu\Button;
 use UnknowL\lib\forms\MenuForm;
+use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 
 final class TagCommand extends BaseCommand
 {
 
-    /**
+	public function __construct()
+	{
+		$settings = Linesia::getInstance()->getCommandManager()->getSettings("tag");
+		parent::__construct(Linesia::getInstance(), $settings->getName(), $settings->getDescription(), $settings->getAliases());
+	}
+
+	/**
      * @inheritDoc
      */
     protected function prepare(): void
     {
 		$this->addConstraint(new InGameRequiredConstraint($this));
+		$this->setPermission("pocketmine.group.user");
 	}
 
     /**
@@ -41,5 +52,6 @@ final class TagCommand extends BaseCommand
 					};
 				});
 			});
+		$sender->sendForm($form);
     }
 }

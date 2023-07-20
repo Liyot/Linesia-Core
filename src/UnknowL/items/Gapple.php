@@ -42,7 +42,8 @@ class Gapple implements Listener
                 $this->cooldown[$event->getPlayer()->getName()][$this::TYPE_CHORUS] = $timeNow;
             } else {
                 $event->cancel();
-                $event->getPlayer()->sendMessage("§cLa prochain utilisation de votre chorus est dans ${timerest}s");
+				\JsonSerializable::
+                $event->getPlayer()->sendMessage("§cLa prochain utilisation de votre chorus est dans {$timerest}s");
             }
         }
     }

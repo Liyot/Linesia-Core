@@ -97,7 +97,6 @@ class Pyramides extends CasinoGame
 					{
 						$multiplier = explode(":", $this->inventory->getItem($this->slot + 9)->getCustomName())[1];
 						$gain = substr($multiplier, 0, stripos($multiplier, "x"));
-						var_dump($gain);
 						$this->game->win($this->player, (float)$gain);
 						$this->inventory->onClose($this->player);
 						$this->getHandler()->cancel();

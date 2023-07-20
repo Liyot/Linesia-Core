@@ -44,8 +44,8 @@ class ChatGameTask extends Task implements ISharedListener
 
 		if ($message === $this->getExpectedResponse())
 		{
-			$player->getEconomyManager()->add(500);
-			Server::getInstance()->broadcastMessage(sprintf("[Linesia] Le joueur %s à gagner 500$ en répondant correctement", $player->getName()));
+			$player->getEconomyManager()->add(100);
+			Server::getInstance()->broadcastMessage(sprintf("§aLe joueur %s à gagner 100$ en répondant correctement !", $player->getName()));
 		}
 	}
 
@@ -55,7 +55,7 @@ class ChatGameTask extends Task implements ISharedListener
 		{
 			case 0:
 				$word = str_shuffle($this->words[array_rand($this->words)]);
-				Server::getInstance()->broadcastMessage(sprintf("[Linesia] Retrouvez le mot suivant %s pour gagner 500$", $word));
+				Server::getInstance()->broadcastMessage(sprintf("§5§lRetrouvez le mot suivant %s pour gagner 100$", $word));
 				$this->expectedResponse = $word;
 				break;
 
@@ -64,7 +64,7 @@ class ChatGameTask extends Task implements ISharedListener
 				$number2 = random_int(1, 100);
 				$rand = random_int(0, 3);
 				$array = ['+', '-', '*', '/'];
-				Server::getInstance()->broadcastMessage(sprintf("[Linesia] Effectuez le calcul %s %s %s pour gagner 500$", $number1, $array[$rand], $number2));
+				Server::getInstance()->broadcastMessage(sprintf("§5§lEffectuez le calcul %s %s %s pour gagner 1100$", $number1, $array[$rand], $number2));
 				$this->expectedResponse = match ($rand)
 				{
 					0 => $number1 + $number2,
@@ -76,7 +76,7 @@ class ChatGameTask extends Task implements ISharedListener
 
             case 2:
 				$word = $this->words[array_rand($this->words)];
-				Server::getInstance()->broadcastMessage(sprintf("[Linesia] Ecrivez le mot %s le plus rapidement pour gagner 500$", $word));
+				Server::getInstance()->broadcastMessage(sprintf("§5§lEcrivez le mot %s le plus rapidement pour gagner 100$", $word));
 				$this->expectedResponse = $word;
 		}
 	}

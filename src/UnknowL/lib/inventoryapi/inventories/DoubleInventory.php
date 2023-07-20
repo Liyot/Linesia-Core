@@ -39,7 +39,6 @@ class DoubleInventory extends SimpleChestInventory {
     public function send(Player $player)
     {
         if (!isset($this->hasSend[$player->getXuid()])) {
-			Linesia::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($player) {
 				$this->holder = new Position((int)$player->getPosition()->getX(), (int)$player->getPosition()->getY() + 3, (int)$player->getPosition()->getZ(), $player->getWorld());
 				$player->getNetworkSession()->sendDataPacket(UpdateBlockPacket::create(BlockPosition::fromVector3($this->holder), TypeConverter::getInstance()->getBlockTranslator()->internalIdToNetworkId(VanillaBlocks::CHEST()->getStateId()), UpdateBlockPacket::FLAG_NETWORK, UpdateBlockPacket::DATA_LAYER_NORMAL));
 				$player->getNetworkSession()->sendDataPacket(UpdateBlockPacket::create(BlockPosition::fromVector3($this->holder->add(1, 0, 0)), TypeConverter::getInstance()->getBlockTranslator()->internalIdToNetworkId(VanillaBlocks::CHEST()->getStateId()), UpdateBlockPacket::FLAG_NETWORK, UpdateBlockPacket::DATA_LAYER_NORMAL));
@@ -50,7 +49,6 @@ class DoubleInventory extends SimpleChestInventory {
 				$player->getNetworkSession()->sendDataPacket(BlockActorDataPacket::create(BlockPosition::fromVector3($this->holder->add(1, 0, 0)), new CacheableNbt(CompoundTag::create())));
 				Linesia::getInstance()->getScheduler()->scheduleDelayedTask(new DelayTask($player, $this), 20); // Delay for PS4 /!\ and switch GUI use bug.
 				$this->hasSend[$player->getXuid()] = true;
-			}), 20);
         }
     }
 }

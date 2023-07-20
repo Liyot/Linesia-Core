@@ -69,7 +69,7 @@ class RankAddPerm extends \UnknowL\lib\commando\BaseSubCommand
 							$perm = $response->getInput()->getValue();
                             $value = $response->getSlider()->getValue();
                             $path = PathLoader::PATH_RANK_ADD_PERM;
-                            $cooldown = $value === 0 ? null : new PlayerCooldown(\DateTime::createFromFormat("d:H:i:s", "0:0:0:0")->setDate(0, $value, 0), $player, $path);
+                            $cooldown = $value === 0 ? null : new PlayerCooldown($value * 86400 , $player, $path);
                             is_null($cooldown) ?: $player->addCooldown($cooldown, $path);
 							$rank->addPermission($perm);
 							$player->sendPopup("La commande à été effectué avec succés");

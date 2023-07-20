@@ -12,9 +12,9 @@ class PurifTask extends Task {
 
 	public function onRun(): void
 	{
-		$world = Server::getInstance()->getWorldManager()->getWorldByName("world");
+		$world = Server::getInstance()->getWorldManager()->getWorldByName("linesia");
 		foreach ($world->getPlayers() as $player){
-			if ($this->isPurifZone($player, ["257", "144", "397"], ["253", "150", "401"])) {
+			if ($this->isPurifZone($player, ["209", "144", "396"], ["204", "150", "401"])) {
 				$item = $player->getInventory()->getItemInHand();
 				if($item->getTypeId() === VanillaItems::DIAMOND()->getTypeId()){
 					$player->getInventory()->removeItem(StringToItemParser::getInstance()->parse("diamond"));

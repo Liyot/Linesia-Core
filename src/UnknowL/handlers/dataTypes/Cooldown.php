@@ -13,18 +13,26 @@ abstract class Cooldown{
 
 	private \DateTime $initialTime;
 
-	public function __construct(private \DateTime $cooldownTime)
+	public function __construct(private int $cooldownTime)
 	{
+
 	}
 
 	public function isFinish() {
 		$currentTime = time();
-		$elapsedTime = $currentTime - $this->cooldownTime->getTimestamp();
 
-		if ($elapsedTime >= $this->cooldownTime) {
+		if ($currentTime >= $this->cooldownTime) {
 			return true;
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getCooldownTime(): int
+	{
+		return $this->cooldownTime;
 	}
 }

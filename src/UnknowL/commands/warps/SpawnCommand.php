@@ -32,7 +32,7 @@ class SpawnCommand extends BaseCommand
     {
         if($sender instanceof Player) {
 
-            $sender->teleport(new Position(255, 70, 255, $sender->getServer()->getWorldManager()->getWorldByName("linesia")));
+            $sender->teleport(new Position(255, 77, 255, $sender->getServer()->getWorldManager()->getWorldByName("linesia")));
             $sender->sendMessage("§aTu as bien été téléporté au spawn !");
 
         }

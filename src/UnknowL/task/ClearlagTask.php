@@ -12,13 +12,13 @@ use UnknowL\Linesia;
 class ClearlagTask extends Task
 {
 
-	private string $world = "world";
+	private string $world = "linesia";
 
-	private int $time = 300 * 20;
+	public static int $time = 300 * 20;
 
 	final public function clear(): \Generator
 	{
-		$this->time = 300 * 20;
+		self::$time = 300 * 20;
 		$count = 0;
 		foreach (Server::getInstance()->getWorldManager()->getWorldByName($this->world)->getEntities() as $entity)
 		{
@@ -32,7 +32,7 @@ class ClearlagTask extends Task
 
 	public function onRun(): void
 	{
-		$this->time !== 0 ? $message = match ($this->time)
+		self::$time !== 0 ? $message = match (self::$time)
 		{
 			30 * 20 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d30 §fseconde(s) !",
 			10 * 20 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d10 §fseconde(s) !",
@@ -41,8 +41,8 @@ class ClearlagTask extends Task
 			20 =>"§d§l» §r§fLe prochain clearlagg aura lieu dans §d1 §fseconde(s) !",
 			default => ''
 
-		} : $message = count(iterator_to_array($this->clear())). " entitées ont été clear";
-		$this->time--;
+		} : $message = "§d§l» §r§fLe clearlag à clear " . count(iterator_to_array($this->clear())). " entitées !";
+		self::$time--;
 		$message === '' ?: Server::getInstance()->broadcastMessage(new Translatable($message));
 	}
 }

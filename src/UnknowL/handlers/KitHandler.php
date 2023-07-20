@@ -18,7 +18,6 @@ final class KitHandler extends Handler
 	public function __construct()
 	{
 		$this->config = new Config(Linesia::getInstance()->getDataFolder()."kits.json");
-		$this->loadAll();
 		parent::__construct();
 	}
 
@@ -42,7 +41,7 @@ final class KitHandler extends Handler
 
 	/**
 	 * @param string $name
-	 * @param string[] $ranks
+	 * @param string $ranks
 	 * @param array $content
 	 * @param array $armorContent
 	 * @param array $contentDisplay
@@ -52,7 +51,7 @@ final class KitHandler extends Handler
 	 * @param array $contentEnchant
 	 * @return void
 	 */
-	private function loadKit(string $name, array $ranks, array $content, array $armorContent, array $contentDisplay, array $armorDisplay, string $cooldown, array $armorEnchant, array $contentEnchant): void
+	private function loadKit(string $name, string $ranks, array $content, array $armorContent, array $contentDisplay, array $armorDisplay, string $cooldown, array $armorEnchant, array $contentEnchant): void
 	{
 		$this->kits[strtolower($name)] = new Kit
 		(
@@ -68,7 +67,7 @@ final class KitHandler extends Handler
 		);
 	}
 
-	final public function create(string $name, array $ranks, array $content, array $armorContent, array $contentDisplay, array $armorDisplay): void
+	final public function create(string $name, string $ranks, array $content, array $armorContent, array $contentDisplay, array $armorDisplay): void
 	{
 		$this->config->set("kits", [$name => [$armorContent, $armorDisplay, $content, $contentDisplay, $ranks, $name]]);
 
@@ -87,7 +86,7 @@ final class KitHandler extends Handler
 		return $this->kits;
 	}
 
-	protected function loadData(): void {}
+	protected function loadData(): void { $this->loadAll(); }
 
 	protected function saveData(): void {}
 

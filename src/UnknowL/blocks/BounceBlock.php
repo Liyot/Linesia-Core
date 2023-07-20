@@ -9,7 +9,7 @@ use pocketmine\math\Vector3;
 
 class BounceBlock implements Listener {
 
-    public function blockBounce(PlayerMoveEvent $event) {
+ /*   public function blockBounce(PlayerMoveEvent $event) {
         $sender = $event->getPlayer();
         $world = $sender->getLocation()->getWorld();
         $position = $sender->getPosition();
@@ -18,6 +18,6 @@ class BounceBlock implements Listener {
         if($under->getTypeId() === VanillaBlocks::PRISMARINE()->getTypeId() && $under->getStateId() == VanillaBlocks::PRISMARINE()->getStateId()) {
             $sender->setMotion(new Vector3(0, 1, 1.5));
         }
-    }
+    }*/
 
 }

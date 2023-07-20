@@ -20,24 +20,11 @@ use UnknowL\player\LinesiaPlayer;
 class ShopData
 {
 	private int $quantities;
-	private int $id ;
+	public int $id;
 	public function __construct(private string $player, private int $price, private ShopHandler $handler, private Item $item, private int $duration)
 	{
-		$this->id = Handler::SHOP()->generateId();
-		$this->quantities = $this->item->getCount();
+		$this->quantities = $item->getCount();
 	}
-
-//	final public function getForm(): BaseForm
-//	{
-//		$form = new CustomForm(sprintf("%s de %s", $this->item->getName(), $this->player),
-//			[new Label($this->description), new Slider("Quantités", 1, $this->quantities), new Button("Retour")], function (LinesiaPlayer $player, CustomFormResponse $response)
-//			{
-//				$this->buy($response->getSlider()->getValue(), $player);
-//			}
-//		);
-//
-//		return $form;
-//	}
 
 	/**
 	 * @param int $quantities
@@ -50,32 +37,53 @@ class ShopData
 		 * @var LinesiaPlayer $player
 		 */
 		$player = Server::getInstance()->getPlayerExact($this->player);
+			if ($player === null)
+			{
+				if ($client->getEconomyManager()->reduce($this->price * $quantities))
+				{
 
-		if ($player === null)
-		{
-			$data = Server::getInstance()->getOfflinePlayerData($this->player)->safeClone();
-			$properties = $data->getCompoundTag("properties");
-			$properties->getCompoundTag("manager")->getCompoundTag("economy")
-				->setInt("money", $properties->getCompoundTag("manager")->getCompoundTag("economy")->getInt("money") + $this->price * $quantities);
-			Server::getInstance()->saveOfflinePlayerData("properties", $properties);
+					$data = Server::getInstance()->getOfflinePlayerData($this->player)?->safeClone();
+					if ($data === null) return;
+					$properties = $data->getCompoundTag("properties");
+					$properties->getCompoundTag("economy")
+						->setFloat("money", $properties->getCompoundTag("economy")->getTag("money")->getValue() + $this->price * $quantities);
+					Server::getInstance()->saveOfflinePlayerData("properties", $properties);
+					$item = clone $this->getItem();
+					$item->getNamedTag()->removeTag("MarketId");
+					$item->setLore([""]);
+					$client->getInventory()->addItem($item->setCount($quantities));
+					$this->item->setCount($this->quantities - $quantities);
 
-			$client->getInventory()->addItem($this->getItem()->setCount($quantities));
+					$client->sendMessage("§aVotre achat à été effectué avec succés");
 
-			$client->sendMessage("Votre achat à été effectué avec succés");
-		}
+					if (($this->quantities - $quantities) <= 0)
+					{
+						Handler::SHOP()->removeSellable($this->id);
+						return;
+					}
+					$this->quantities -= $quantities;
+					return;
+				}
 
-		if(!is_null($player) && $player->getEconomyManager()->transfer($this->price * $quantities, $client))
-		{
-			$player->sendMessage(sprintf("Votre objet %s à été vendu %d fois pour un total de %d$", $this->item->getName(), $quantities, $quantities * $this->price));
-			$client->getInventory()->addItem($this->getItem()->setCount($quantities));
-		}
-		if ($this->quantities === $quantities)
-		{
-			$this->handler->removeSellable($this->id);
-			return;
-		}
+				$client->sendMessage("§cVous n'avez pas assez d'argent");
+			}
 
-		$this->quantities -= $quantities;
+			if(!is_null($player) && $client->getEconomyManager()->transfer($this->price * $quantities, $player))
+			{
+				$player->sendMessage(sprintf("§aVotre objet %s à été vendu %d fois pour un total de %d$", $this->item->getName(), $quantities, $quantities * $this->price));
+				$item = clone $this->getItem();
+				$item->setLore([""]);
+				$client->getInventory()->addItem($item->setCount($quantities));
+				$this->item->setCount($this->quantities - $quantities);
+
+				if (($this->quantities - $quantities) <= 0)
+				{
+					Handler::SHOP()->removeSellable($this->id);
+					return;
+				}
+				$this->quantities -= $quantities;
+			}
+
 	}
 
 	final public function format(): array
@@ -84,14 +92,11 @@ class ShopData
 			"id" => $this->id,
 			"player" => $this->player,
 			"price" => $this->price,
-			"item" => (new LittleEndianNbtSerializer())->write(new TreeRoot($this->item->nbtSerialize())),
+			"item" => base64_encode((new LittleEndianNbtSerializer())->write(new TreeRoot($this->item->nbtSerialize()))),
 			"quantities" => $this->quantities,
 			"duration" => $this->duration
 		];
 	}
-
-
-
 
 	/**
 	 * @return ShopHandler
@@ -140,6 +145,14 @@ class ShopData
 	public function getQuantities(): int
 	{
 		return $this->quantities;
+	}
+
+	/**
+	 * @return int
+	 */
+	final public function getDuration(): int
+	{
+		return $this->duration;
 	}
 
 }

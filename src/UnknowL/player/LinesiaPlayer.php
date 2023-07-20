@@ -2,15 +2,25 @@
 
 namespace UnknowL\player;
 
+use DaPigGuy\PiggyFactions\PiggyFactions;
 use pocketmine\entity\Entity;
-use pocketmine\form\Form;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\inventory\ArmorInventory;
+use pocketmine\inventory\CallbackInventoryListener;
+use pocketmine\inventory\Inventory;
+use pocketmine\item\Armor;
+use pocketmine\item\Item;
+use pocketmine\item\ItemBlock;
 use pocketmine\lang\Translatable;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\ListTag;
+use pocketmine\network\mcpe\convert\TypeConverter;
+use pocketmine\network\mcpe\protocol\types\BlockPosition;
+use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
+use pocketmine\player\GameMode;
 use pocketmine\player\Player;
-use pocketmine\scheduler\ClosureTask;
 use pocketmine\Server;
+use pocketmine\utils\Config;
 use pocketmine\utils\Utils;
 use UnknowL\events\CooldownExpireEvent;
 use UnknowL\handlers\dataTypes\PlayerCooldown;
@@ -39,7 +49,7 @@ final class LinesiaPlayer extends Player
 
 	private \Closure $onChatResponse;
 
-	private bool $inDual = false;
+	private bool $inDual = false, $inCrafting = false;
 
 	/**
 	 * @var bool[]
@@ -51,8 +61,6 @@ final class LinesiaPlayer extends Player
 	 */
 	private array $cooldowns = [];
 
-	/**@var string[]*/
-	private array $purchasedTags = [];
 
 	private Tag $tag;
 
@@ -66,15 +74,28 @@ final class LinesiaPlayer extends Player
 		$this->properties = new PlayerProperties($nbt);
 		$this->economyManager = new EconomyManager($this);
 		$this->statManager = new StatManager($this);
+		var_dump($this->properties);
 
 		$this->rank = Handler::RANK()->getRank($this->properties->getProperties("rank"));
 		array_map(fn($value) => $this->setBasePermission($value, true), $this->rank->getPermissions());
-		$this->properties->setProperties("permissions" ,$this->getRank()->getPermissions());
+		$this->properties->setNestedProperties("permissions.normal" ,$this->getRank()->getPermissions());
+		$this->removeTempPermissions();
 
-		$this->purchasedTags = $this->properties->getProperties("purchasedTags") ?? [];
+		$this->initTag();
 
+		$this->getArmorInventory()->getListeners()->add(new CallbackInventoryListener(
+			function(Inventory $inventory, int $slot, Item $oldItem) : void{
+				if ($inventory instanceof ArmorInventory) {
+					$targetItem = $inventory->getItem($slot);
+
+					Handler::ARMOREFFECTS()->applyEffect($targetItem, $this);
+					Handler::ARMOREFFECTS()->removeEffect($oldItem, $this);
+				}
+			}
+		, function(Inventory $inventory, array $oldContents): void {}));
 		$this->loadCooldowns($nbt);
 		$this->setBaseActiveInteraction();
+		$this->formatNameTag();
 	}
 
 	public function saveNBT(): CompoundTag
@@ -110,62 +131,71 @@ final class LinesiaPlayer extends Player
 
 	final public function hasPermission($name): bool
 	{
+		$perm = $this->getPlayerProperties()->getProperties("permissions");
+		var_dump($perm);
 		return in_array($name, !isset($this->rank) ? [] : $this->getRank()->getPermissions(), true)
             || parent::hasPermission($name)
-            || Server::getInstance()->isOp($this->getName());
+            || Server::getInstance()->isOp($this->getName())
+			|| in_array($name, is_array($perm["normal"]) ? $perm["normal"] : [$perm["temp"]])
+			|| in_array($name, is_array($perm["temp"]) ? $perm["temp"] : [$perm["temp"]]);
+
 	}
 
-	final public function addPermission(string $perm, string $days = ""): void
+	final public function addPermission(string $perm, int $days = 0): void
 	{
         if(!empty($days))
         {
-            $permissions = $this->getPlayerProperties()->getNestedProperties("permissons.temp");
-            $permissions[] = [$perm, $days];
+            $permissions = $this->getPlayerProperties()->getProperties("permissions.temp");
+			is_array($permissions) ?: $permissions = [$permissions];
+			$permissions[$days] = $perm;
             $this->getPlayerProperties()->setNestedProperties("permissions.temp", $permissions);
             return;
         }
-		$permissions = $this->getPlayerProperties()->getProperties("permissions");
+		$permissions = $this->getPlayerProperties()->getNestedProperties("permissions");
+		is_array($permissions) ?: $permissions = [$permissions];
 		$permissions[] = $perm;
-		$this->getPlayerProperties()->setProperties("permissions", $perm);
+		$this->getPlayerProperties()->setNestedProperties("permissions.normal", $perm);
 	}
 
-	final public function addCooldown(PlayerCooldown $cooldown, string $path, ...$args): void
+	final public function addCooldown(PlayerCooldown $cooldown, string $path): void
 	{
-		$this->cooldowns[sprintf($path, $args)] = $cooldown;
+		$this->cooldowns[$path] = $cooldown;
 	}
 
-	final public function getCooldown(string $path, $args): ?Cooldown
+	final public function getCooldown(string $path): ?Cooldown
 	{
-		return $this->cooldowns[sprintf($path, $args)] ?? null;
+		return $this->cooldowns[$path] ?? null;
 	}
 
-	final public function loadCooldowns(CompoundTag|ListTag $array, $path = ""): void
+	final public function loadCooldowns(CompoundTag $tag, string $previous = ""): void
 	{
-		foreach ($array->getValue() as $key => $properties)
+		foreach ($tag->getValue() as $key => $properties)
 		{
-			if($key === "cooldown" && $properties->getValue() !== "'null'")
+			if (str_contains($key, "cooldown"))
 			{
-				$data = explode(";", $properties->getValue());
-				$cooldown = new PlayerCooldown(\DateTime::createFromFormat("d:H:i:s", $data[0]), $this, $data[1], true,
-					\DateTime::createFromFormat("d:H:i:s",$data[2]));
-				$this->addCooldown($cooldown,empty($path) ? $key : $path);
-                $this->testCooldown(empty($path) ? $key : $path);
-				return;
-			}
-
-			if($properties instanceof CompoundTag || $properties instanceof ListTag)
+				if(!empty($properties))
+				{
+					$path = empty($previous) ? $key : $previous.'.'.$key;
+					var_dump([$path => (int)$properties->getValue()]);
+					$previous = "";
+					$cooldown = new PlayerCooldown((int)$properties->getValue(), $this, $path, true);
+					$this->addCooldown($cooldown, $path);
+					$this->testCooldown($path);
+				}
+				continue;
+			}elseif($properties instanceof CompoundTag)
 			{
-				$this->loadCooldowns($properties, $path.$key);
+				$this->loadCooldowns($properties, $key);
 			}
 		}
 	}
 
     protected function testCooldown(string $path): bool
     {
-        $cooldown = $this->getCooldown($path, strtolower($this->getName()));
+        $cooldown = $this->getCooldown($path);
         if(!is_null($cooldown))
         {
-            if($cooldown->end())
+            if($cooldown->getCooldownTime() <= time())
             {
                 $event = new CooldownExpireEvent($cooldown, $this);
                 $event->call();
@@ -176,25 +206,42 @@ final class LinesiaPlayer extends Player
         return true;
     }
 
-	final public function sendForm(Form $form): void
+	final public function move(float $dx, float $dy, float $dz): void
 	{
-		Linesia::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($form) {
-			parent::sendForm($form);
-		}), 20);
+		if ($this->inCrafting) $this->removeCraftingInventory();
+		parent::move($dx, $dy, $dz);
 	}
 
 	final public function onUpdate(int $currentTick): bool
 	{
-		$this->setScoreTag($this->formatNameTag());
+		$this->setScoreTag($this->formatHealth());
 
 		if ($currentTick % (20 * 60) === 0) $this->getStatManager()->recalculateGameTime();
 
 		return parent::onUpdate($currentTick);
 	}
 
-	private function formatNameTag(): string
+	public function formatNameTag(): void
 	{
-		return str_repeat("§a■", round($this->getHealth())) . str_repeat("§c■", round($this->getMaxHealth() - $this->getHealth()));
+		$this->setNameTag($this->rank->getNametag($this));
+	}
+
+	private function formatHealth(): string
+	{
+		return str_repeat("§a■", round($this->getHealth() / 2)) . str_repeat("§c■", round(($this->getMaxHealth() - $this->getHealth()) / 2));
+	}
+
+	private function removeTempPermissions(): void
+	{
+		$tempPermissions = $this->getPlayerProperties()->getNestedProperties("permissions.temp");
+		foreach ($tempPermissions ?? [] as $key => $value)
+		{
+			if ($value < time())
+			{
+				unset($tempPermissions[$key]);
+			}
+		}
+		$this->getPlayerProperties()->setNestedProperties("permissions.temp", $tempPermissions ?? []);
 	}
 
 	final public function onPostDisconnect(Translatable|string $reason, Translatable|string|null $quitMessage): void
@@ -203,7 +250,9 @@ final class LinesiaPlayer extends Player
 		{
 			$cooldown->save($this);
 		}
-		$this->properties->setProperties("purchasedTags", $this->purchasedTags);
+		$this->properties->setProperties('activeTags', $this->tag->getName());
+		$this->properties->setProperties('rank', $this->rank->getName());
+		$this->properties->setProperties('money', $this->getEconomyManager()->getMoney());
 		$this->saveManager();
 		parent::onPostDisconnect($reason, $quitMessage); // TODO: Change the autogenerated stub
 	}
@@ -238,6 +287,22 @@ final class LinesiaPlayer extends Player
 	final public function isInDual(): bool
 	{
 		return $this->inDual;
+	}
+
+	final public function initTag(): void
+	{
+		if ($this->getPlayerProperties()->getProperties('activeTag') !== null)
+		{
+			$this->tag = Handler::TAG()->getTag($this->getPlayerProperties()->getProperties('activeTag'));
+			return;
+		}
+		$this->tag = Handler::TAG()->getTag("Joueur");
+	}
+
+	final public function attack(EntityDamageEvent $source): void
+	{
+		parent::attack($source);
+		$this->setScoreTag($this->formatHealth());
 	}
 
 	final public function setBaseActiveInteraction(): void
@@ -307,12 +372,40 @@ final class LinesiaPlayer extends Player
 	 */
 	final public function setTag(Tag $tag): void
 	{
-		in_array($tag->getName(), $this->purchasedTags, true) ?: $this->purchasedTags[] = $tag->getName();
-		$this->tag = $tag;
+		if ($this->hasPermission($tag->getPermission())) $this->tag = $tag;
 	}
 
 	final public function hasTag(string $tag): bool
 	{
-		return in_array($tag, $this->purchasedTags, true);
+		$tag = Handler::TAG()->getTag($tag);
+		return $this->hasPermission($tag->getPermission());
+	}
+
+	private function removeCraftingInventory(): void
+	{
+		$this->getNetworkSession()->sendDataPacket(UpdateBlockPacket::create
+		(
+			BlockPosition::fromVector3($this->getPosition()->add(0, 3, 0)),
+			TypeConverter::getInstance()->getBlockTranslator()->internalIdToNetworkId($this->getWorld()->getBlock($this->getPosition()->add(0, 3, 0))->getStateId()),
+			UpdateBlockPacket::FLAG_NETWORK,
+			UpdateBlockPacket::DATA_LAYER_NORMAL)
+		);
+		$this->setInCrafting(false);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isInCrafting(): bool
+	{
+		return $this->inCrafting;
+	}
+
+	/**
+	 * @param bool $inCrafting
+	 */
+	public function setInCrafting(bool $inCrafting = true): void
+	{
+		$this->inCrafting = $inCrafting;
 	}
 }

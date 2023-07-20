@@ -32,7 +32,7 @@ class TutoCommand extends BaseCommand
     {
         if($sender instanceof Player) {
 
-            $sender->teleport(new Position(191, 68, 257, $sender->getServer()->getWorldManager()->getWorldByName("tuto")));
+            $sender->teleport(new Position(246, 71, 254, $sender->getServer()->getWorldManager()->getWorldByName("tuto")));
             $sender->sendMessage("§aTu as bien été téléporté à la zone de tutoriel !");
 
         }

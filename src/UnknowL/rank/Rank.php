@@ -2,15 +2,15 @@
 
 namespace UnknowL\rank;
 
+use DaPigGuy\PiggyFactions\PiggyFactions;
 use pocketmine\permission\Permission;
 use pocketmine\permission\PermissionManager;
 use UnknowL\player\LinesiaPlayer;
 
 final class Rank
 {
-	public function __construct(protected string $name, private string $chatFormat, private array $permissions, private bool $default)
+	public function __construct(protected string $name, private string $chatFormat, private array $permissions, private bool $default, private string $nametagFormat, private int $marketTaxes = 0)
 	{
-		var_dump($this->chatFormat);
 		array_map(fn(string $permission) => PermissionManager::getInstance()->addPermission(new Permission($permission)),$permissions);
 	}
 
@@ -23,8 +23,10 @@ final class Rank
 	{
 		$chatFormat = $this->chatFormat;
 
+		$faction = PiggyFactions::getInstance()->getPlayerManager()->getPlayer($player)->getFaction();
+
 		$toReplace = [
-			"faction" => 'dont exist ',
+			"faction" => is_null($faction) ? "§cAucune" : $faction->getName(),
 			'prefix' => 'prefix',
 			'rank' => ucfirst($this->getName()),
 			'playerName' => $player->getName(),
@@ -32,21 +34,26 @@ final class Rank
 			'tag' => $player->getTag()->getFormat()
 		];
 
-		for ($i = self::countCharOccurences($chatFormat, '{'); $i >= 0 ; $i--)
+		return $this->replaceMessageWithArgs($chatFormat, $toReplace);
+	}
+
+	final public function replaceMessageWithArgs(string $configString, array $args): string
+	{
+		for ($i = self::countCharOccurences($configString, '{'); $i >= 0 ; $i--)
 		{
-			$fullName = substr($chatFormat, stripos($chatFormat, '{'), (stripos($chatFormat, '}') + 1) - stripos($chatFormat, '{'));
+			$fullName = substr($configString, stripos($configString, '{'), (stripos($configString, '}') + 1) - stripos($configString, '{'));
 
 			$name = preg_replace('/[{}]/', '', $fullName);
 			$name = str_replace('&', '',$name);
-			foreach ($toReplace as $key => $value)
+			foreach ($args as $key => $value)
 			{
 				if (str_contains($name, $key))
 				{
-					$chatFormat = str_replace($fullName, str_replace($fullName, $value, $fullName), $chatFormat);
+					$configString = str_replace($fullName, str_replace($fullName, $value, $fullName), $configString);
 				}
 			}
 		}
-		return $chatFormat;
+		return $configString;
 	}
 
 	public static function countCharOccurences(string $string, string $char): int
@@ -60,6 +67,17 @@ final class Rank
 			}
 		}
 		return $count;
+	}
+
+	final public function getNametag(LinesiaPlayer $player): string
+	{
+		$faction = PiggyFactions::getInstance()->getPlayerManager()->getPlayer($player)?->getFaction();
+		if (is_null($faction))
+		{
+			return $this->replaceMessageWithArgs($this->nametagFormat, ["faction" => "§cAucune", "playerName" => $player->getName()]);
+		}
+
+		return $this->replaceMessageWithArgs($this->getNametagFormat(), ["faction" => $faction->getName(), "playerName" => $player->getName()]);
 	}
 
 	final public function testPermission(string $perm): bool
@@ -97,5 +115,21 @@ final class Rank
 	public function isDefault(): bool
 	{
 		return $this->default;
+	}
+
+	/**
+	 * @return int
+	 */
+	final public function getMarketTaxes(): int
+	{
+		return $this->marketTaxes;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getNametagFormat(): string
+	{
+		return $this->nametagFormat;
 	}
 }

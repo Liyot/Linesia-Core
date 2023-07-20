@@ -10,7 +10,7 @@ final class RepairHandler
 
     private static Config $cooldown;
 
-    protected static function setup(): void
+    public static function setup(): void
     {
         self::$cooldown = new Config(Linesia::getInstance()->getDataFolder() . "repair.json", Config::JSON);
     }

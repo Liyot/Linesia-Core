@@ -4,6 +4,7 @@ namespace UnknowL\commands\settings;
 
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
+use UnknowL\form\SettingsForms;
 use UnknowL\lib\commando\BaseCommand;
 use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
 use UnknowL\Linesia;
@@ -30,9 +31,7 @@ class SettingsCommand extends BaseCommand
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
         if($sender instanceof Player) {
-
             SettingsForms::mainForm($sender);
-
         }
     }
 }

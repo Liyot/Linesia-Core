@@ -106,7 +106,7 @@ trait ArgumentableTrait{
 				$parsed = false;
 				$optional = true;
 				foreach($possibleArguments as $argument) {
-					$arg = trim(implode(" ", array_slice($rawArgs, $offset, ($len = $argument->getSpanLength()))));
+					$arg = trim(implode(" ", array_slice($rawArgs, (int)$offset, ($len = $argument->getSpanLength()))));
 					if(!$argument->isOptional()) {
 						$optional = false;
 					}

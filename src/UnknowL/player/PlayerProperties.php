@@ -3,6 +3,8 @@
 namespace UnknowL\player;
 
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\IntegerishTagTrait;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\Server;
@@ -19,15 +21,26 @@ final class PlayerProperties
 	{
 		if($nbt->getCompoundTag('properties') === null || empty($nbt->getCompoundTag("properties")->getValue()))
 		{
-			var_dump('fff');
 			$this->setBaseProperties([
 				"rank" => Handler::RANK()->getDefaultRank()->getName(),
-                PathLoader::PATH_RANK_ADD_PERM => null,
-                PathLoader::PATH_RANK_CACHE => null,
-				"kit" => [
-					"base" => [
-						"cooldown" => null
+                PathLoader::PATH_RANK_ADD_PERM => [
+					"cooldown" => null
+				],
+                PathLoader::PATH_RANK_CACHE => [
+					"cooldown" => null
 					],
+				"activeTag" => [],
+				"purchasedTags" => [],
+				"permissions" => [
+					"temp" => [
+
+					],
+					"normal" => [
+
+					]
+				],
+				"basekit" => [
+					"cooldown" => null
 				],
 				"manager" => [
 						"statistics" => [
@@ -68,15 +81,15 @@ final class PlayerProperties
 		return $this->properties;
 	}
 
-	private function arraytoTag(array $array): CompoundTag {
-		$nbt = new CompoundTag();
+	private function arraytoTag(array $array, ?CompoundTag $tag = null): CompoundTag {
+		$nbt ??= new CompoundTag();
 		foreach($array as $property => $value){
 			match (gettype($value)){
-				"integer" => $nbt->setInt($property, $value),
+				"integer" => $value > 0x7fffffff ? $nbt->setLong($property, $value) : $nbt->setInt($property, $value),
 				"double" => $nbt->setDouble($property, $value),
 				"string" => $nbt->setString($property, $value),
 				"boolean" => $nbt->setByte($property, $value),
-				"array" => $nbt->setTag($property, self::arrayToTag($value)),
+				"array" => $nbt->setTag($property, self::arrayToTag($value, $nbt)),
 				"object" => $nbt->setString($property, $value->serialize()),
 				"NULL" =>  $nbt->setString($property, "'null'")
 			};

@@ -9,6 +9,12 @@ use UnknowL\player\LinesiaPlayer;
 
 class RequestHandler extends Handler
 {
+
+	public function __construct()
+	{
+		parent::__construct();
+	}
+
 	/**
 	 * @var $requests list<array<list<Request>>>
 	 */

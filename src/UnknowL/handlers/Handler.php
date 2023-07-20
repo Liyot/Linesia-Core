@@ -3,6 +3,8 @@
 namespace UnknowL\handlers;
 use pocketmine\utils\EnumTrait;
 use UnknowL\casino\CasinoHandler;
+use UnknowL\games\GameHandler;
+use UnknowL\handlers\specific\RepairHandler;
 use UnknowL\Linesia;
 use UnknowL\rank\RankManager;
 
@@ -18,6 +20,10 @@ use UnknowL\rank\RankManager;
  * @method static BoxHandler BOX()
  * @method static ChunkHandler CHUNK()
  * @method static TagHandler TAG()
+ * @method static OfflineDataHandler OFFLINEDATA()
+ * @method static WorldHandler WORLD()
+ * @method static ArmorEffectHandler ARMOREFFECTS()
+ * @method static GameHandler GAME()
  */
 abstract class Handler
 {
@@ -39,6 +45,7 @@ abstract class Handler
 	private static function getHandlers(): array
 	{
 		return [
+			new OfflineDataHandler(),
 			new CooldownHandler(),
 			new MarketHandler(),
 			new ShopHandler(),
@@ -48,7 +55,10 @@ abstract class Handler
 			new RequestHandler(),
 			new BoxHandler(),
 			new ChunkHandler(),
-			new TagHandler()
+			new TagHandler(),
+			new WorldHandler(),
+			new ArmorEffectHandler(),
+			new GameHandler()
 		];
 	}
 
@@ -56,6 +66,7 @@ abstract class Handler
 	{
 		self::setup();
 		self::_registryRegister("Casino", new CasinoHandler());
+		RepairHandler::setup();
 	}
 
 	public static function saveHandler(): void
@@ -68,9 +79,10 @@ abstract class Handler
 
 	protected static function setup(): void
 	{
+		/**@var Handler $handler*/
 		foreach (self::getHandlers() as $handler) {
 			self::register($handler);
-			!$handler instanceof ShopHandler ?: $handler->loadData();
+			$handler->loadData();
 		}
 	}
 }

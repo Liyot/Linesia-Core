@@ -2,17 +2,16 @@
 
 namespace UnknowL\commands\stat;
 
-use JetBrains\PhpStorm\ArrayShape;
 use pocketmine\command\CommandSender;
 use pocketmine\Server;
-use UnknowL\commands\CommandManager;
 use UnknowL\lib\commando\args\TargetArgument;
+use UnknowL\lib\commando\BaseCommand;
 use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
 use UnknowL\lib\forms\MenuForm;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 
-final class StatCommand extends \UnknowL\lib\commando\BaseCommand
+final class StatCommand extends BaseCommand
 {
 
 	public function __construct()

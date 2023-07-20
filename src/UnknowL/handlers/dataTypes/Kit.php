@@ -6,6 +6,9 @@ use Cassandra\Date;
 use DateTime;
 use pocketmine\data\bedrock\EnchantmentIdMap;
 use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
+use pocketmine\inventory\ArmorInventory;
+use pocketmine\item\Armor;
+use pocketmine\item\ArmorTypeInfo;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\Item;
@@ -21,34 +24,35 @@ final class Kit
 
 	/**
 	 * @param string $name
-	 * @param string[] $rank
+	 * @param string $permission
 	 * @param Item[] $content
 	 * @param array $contentDisplay
 	 * @param array $armorContent
 	 * @param array $armorDisplay
 	 * @param string $cooldownData
 	 * @param array $armorEnchantData
-	 * @param array $contentArmorEnchant
+	 * @param array $contentEnchant
 	 */
 	public function __construct
 	(
-		protected string $name,
-		private array $rank,
-		private array $content = [],
-		private array $contentDisplay = [],
-		private array $armorContent = [],
-		private array $armorDisplay = [],
-		private string $cooldownData = "",
-		private array $armorEnchantData = [],
-		private array $contentEnchant = []
+		protected string        $name,
+		private readonly string $permission,
+		private array           $content = [],
+		private readonly array  $contentDisplay = [],
+		private array           $armorContent = [],
+		private readonly array  $armorDisplay = [],
+		private readonly string $cooldownData = "",
+		private array           $armorEnchantData = [],
+		private array           $contentEnchant = []
 	){}
 
 	final public function canClaim(LinesiaPlayer $player): bool
 	{
 		$return = true;
-		if(!count(array_filter($this->rank,fn($perm) => $player->hasPermission($perm))) >= 1 )
+		var_dump($this->getPermission());
+		if(!$player->hasPermission($this->getPermission()))
 		{
-			$player->sendMessage("Vous n'avez pas la permission");
+			$player->sendMessage("§cVous n'avez pas la permission");
 			$return = false;
 		}
 		if(!$this->testCooldown($player))
@@ -60,12 +64,13 @@ final class Kit
 
 	private function testCooldown(LinesiaPlayer $player): bool
 	{
-		$cooldown = $player->getCooldown(PathLoader::PATH_KIT_COOLDOWN, strtolower($this->getName()));
+		$path = sprintf(PathLoader::PATH_KIT_COOLDOWN, strtolower($this->getName()));
+		$cooldown = $player->getCooldown($path);
 		if(!is_null($cooldown))
 		{
 			if(!$cooldown->end())
 			{
-				$player->sendPopup(sprintf("Il te reste %s à attendre", $cooldown->format()));
+				$player->sendPopup(sprintf("§cIl te reste %s à attendre", $cooldown->format()));
 				return false;
 			}
 		}
@@ -81,7 +86,7 @@ final class Kit
 			{
 				$exp = explode(":", $value);
 				$key = array_search($value, $array, true);
-				$item = StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($exp[0]))->setCount($exp[1]);
+				$item = StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($exp[0]))->setCount($exp[2]);
 				if (isset($enchant[$key]))
 				{
 					$ex = explode(":", $enchant[$key]);
@@ -90,16 +95,21 @@ final class Kit
 				return $item;
 			};
 
-			array_map(function($item) use ($func, $player) {
-				if ($player->getArmorInventory()->canAddItem($func($item, $this->armorContent, $this->armorEnchantData)))
+			array_map(function($item) use ($func, &$player) {
+				/**@var Armor $item*/
+				$item = $func($item, $this->armorContent, $this->armorEnchantData);
+				if ($player->getArmorInventory()->canAddItem($item))
 				{
-					$player->getArmorInventory()->addItem($func($item, $this->armorContent, $this->armorEnchantData));
+					$player->getArmorInventory()->setItem($item->getArmorSlot(), $item);
+					return;
 				}
+				$player->getInventory()->addItem($item);
 			} , $this->armorContent);
 
 			array_map(fn($item) => $player->getInventory()->addItem($func($item, $this->content, $this->contentEnchant)), $this->content);
-			new PlayerCooldown(DateTime::createFromFormat("d:H:i:s", $this->cooldownData), $player, $data, (int)explode(":", $this->cooldownData)[0] === 0);
-			$player->sendPopup(sprintf("[+] %s", $this->getName()));
+			new PlayerCooldown((int) $this->cooldownData, $player, $data);
+            $name = $this->getName();
+			$player->sendMessage("§aVous avez récupéré le kit $name !");
 		}
 	}
 
@@ -121,14 +131,14 @@ final class Kit
 			$form->setItem($this->armorDisplay[$i], $item);
 		}
 
-		for ($i = 0 ; $i < count($this->contentDisplay) ; $i++)
+		for ($i = 0 ; $i < count($this->contentDisplay); $i++)
 		{
 			$ex = explode(":", $this->content[$i]);
 			$item = StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($ex[0]));
 
-			if (isset($this->contentArmorEnchant[$i]))
+			if (isset($this->contentEnchant[$i]))
 			{
-				$enchant = explode(":", $this->contentArmorEnchant[$i]);
+				$enchant = explode(":", $this->contentEnchant[$i]);
 				$item->addEnchantment(new EnchantmentInstance(EnchantmentIdMap::getInstance()->fromId($enchant[0]), $enchant[1]));
 			}
 
@@ -146,11 +156,11 @@ final class Kit
 	}
 
 	/**
-	 * @return Rank[]
+	 * @return string
 	 */
-	public function getRank(): array
+	public function getPermission(): string
 	{
-		return $this->rank;
+		return $this->permission;
 	}
 
 	/**

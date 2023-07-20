@@ -32,9 +32,9 @@ abstract class CasinoGame implements IGame
 						break;
 
 					case "Lancer le jeu":
-						if (isset($this->mise))
+						if ($this instanceof Roulette)
 						{
-							$this->start($player, $this->mise);
+							$this->start($player);
 							return;
 						}
 						$form = new CustomForm("Choississez votre mise", [new Input("Mise:", "")],

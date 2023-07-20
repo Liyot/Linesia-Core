@@ -34,7 +34,6 @@ class EcCommand extends BaseCommand
 
             $ec = new EnderChestForm($sender);
             $ec->open();
-
         }
     }
 }

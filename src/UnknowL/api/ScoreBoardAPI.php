@@ -9,6 +9,7 @@ use pocketmine\network\mcpe\protocol\SetScorePacket;
 use pocketmine\network\mcpe\protocol\types\ScorePacketEntry;
 use pocketmine\player\Player;
 use pocketmine\Server;
+use UnknowL\commands\vote\VoteCommand;
 use UnknowL\handlers\Handler;
 use UnknowL\player\LinesiaPlayer;
 
@@ -30,16 +31,18 @@ class ScoreBoardAPI {
 
         $money = $player->getEconomyManager()->getMoney();
         $rank = $player->getRank()->getName();
+		$votePart = VoteCommand::getInstance()->getVoteParty();
 
         self::$scoreboard[] = $player->getName();
-        self::lineTitle($player, "§5- §dLinesia V7 §5-");
+        self::lineTitle($player, "§5- §dLinesia V8 §5-");
         self::lineCreate($player, 1, "  ");
         self::lineCreate($player, 2, " §l§5» §d{$player->getName()}");
         self::lineCreate($player, 3, " Grade: §d$rank");
         self::lineCreate($player, 4, " Money: §d$money");
-        self::lineCreate($player, 5, " Connecté(s): §d$online");
-        self::lineCreate($player, 6, "   ");
-        self::lineCreate($player, 7, "§5linesia.eu");
+		self::lineCreate($player, 5, " VoteParty: §d$votePart");
+        self::lineCreate($player, 6, " Connecté(s): §d$online");
+        self::lineCreate($player, 7, "");
+        self::lineCreate($player, 8, "§5linesia.eu");
     }
 
     //use linesia\core\api\ScoreBoardAPI;
@@ -78,8 +81,8 @@ class ScoreBoardAPI {
         $online = $removeOne ? count(Server::getInstance()->getOnlinePlayers()) - 1 : count(Server::getInstance()->getOnlinePlayers());
         /** @var LinesiaPlayer $player */
         foreach (Server::getInstance()->getOnlinePlayers() as $player) {
-            self::lineRemove($player, 5);
-            self::lineCreate($player, 5, " Connectés: §d$online");
+            self::lineRemove($player, 6);
+            self::lineCreate($player, 6, " Connectés: §d$online");
         }
     }
 
@@ -87,6 +90,12 @@ class ScoreBoardAPI {
     {
         return in_array($player->getName(), self::$scoreboard);
     }
+
+	public static function updateVoteParty(LinesiaPlayer $player, int $actual): void
+	{
+		self::lineRemove($player, 5);
+		self::lineCreate($player, 5, " VoteParty: §d$actual");
+	}
 
     public static function removeScoreboard(Player $player): void
     {

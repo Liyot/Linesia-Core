@@ -89,7 +89,6 @@ final class Escalier extends CasinoGame
 		}
 		$inventory->onClose($player);
 		$gain = count($this->getItems(VanillaBlocks::EMERALD()->asItem(), $inventory)) * $this->mise * 1.20;
-		var_dump($gain);
 		$this->win($player, $gain);
 	}
 

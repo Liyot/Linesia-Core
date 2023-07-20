@@ -5,6 +5,7 @@ namespace UnknowL\casino\types;
 use pocketmine\block\Concrete;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\block\VanillaBlocks;
+use pocketmine\item\ItemBlock;
 use UnknowL\lib\forms\CustomForm;
 use UnknowL\lib\forms\CustomFormResponse;
 use UnknowL\lib\forms\element\Dropdown;
@@ -20,7 +21,6 @@ class Roulette extends CasinoGame
 
 	public function __construct()
 	{
-		$this->mise = 0;
 	}
 
     public function getName(): string
@@ -33,7 +33,7 @@ class Roulette extends CasinoGame
 		return "Tenter de gagner le double de votre mise en tombant sur la bonne couleur";
 	}
 
-	public function start(LinesiaPlayer $player, int $mise): void
+	public function start(LinesiaPlayer $player, int $mise = 0): void
 	{
 		$roulette = [];
 		for($i = 0; $i <= 36; $i++){
@@ -46,54 +46,65 @@ class Roulette extends CasinoGame
 		}
 
 		$form = new CustomForm("Choississez votre mise", [new Input("Mise:" ,"", 1), new Dropdown("Couleur", ["Rouge", 'Noir', 'Vert'])]
-			, function (LinesiaPlayer $player, CustomFormResponse $response) use ($roulette) {
+			, function (LinesiaPlayer $player, CustomFormResponse $response) use ($mise, &$roulette) {
 			$input = $response->getInput();
 			$dropdown = $response->getDropdown();
-			$inventory = InventoryAPI::createSimpleChest(true);
-			$inventory->send($player);
-			$block = match ($dropdown->getSelectedOption())
-			{
-				"Rouge" => VanillaBlocks::CONCRETE()->setColor(DyeColor::RED())->asItem(),
-				'Noir' => VanillaBlocks::CONCRETE()->setColor(DyeColor::BLACK())->asItem(),
-				'Vert' => VanillaBlocks::CONCRETE()->setColor(DyeColor::GREEN())->asItem()
-			};
-			if(!is_int((int)$input->getValue())) return;
-			Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new class($roulette, $inventory, $player, $block, (int)$input->getValue()) extends InventoryAnimationTask
-			{
+			$mise = $input->getValue();
 
-				public function __construct(array $items, SimpleChestInventory $inventory, LinesiaPlayer $player, private Concrete $misedColor, private int $mise = 1)
+			if ($player->getEconomyManager()->reduce(round($mise)))
+			{
+				$inventory = InventoryAPI::createSimpleChest(true);
+				$inventory->send($player);
+				$block = match ($dropdown->getSelectedOption())
 				{
-					$this->items = $items;
-					$this->inventory = $inventory;
-					$this->player = $player;
-					parent::__construct($items, $inventory, $player);
-				}
+					"Rouge" => VanillaBlocks::CONCRETE()->setColor(DyeColor::RED()),
+					'Noir' => VanillaBlocks::CONCRETE()->setColor(DyeColor::BLACK()),
+					'Vert' => VanillaBlocks::CONCRETE()->setColor(DyeColor::GREEN())
+				};
 
-				public function onCancel(): void
+				if(!is_int((int)$mise)) return;
+				Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new class($roulette, $inventory, $player, $block, $mise) extends InventoryAnimationTask
 				{
-					/**@var Concrete $final*/
-					$final = $this->getResult();
-					if ($this->player->isConnected())
+					protected array $items;
+					protected SimpleChestInventory $inventory;
+					protected LinesiaPlayer $player;
+					public function __construct(array $items, SimpleChestInventory $inventory, LinesiaPlayer $player, private Concrete $misedColor, private int $mise = 1)
 					{
-						if($final->getColor()->name() === $this->misedColor->getColor()->name())
-						{
-							$gain = match ($final)
-							{
-								VanillaBlocks::CONCRETE()->setColor(DyeColor::GREEN())->asItem() => $this->mise * 14,
-								default => $this->mise * 2
-							};
-							$this->player->sendMessage("Vous avez gagné ". $gain);
-							$this->inventory->onClose($this->player);
-							return;
-						}
-						$this->player->sendMessage("Vous n'avez rien gagner");
-						$this->inventory->onClose($this->player);
-						parent::onCancel();
+						$this->items = $items;
+						$this->inventory = $inventory;
+						$this->player = $player;
+						parent::__construct($items, $inventory, $player);
 					}
-				}
-			}, 5);
-		});
+
+					public function onCancel(): void
+					{
+						/**@var ItemBlock $final*/
+						$final = $this->getResult()->getBlock();
+						if ($this->player->isConnected())
+						{
+							/**@var $final Concrete*/
+							if($final->getColor()->name() === $this->misedColor->getColor()->name())
+							{
+								$gain = match ($final)
+								{
+									VanillaBlocks::CONCRETE()->setColor(DyeColor::GREEN())->asItem() => $this->mise * 14,
+									default => $this->mise * 2
+								};
+								$this->player->getEconomyManager()->add(round($gain));
+								$this->player->sendMessage("Vous avez gagné ". $gain);
+								$this->inventory->onClose($this->player);
+								return;
+							}
+							$this->player->sendMessage("Vous n'avez rien gagner");
+							$this->inventory->onClose($this->player);
+							parent::onCancel();
+						}
+					}
+				}, 5);
+			}
+			});
 		$player->sendForm($form);
+
 	}
 
 	public function win(LinesiaPlayer $player, int $gain): void {/*empty*/}

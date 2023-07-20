@@ -6,7 +6,7 @@ final class Tag
 {
 
 	private bool $isDisabled = false;
-	public function __construct(private string $name, private string $format, private int $price) {}
+	public function __construct(private string $name, private string $format, private int $price, private string $permission = "pocketmine.group.user") {}
 
 	/**
 	 * @return string
@@ -21,7 +21,10 @@ final class Tag
 	 */
 	public function getFormat(): string
 	{
-		return $this->isDisabled ? "" : $this->format;
+		$format = preg_replace('/[{}]/', '', $this->format);
+		str_replace('TagName', $format, $this->format);
+		str_contains($format, 'TagName') ? $format = "" : true;
+		return $this->isDisabled ? "§cAucun" : $format;
 	}
 
 	/**
@@ -35,5 +38,13 @@ final class Tag
 	final public function disable(bool $value = true): void
 	{
 		$this->isDisabled = $value;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getPermission(): string
+	{
+		return $this->permission;
 	}
 }

@@ -30,7 +30,7 @@ final class StatManager extends PlayerManager
 		'death' => 'int',
 		'killstreak' => 'int',
 		'kd' => 'float',
-		'gametime' => 'string',
+		'gametime' => 'int',
 		'blockmined' => 'int',
 		'blockposed' => 'int',
 		'firstconnexion' => 'int',
@@ -47,7 +47,6 @@ final class StatManager extends PlayerManager
 	private function deserialize(): array
 	{
 		$properties = $this->getPlayer()->getPlayerProperties();
-		var_dump($properties);
 		return $properties->getNestedProperties("manager.statistics") ?? $properties->getProperties("statistics") ?? [];
 	}
 
@@ -94,8 +93,6 @@ final class StatManager extends PlayerManager
 	private function addMinedBlock(): void
 	{
 		$this->statistics["blockmined"] += 1;
-
-		var_dump($this->formatGameTime());
 	}
 
 	private function addPosedBlock(): void
@@ -120,21 +117,14 @@ final class StatManager extends PlayerManager
 
     final public function formatGameTime(): string
     {
-//		$datetime1 = new \DateTime();
-//		$datetime2 = new \DateTime(sprintf('@%d', (int) $this->statistics["gametime"]));
-//		var_dump($datetime2);
-//		$interval = $datetime1->diff($datetime2);
-//
-//		$date = explode('-', gmdate("m-d-h", (int)$this->statistics["gametime"]));
-//
-//		var_dump($this->statistics["gametime"], $interval);
-
 		return $this->convertUnixTime($this->statistics["gametime"]);
     }
 
 	final protected function recalculateRatio(): void
 	{
-        $kd = round($this->statistics['kill'] / $this->statistics['death'], 2);
+		$death = $this->statistics["death"];
+		$death > 1 ?: $death = 1;
+        $kd = round($this->statistics['kill'] / $death, 2);
         $this->statistics["kd"] = $kd;
 	}
 
@@ -148,9 +138,9 @@ final class StatManager extends PlayerManager
 		$stats = $this->statistics;
 		return sprintf
 		(
-			"Depuis le début de votre avanture vous avez: \n - tué %d perssonne(s) \n - êtes mort %d fois \n  et avez gagné %d duels \n ce qui vous fait un kd de %.2f. \n
-		 En ce qui concerne le minage vous avez: \n - posé(e) %d blocks \n - miné(e) %d blocks \n Vous avez réalisé ces exploits avec un temps de jeu de %s",
-			$stats["kill"], $stats["death"], $stats["dualwon"], $stats["kd"], $stats["blockposed"], $stats["blockmined"], $this->formatGameTime()
+			"§5Depuis le début de votre avanture vous avez : \n §d- Kill = %d joueur(s) \n §d- Death = %d fois \n - KD = %.2f. \n\n
+		 §5En ce qui concerne le minage vous avez: \n §d- Placer %d blocks \n §d- Casser %d blocks \n\n §5Vous avez réalisé ces exploits avec un temps de jeu de %s",
+			$stats["kill"], $stats["death"], $stats["kd"], $stats["blockposed"], $stats["blockmined"], $this->formatGameTime()
 		);
 	}
 
@@ -195,6 +185,7 @@ final class StatManager extends PlayerManager
 		$statistics = $this->TagtoArray(Server::getInstance()->getOfflinePlayerData($name)->getCompoundTag('properties')->getCompoundTag('statistics'));
 		$statManager = clone $this;
 		$statManager->statistics = $statistics;
+		unset($statManager->player);
 		unset($this->offlineStatsCache);
 		return $statManager;
 	}

@@ -5,6 +5,10 @@ namespace UnknowL\handlers;
 class VoteHandler extends Handler
 {
 
+	public function __construct()
+	{
+		parent::__construct();
+	}
     protected function loadData(): void
     {
 

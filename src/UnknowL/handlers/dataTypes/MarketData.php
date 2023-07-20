@@ -12,25 +12,32 @@ class MarketData
 	public function __construct
 	(
 		private Item $item,
-		private EnchantmentInstance $enchantment,
-		private int $price = 0,
+		private int|float $sellPrice = 0,
 		private string $description = "",
 		private string $image = "",
 		private string $name = "",
-		private int $quantities = 64
+		private int $quantities = 64,
+		private int|float $buyPrice = 0,
 	){}
 
 	final public function buy(LinesiaPlayer $player, int $quantities): void
 	{
-		$player->getEconomyManager()->reduce($this->getPrice() * $quantities);
-		$player->getInventory()->addItem($this->getItem()->setCount($quantities));
+		if ($player->getEconomyManager()->reduce(round($this->getBuyPrice() * $quantities, 1)))
+		{
+			$player->getInventory()->addItem($this->getItem()->setCount($quantities));
+		}
 	}
 
-    final public function sell(LinesiaPlayer $player, int $quantities)
+    final public function sell(LinesiaPlayer $player, int $quantities): void
     {
-        $player->getEconomyManager()->add($quantities * $this->getPrice());
-        $player->getInventory()->remove($this->getItem()->setCount($quantities));
-        $player->sendMessage("Vous avez vendu votre item avec succés");
+		if ($player->getInventory()->contains($this->item->setCount($quantities)))
+		{
+			$player->getEconomyManager()->add(round($quantities * $this->getSellPrice(), 1));
+			$player->getInventory()->remove($this->getItem()->setCount($quantities));
+			$player->sendMessage("§aVous avez vendu votre item avec succés !");
+			return;
+		}
+		$player->sendMessage("§cVous n'avez pas assez d'item dans votre inventaire !");
     }
 
 	/**
@@ -41,20 +48,18 @@ class MarketData
 		return $this->item;
 	}
 
-	/**
-	 * @return EnchantmentInstance
-	 */
-	public function getEnchantment(): EnchantmentInstance
-	{
-		return $this->enchantment;
-	}
 
 	/**
 	 * @return int
 	 */
-	public function getPrice(): int
+	public function getSellPrice(): int|float
 	{
-		return $this->price;
+		return $this->sellPrice;
+	}
+
+	public function getBuyPrice(): int|float
+	{
+		return $this->buyPrice;
 	}
 
 	/**

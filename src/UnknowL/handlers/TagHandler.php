@@ -10,6 +10,12 @@ use UnknowL\player\LinesiaPlayer;
 final class TagHandler extends Handler
 {
 
+
+	public function __construct()
+	{
+		parent::__construct();
+	}
+
 	/**@var Tag[]*/
 	private array $tags = [];
 
@@ -37,8 +43,8 @@ final class TagHandler extends Handler
 		{
 			if ($player->getEconomyManager()->reduce($tag->getPrice()))
 			{
-
 				$player->setTag($tag);
+				$player->addPermission("perm.tag.{$tag->getName()}");
 			}
 		}
 	}
@@ -60,6 +66,6 @@ final class TagHandler extends Handler
 
 	public function getName(): string
 	{
-		return "Tags";
+		return "Tag";
 	}
 }

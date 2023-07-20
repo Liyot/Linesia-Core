@@ -43,11 +43,12 @@ class BoxCommand extends BaseCommand
      */
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
+		$key = $sender->getInventory()->getItemInHand();
 		if (isset($args["name"]) && is_string($args["name"]))
 		{
 			if (Handler::BOX()->getBox($args["name"]) !== null)
 			{
-				$sender->sendMessage("Cette boite est déjà enregistré");
+				$sender->sendMessage("§cCette box est déjà enregistré");
 				return;
 			}
 
@@ -111,7 +112,7 @@ class BoxCommand extends BaseCommand
 
 			$item = VanillaBlocks::CHEST()->asItem();
 
-			$form->setCloseListener(function (LinesiaPlayer $player, BaseInventoryCustom $inventory) use ($form, $args, &$item)
+			$form->setCloseListener(function (LinesiaPlayer $player, BaseInventoryCustom $inventory) use ($key, $form, $args, &$item)
 			{
 				if (!empty($inventory->getContents()))
 				{
@@ -119,6 +120,7 @@ class BoxCommand extends BaseCommand
 					$item->getNamedTag()->setString('box', $args['name']);
 					$player->getInventory()->addItem($item);
 					$box = new Box($args['name'], $inventory->getContents());
+					$box->setKey($key);
 					Handler::BOX()->addBox($box);
 					return;
 				}

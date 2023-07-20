@@ -8,7 +8,12 @@ use pocketmine\world\World;
 final class ChunkHandler extends Handler
 {
 
-    protected function loadData(): void
+	public function __construct()
+	{
+		parent::__construct();
+	}
+
+	protected function loadData(): void
     {
 		//NOOP
 	}

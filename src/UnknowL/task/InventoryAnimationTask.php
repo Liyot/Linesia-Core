@@ -54,7 +54,9 @@ class InventoryAnimationTask extends Task
 
 	public function onCancel(): void
 	{
-		$this->inventory->onClose($this->player);
+		if ($this->player->isConnected()) {
+			$this->inventory->onClose($this->player);
+		}
 		parent::onCancel();
 	}
 

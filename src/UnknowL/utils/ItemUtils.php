@@ -1,4 +1,5 @@
 <?php
+namespace UnknowL\utils;
 
 use pocketmine\data\bedrock\block\upgrade\LegacyBlockIdToStringIdMap;
 use pocketmine\data\bedrock\item\SavedItemData;
@@ -15,7 +16,6 @@ abstract class ItemUtils
 
 		foreach ($metaUpgrader->getValue(GlobalBlockStateHandlers::getUpgrader()->getBlockIdMetaUpgrader()) as $key => $value)
 		{
-			var_dump([$key, $value]);
 		}
 
 		return 0;

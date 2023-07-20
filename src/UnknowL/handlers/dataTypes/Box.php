@@ -31,6 +31,7 @@ final class Box
 	use InventoryContainerTrait;
 
 	private string $worldName;
+	private Item $key;
 
 	/**
 	 * @param string $name
@@ -39,7 +40,20 @@ final class Box
 	 */
 	public function __construct(private string $name, private array $items, private ?Position $position = null)
 	{
-		array_map(fn(Item $item) => $item->setLore([sprintf("(%d)", $item->getNamedTag()->getInt('percentage'))]), $this->items);
+		foreach ($items as $item)
+		{
+			if ($item->getNamedTag()->getTag('percentage') !== null)
+			{
+				$item->setLore(["{$item->getNamedTag()->getTag('percentage')->getValue()}"]);
+				continue;
+			}
+			if($item->isNull())
+			{
+				unset($this->items[array_search($item, $this->items, true)]);
+				continue;
+			}
+			$item->setNamedTag($item->getNamedTag()->setInt('percentage', 0));
+		}
 	}
 
 	public function open(LinesiaPlayer $player): void
@@ -65,16 +79,16 @@ final class Box
 			[
 				"name" => $this->getName(),
 				"content" => $this->jsonSerialiezeItems(),
-				"position" => [$pos->getX(), $pos->getY(), $pos->getZ(), $this->worldName]
+				"position" => [$pos->getX(), $pos->getY(), $pos->getZ(), $this->worldName],
+				"key" => (new LittleEndianNbtSerializer())->write(new TreeRoot($this->getKey()->nbtSerialize()))
 			];
 	}
 
 	final protected function jsonSerialiezeItems(): array
 	{
-
 		return array_map(fn(Item $item, int $slot) =>
 		[
-			"item" => (new LittleEndianNbtSerializer())->write(new TreeRoot($item->nbtSerialize($slot)))
+			"item" => $item->isNull() ?: (new LittleEndianNbtSerializer())->write(new TreeRoot($item->nbtSerialize($slot)))
 		], $this->items, array_keys($this->items));
 	}
 
@@ -98,7 +112,6 @@ final class Box
 		{
 			$multuplier = round((100 / $this->getPercentageFromLore($item->getLore()[0]) * count($this->items)));
 			for ($i = $multuplier; $i > 0; $i--) $array[] = $item;
-			var_dump($multuplier);
 		}
 		shuffle($array);
 		return $array;
@@ -111,15 +124,24 @@ final class Box
 
 	protected function startAnimation(LinesiaPlayer $player, SimpleChestInventory $inventory): void
 	{
-		$inventory->send($player);
-		Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new class($this->sortByPercentage(), $inventory, $player) extends InventoryAnimationTask
+		if ($player->getInventory()->getItemInHand()->equals($this->getKey(), false, false))
 		{
-			public function onCancel(): void
+			$inventory->send($player);
+			Linesia::getInstance()->getScheduler()->scheduleRepeatingTask(new class($this->sortByPercentage(), $inventory, $player) extends InventoryAnimationTask
 			{
-				parent::onCancel();
-				$this->player->getInventory()->addItem($this->getResult());
-			}
-		}, 5);
+				public function onCancel(): void
+				{
+					parent::onCancel();
+					$item = $this->getResult();
+					$item->setLore([""]);
+					if ($this->player->isConnected())
+					{
+						$this->player->getInventory()->addItem($item);
+					}
+				}
+			}, 5);
+			$player->getInventory()->removeItem($player->getInventory()->getItemInHand()->setCount(1));
+		}
 	}
 
 	final public function getPosition(): ?Position
@@ -130,6 +152,11 @@ final class Box
 	public function isPlaced(): bool
 	{
 		return is_null($this->position);
+	}
+
+	public function setKey(Item $key): void
+	{
+		$this->key = $key;
 	}
 
 	final public function setPosition(Position $position): void
@@ -161,6 +188,11 @@ final class Box
 	public function getContents(): array
 	{
 		return $this->items;
+	}
+
+	public function getKey(): Item
+	{
+		return $this->key;
 	}
 
 	public function __destruct()

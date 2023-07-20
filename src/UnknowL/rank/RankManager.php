@@ -5,6 +5,7 @@ namespace UnknowL\rank;
 use pocketmine\utils\Config;
 use pocketmine\utils\SingletonTrait;
 use UnknowL\handlers\Handler;
+use UnknowL\lib\commando\args\RankArgument;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 
@@ -44,13 +45,15 @@ final class RankManager extends Handler
 	{
 		foreach ($this->config->get("ranks") as $name => $data)
 		{
-			$this->loadRank($data["displayName"], $data["permissions"], $data["chatFormat"], $data["default"]);
+			$this->loadRank($data["displayName"], $data["permissions"], $data["chatFormat"], $data["default"],
+				$data["nametagFormat"],  $data["MarketTaxes"] ?? 0);
 		}
 	}
 
-	private function loadRank(string $name, array $permissions, string $chatFormat, bool $isDefault): void
+	private function loadRank(string $name, array $permissions, string $chatFormat, bool $isDefault, string $nametagFormat,  int $marketTaxes): void
 	{
-		$this->ranks[strtolower($name)] = new Rank($name, $chatFormat, $permissions, $isDefault);
+		$this->ranks[strtolower($name)] = new Rank($name, $chatFormat, $permissions, $isDefault, $nametagFormat,$marketTaxes);
+		RankArgument::$VALUES[strtolower($name)] = strtolower($name);
 	}
 
 	final public function saveAll(): void

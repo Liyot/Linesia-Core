@@ -4,6 +4,7 @@ namespace UnknowL\entities;
 
 use jojoe77777\FormAPI\ModalForm;
 use JsonException;
+use UnknowL\api\MineAPI;
 use UnknowL\lib\ref\libNpcDialogue\form\NpcDialogueButtonData;
 use UnknowL\lib\ref\libNpcDialogue\NpcDialogue;
 use pocketmine\entity\Location;
@@ -34,7 +35,7 @@ final class MinageNPC extends Villager
      */
     public function onInteract(Player $player, Vector3 $clickPos): bool
     {
-        $quest = match (Linesia::getInstance()->getData()->getNested($player->getName() . ".quest", 1)) {
+        $quest = match (MineAPI::getInstance()->getQuestData()->getNested($player->getName() . ".quest", 1)) {
             1 => "Quest1",
             2 => "Quest2",
             3 => "Quest3",
@@ -78,32 +79,32 @@ final class MinageNPC extends Villager
             case "Quest1":
                 $player->getInventory()->removeItem(VanillaItems::EMERALD()->setCount(192));
                 $player->sendMessage("§aVous avez terminé la première quête !");
-                Linesia::getInstance()->getData()->setNested($player->getName() . ".quest", 2);
-                Linesia::getInstance()->getData()->save();
+                MineAPI::getInstance()->getQuestData()->setNested($player->getName() . ".quest", 2);
+				MineAPI::getInstance()->getQuestData()->save();
                 break;
             case "Quest2":
                 $player->getInventory()->removeItem(VanillaItems::IRON_NUGGET()->setCount(5));
                 $player->sendMessage("§aVous avez terminé la deuxième quête !");
-                Linesia::getInstance()->getData()->setNested($player->getName() . ".quest", 3);
-                Linesia::getInstance()->getData()->save();
+				MineAPI::getInstance()->getQuestData()->setNested($player->getName() . ".quest", 3);
+				MineAPI::getInstance()->getQuestData()->save();
                 break;
             case "Quest3":
                 $player->getInventory()->removeItem(VanillaItems::GOLD_INGOT()->setCount(256)); //128 rubis
                 $player->sendMessage("§aVous avez terminé la troisième quête !");
-                Linesia::getInstance()->getData()->setNested($player->getName() . ".quest", 4);
-                Linesia::getInstance()->getData()->save();
+				MineAPI::getInstance()->getQuestData()->setNested($player->getName() . ".quest", 4);
+				MineAPI::getInstance()->getQuestData()->save();
                 break;
             case "Quest4":
                 $player->getInventory()->removeItem(VanillaItems::ROTTEN_FLESH()->setCount(2000));
                 $player->sendMessage("§aVous avez terminé la quatrième quête !");
-                Linesia::getInstance()->getData()->setNested($player->getName() . ".quest", 5);
-                Linesia::getInstance()->getData()->save();
+				MineAPI::getInstance()->getQuestData()->setNested($player->getName() . ".quest", 5);
+				MineAPI::getInstance()->getQuestData()->save();
                 break;
             case "Quest5":
                 $player->getEconomyManager()->reduce(200000);
                 $player->sendMessage("§aVous avez terminé la dernière quête !");
-                Linesia::getInstance()->getData()->setNested($player->getName() . ".quest", 6);
-                Linesia::getInstance()->getData()->save();
+				MineAPI::getInstance()->getQuestData()->setNested($player->getName() . ".quest", 6);
+				MineAPI::getInstance()->getQuestData()->save();
                 break;
         }
     }

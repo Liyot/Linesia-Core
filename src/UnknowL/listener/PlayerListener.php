@@ -5,8 +5,16 @@ namespace UnknowL\listener;
 use pocketmine\block\Anvil;
 use pocketmine\block\EnchantingTable;
 use pocketmine\block\EnderChest;
+use pocketmine\block\inventory\CraftingTableInventory;
 use pocketmine\block\ItemFrame;
+use pocketmine\block\MonsterSpawner;
 use pocketmine\block\VanillaBlocks;
+use pocketmine\console\ConsoleCommandSender;
+use pocketmine\crafting\CraftingGrid;
+use pocketmine\data\bedrock\item\SavedItemData;
+use pocketmine\data\bedrock\item\SavedItemStackData;
+use pocketmine\data\bedrock\PotionTypeIdMap;
+use pocketmine\data\bedrock\PotionTypeIds;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -14,6 +22,7 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityTrampleFarmlandEvent;
 use pocketmine\event\entity\ItemSpawnEvent;
 use pocketmine\event\Event;
+use pocketmine\event\inventory\CraftItemEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
@@ -25,20 +34,20 @@ use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerJumpEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerToggleSneakEvent;
+use pocketmine\event\server\CommandEvent;
+use pocketmine\inventory\CreativeInventory;
 use pocketmine\inventory\PlayerOffHandInventory;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
+use pocketmine\item\Durable;
+use pocketmine\item\Item;
 use pocketmine\item\StringToItemParser;
 use pocketmine\item\VanillaItems;
 use pocketmine\lang\Translatable;
 use pocketmine\math\Vector3;
-use pocketmine\permission\DefaultPermissions;
 use pocketmine\player\chat\ChatFormatter;
-use pocketmine\player\chat\LegacyRawChatFormatter;
-use pocketmine\player\chat\StandardChatFormatter;
 use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\Server;
-use pocketmine\world\format\io\GlobalItemDataHandlers;
 use pocketmine\world\Position;
 use UnknowL\api\CombatLoggerManager;
 use UnknowL\api\ElevatorAPI;
@@ -52,9 +61,12 @@ use UnknowL\events\CooldownExpireEvent;
 use UnknowL\form\EnderChestForm;
 use UnknowL\handlers\dataTypes\PlayerCooldown;
 use UnknowL\handlers\Handler;
+use UnknowL\lib\customies\item\CustomiesItemFactory;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
+use UnknowL\player\manager\StatManager;
 use UnknowL\task\ChatGameTask;
+use UnknowL\utils\ItemUtils;
 use UnknowL\utils\PathLoader;
 
 final class PlayerListener implements Listener
@@ -69,6 +81,8 @@ final class PlayerListener implements Listener
 
 	/**@var SimpleSharedListener[] $sharedListeners*/
 	public array $sharedListeners = [];
+
+	private array $items = ["minecraft:stone_sword" => 2000, "minecraft:golden_sword" => 2500, "minecraft:iron_sword" => 3000];
 
 	public function __construct()
 	{
@@ -87,23 +101,24 @@ final class PlayerListener implements Listener
 
     public function onJoin(PlayerJoinEvent $event): void {
 
-		/**@var LinesiaPlayer $sender*/
-        $sender = $event->getPlayer();
-        $name = $sender->getName();
+		/**@var LinesiaPlayer $player*/
+        $player = $event->getPlayer();
+        $name = $player->getName();
 
         //SETTINGS
-        SettingsAPI::createPlayer($sender);
+        SettingsAPI::createPlayer($player);
 
-        if($sender->hasPlayedBefore()) {
+        if($player->hasPlayedBefore()) {
             $event->setJoinMessage("§a[+] $name");
-			$sender->getStatManager()->onConnexion();
+			$player->getStatManager()->onConnexion();
         } else {
             $event->setJoinMessage("§d$name §fnous a rejoints pour la première fois, bienvenue à lui !");
-			$sender->getStatManager()->onFirstConnexion();
+			$player->getStatManager()->onFirstConnexion();
             //$sender->teleport(new Position(300.5, 6, 305.5, $sender->getServer()->getWorldManager()->getWorldByName("tuto")));
         }
 
-        //CPS
+
+		//CPS
         //Main::$instance->clicks[$event->getPlayer()->getName()] = [];
 
         //EFFECTARMOR
@@ -128,9 +143,9 @@ final class PlayerListener implements Listener
         },  null));*/
 
         //SCORDBOARD
-        ScoreBoardAPI::sendScoreboard($sender);
+        ScoreBoardAPI::sendScoreboard($player);
         ScoreBoardAPI::updateServer();
-        self::$time[$sender->getName()] = time();
+        self::$time[$player->getName()] = time();
     }
 
     public function onQuit(PlayerQuitEvent $event): void {
@@ -179,6 +194,23 @@ final class PlayerListener implements Listener
         }
     }
 
+
+
+	public function onCraft(CraftItemEvent $event)
+	{
+		$array = [VanillaItems::BOW(), VanillaBlocks::SLIME()->asItem(), VanillaItems::SLIMEBALL(),
+			VanillaItems::BLAZE_POWDER(), VanillaItems::SUGAR(), VanillaItems::BOOK(), VanillaBlocks::BEACON()->asItem(), VanillaItems::PAPER(), VanillaItems::MAGMA_CREAM(),
+			VanillaBlocks::HOPPER()->asItem(), VanillaBlocks::TRIPWIRE_HOOK()->asItem(), VanillaItems::FERMENTED_SPIDER_EYE(), VanillaItems::SPIDER_EYE(), VanillaBlocks::EMERALD()->asItem(),
+			VanillaItems::MELON_SEEDS(), VanillaItems::PUMPKIN_SEEDS(), VanillaItems::PAINTING(), VanillaBlocks::FURNACE()->asItem(), VanillaItems::BONE_MEAL(), VanillaItems::SHEARS()
+		, VanillaItems::FLINT_AND_STEEL(), VanillaBlocks::TNT()->asItem()];
+
+		if (!array_map(fn(Item $item) => in_array($item, $event->getOutputs(), true), $array ))
+		{
+			$event->cancel();
+			$event->getPlayer()->sendToastNotification("Impossible!","§cVous ne pouvez pas crée des objets de ce type!");
+		}
+	}
+
     public function onInventoryTransaction(InventoryTransactionEvent $event) : void
     {
         $transaction = $event->getTransaction();
@@ -194,35 +226,6 @@ final class PlayerListener implements Listener
         }
     }
 
-    /*private function addEffects(Living $player, Item $sourceItem, Item $targetItem) : void {
-        $configs = Utils::getConfigFile("ArmorEffect", "yml")->getAll();
-        $ids = array_keys($configs);
-
-        if (in_array($sourceItem->getId(), $ids)) {
-            $array = Utils::getConfigFile("ArmorEffect", "yml")->getAll()[$sourceItem->getId()];
-            $effects = $array["effect"];
-
-            foreach ($effects as $effectid => $arrayeffect) {
-                $player->getEffects()->remove(EffectIdMap::getInstance()->fromId($effectid));
-            }
-        }
-
-        if (in_array($targetItem->getId(), $ids)) {
-            $array = Utils::getConfigFile("ArmorEffect", "yml")->getAll()[$targetItem->getId()];
-            $effects = $array["effect"];
-
-            foreach ($effects as $effectid => $arrayeffect) {
-                $eff = new EffectInstance(
-                    EffectIdMap::getInstance()->fromId($effectid),
-                    self::EFFECT_MAX_DURATION,
-                    (int)$arrayeffect["amplifier"],
-                    (bool)$arrayeffect["visible"]
-                );
-                $player->getEffects()->add($eff);
-            }
-        }
-    }*/
-
     public function onDamage(EntityDamageEvent $event)
     {
 
@@ -233,6 +236,32 @@ final class PlayerListener implements Listener
         }
     }
 
+	public function onCommand(CommandEvent $event)
+	{
+		$player = $event->getSender();
+		$message = $event->getCommand();
+		$playerName = $player->getName();
+
+		//COMBAT LOGGER
+		if (!in_array($message, ["mute", "ban", "gm1", "unmute", "jail"]) && isset(CombatLoggerManager::$isLogged[$player->getName()])) {
+
+			$player->sendMessage("§cVous ne pouvez pas effectuer de commande en combat !");
+			$event->cancel();
+		}
+
+		//SPY
+		Server::getInstance()->getLogger()->info("{$playerName} -> {$message}");
+
+		if (!empty(SpyCommand::$spy)) {
+			foreach (SpyCommand::$spy as $name) {
+				$player = Server::getInstance()->getPlayerExact($name);
+				if ($player instanceof Player) {
+					$player->sendMessage("§c{$player->getName()}§7 -> §c{$message}");
+				}
+			}
+		}
+	}
+
     public function onCombatLogger(EntityDamageByEntityEvent $event): void {
 
         $victim = $event->getEntity();
@@ -241,6 +270,7 @@ final class PlayerListener implements Listener
         //KB
         $event->setKnockBack(0.354);
         $event->setAttackCooldown(7); //7.5
+
 
         //COMBAT LOGGER
         Linesia::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($event, $victim, $damager) : void {
@@ -257,30 +287,33 @@ final class PlayerListener implements Listener
                     $damager->sendMessage("§cVous entrez en combat, merci de ne pas déconnecter !");
 
                 //MAXITEM
+				/**@var Item[] $maxItems*/
                 $maxItems = [
-                    "slimeball" => ["id" => 341, "meta" => 0, "max" => 64],
-                    "golden_apple" => ["id" => 322, "meta" => 0, "max" => 6],
-                    "ender_pearl" => ["id" => 368, "meta" => 0, "max" => 16]
+					64 => VanillaItems::SLIMEBALL(),
+					6 => VanillaItems::GOLDEN_APPLE(),
+					16 => VanillaItems::ENDER_PEARL(),
+
                 ];
 
+				/**@var Player $player*/
                 foreach (array($victim, $damager) as $player){
-                    foreach ($maxItems as $itemName => $itemData){
-                        $count = 0;
-                        $index= [];
-                        foreach ($player->getInventory()->getContents(true) as $slot => $item){
-                            if($item->getId() === $itemData["id"] && $item->getMeta() == $itemData["meta"]){
-                                $count+= $item->getCount();
-                                $index[] = $slot;
-                            }
-                        }
-                        if($count > $itemData["max"]){
-                            foreach ($index as $i){
-                                $player->getInventory()->setItem($i,VanillaItems::AIR());
-                            }
-                            $player->getInventory()->addItem(GlobalItemDataHandlers::getUpgrader()->upgradeItemTypeDataInt($itemData["id"], $itemData["meta"], $itemData["max"], null));
-                        }
-                    }
+					$count = [];
+                        foreach ($player->getInventory()->getContents() as $slot => $invItem) {
+							if (in_array($invItem->getVanillaName(), array_map(fn(Item $item) => $item->getVanillaName(), $maxItems)))
+							{
+								isset($count[$invItem->getVanillaName()]) ? $count[$invItem->getVanillaName()] += $invItem->getCount() : $count[$invItem->getVanillaName()] = $invItem->getCount();
+							}
+						}
+						foreach ($maxItems as $itemCount => $item)
+						{
+							if (isset($count[$item->getVanillaName()]) && $count[$item->getVanillaName()] > $itemCount)
+							{
+								$player->getInventory()->removeItem($item->setCount($count[$item->getVanillaName()]));
+								$player->getInventory()->addItem($item->setCount($itemCount));
+							}
+						}
                 }
+
                 CombatLoggerManager::updateLog($victim);
                 CombatLoggerManager::updateLog($damager);
             }
@@ -376,27 +409,6 @@ final class PlayerListener implements Listener
 
 		$this->sharedExecution($event);
 
-        //COMBAT LOGGER
-        if ($event->getMessage()[0] === "/") {
-            if(str_starts_with($message, "/") && !in_array($message, ["mute", "ban", "gm1", "unmute", "jail"]) && isset(CombatLoggerManager::$isLogged[$player->getName()])) {
-
-                $player->sendMessage("§cVous ne pouvez pas effectuer de commande en combat !");
-                $event->cancel();
-            }
-
-            //SPY
-            Server::getInstance()->getLogger()->info("{$event->getPlayer()->getName()} -> {$event->getMessage()}");
-
-            if (!empty(SpyCommand::$spy)) {
-                foreach (SpyCommand::$spy as $name) {
-                    $player = Server::getInstance()->getPlayerExact($name);
-                    if ($player instanceof Player) {
-                        $player->sendMessage("§c{$event->getPlayer()->getName()}§7 -> §c{$event->getMessage()}");
-                    }
-                }
-            }
-        }
-
        // mdr non if ($player->hasPermission(DefaultPermissions::ROOT_OPERATOR)) return;
 
         //MINIMUM LETTRE MSG
@@ -427,13 +439,13 @@ final class PlayerListener implements Listener
         }
 
         //Mot BLOCKER
-        foreach ($this->blockedWords as $word) {
+        /*foreach ($this->blockedWords as $word) {
             if (stripos($message, $word) !== false) {
                 $player->sendMessage("§cLe mot '$word' est interdit !");
                 $event->cancel();
                 break;
             }
-        }
+        }*/
 
         //COOLDOWN CHAT
         if(isset(self::$cooldown[$playerName]) && self::$cooldown[$playerName] > microtime(true)) {
@@ -480,10 +492,20 @@ final class PlayerListener implements Listener
         }
     }*/
 
+	/**@priority LOWEST*/
     public function onBlockBreak(BlockBreakEvent $event) : void{
 
         $player = $event->getPlayer();
         $block = $event->getBlock();
+		$world = $event->getPlayer()->getWorld();
+
+		if ($event->isCancelled()) return;
+
+		if (Handler::BOX()->testPosition($block->getPosition()))
+		{
+			$box = Handler::BOX()->getBoxByPosition($block->getPosition());
+			if (Server::getInstance()->isOp($player->getName()))  Handler::BOX()->removeBox($box);
+		}
 
         if ($block->getTypeId() == VanillaBlocks::NETHER_WART_BLOCK()->getTypeId()) {
             $rand = mt_rand(0, 250);
@@ -516,9 +538,7 @@ final class PlayerListener implements Listener
     public function onBlockPlace(BlockPlaceEvent $event){
 		/**@var LinesiaPlayer $player*/
         $player = $event->getPlayer();
-
-        //STATS
-        //if (!$event->isCancelled()) $player->getStatManager()->handleEvents(StatManager::TYPE_BLOCK_PLACED);
+		$blocks = $event->getTransaction()->getBlocks();
 
         //CANCEL
         $item = $event->getItem();
@@ -529,7 +549,23 @@ final class PlayerListener implements Listener
 		if ($item->getNamedTag()->getTag('box', null) !== null)
 		{
 			Handler::BOX()->getBox($item->getNamedTag()->getString('box'))
-				->place(Position::fromObject($event->getBlockAgainst()->getPosition()->add(0, 1, 0), $player->getWorld()), $player);
+				?->place(Position::fromObject($event->getBlockAgainst()->getPosition()->add(0, 1, 0), $player->getWorld()), $player);
+		}
+
+		if (!$event->isCancelled())
+		{
+			$player->getStatManager()->handleEvents(StatManager::TYPE_BLOCK_PLACED);
+		}
+
+		foreach ($blocks as $block)
+		{
+			if ($block instanceof MonsterSpawner)
+			{
+				if ($block->getPosition()->getWorld()->getFolderName() === "linesia")
+				{
+					$event->cancel();
+				}
+			}
 		}
     }
 

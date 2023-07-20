@@ -22,26 +22,15 @@ class AnvilUI {
             $result = $data;
             $item = $sender->getInventory()->getItemInHand();
             if($result === null){
-                return true;
+                return;
             }
             switch($result){
                 case 0:
-                    if ($item instanceof Durable or $item instanceof Armor or $item instanceof Tool){
-                        $id = $item->getTypeId();
-                        $meta = $item->getStateId();
-                        $item2 = StringToItemParser::getInstance()->get($id);
+                    if ($item instanceof Durable){
                         if ($sender->getEconomyManager()->getMoney() >= 100) {
-                            if ($item->hasCustomName()) {
-                                $item2->setCustomName($item->getCustomName());
-                            }
-                            if ($item->hasEnchantments()) {
-                                foreach ($item->getEnchantments() as $enchant) {
-                                    $item2->addEnchantment($enchant);
-                                }
-                            }
-                            $sender->getEconomyManager()->reduce(100);
-                            $sender->getInventory()->removeItem($item);
-                            $sender->getInventory()->addItem($item2);
+							$item->setDamage(0);
+                            $sender->getInventory()->setItemInHand($item);
+							$sender->getEconomyManager()->reduce(100);
                         }else{
                             $sender->sendMessage("§cIl vous faut 100 coins pour réparer un item !");
                         }

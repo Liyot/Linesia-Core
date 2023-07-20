@@ -34,32 +34,8 @@ class RepairCommand extends BaseCommand
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
         if ($sender instanceof Player) {
-            if (!isset($args[0])) {
-                if (RepairHandler::getCooldown()->exists($sender->getXuid() . "-repair")) {
-                    if (time() > RepairHandler::getCooldown()->get($sender->getXuid() . "-repair")) {
-                        $item = $sender->getInventory()->getItemInHand();
-                        if ($item instanceof Durable) {
-                            if ($item->getDamage() >= 5) {
-                                $item->setDamage(0);
-                                $sender->getInventory()->setItemInHand($item);
-                                $config = RepairHandler::getCooldown();
-                                $config->set($sender->getXuid() . "-repair", time() + 600);
-                                $config->save();
-                                return;
-                            } else {
-                                $sender->sendMessage("§cL'item dans votre main a déjà sa durabilité au maximum.");
-                                return;
-                            }
-                        } else {
-                            $sender->sendMessage("§cL'item dans votre main ne possède pas de durabilité.");
-                            return;
-                        }
-                    } else {
-                        $time = RepairHandler::convert(RepairHandler::getCooldown()->get($sender->getXuid() . "-repair") - time());
-                        $sender->sendMessage("§cVous pourrez réutiliser cette commande dans $time");
-                        return;
-                    }
-                } else {
+            if (RepairHandler::getCooldown()->exists($sender->getXuid() . "-repair")) {
+                if (time() > RepairHandler::getCooldown()->get($sender->getXuid() . "-repair")) {
                     $item = $sender->getInventory()->getItemInHand();
                     if ($item instanceof Durable) {
                         if ($item->getDamage() >= 5) {
@@ -77,63 +53,28 @@ class RepairCommand extends BaseCommand
                         $sender->sendMessage("§cL'item dans votre main ne possède pas de durabilité.");
                         return;
                     }
+                } else {
+                    $time = RepairHandler::convert(RepairHandler::getCooldown()->get($sender->getXuid() . "-repair") - time());
+                    $sender->sendMessage("§cVous pourrez réutiliser cette commande dans $time");
+                    return;
                 }
             } else {
-                if ($sender->hasPermission("repair.all.use")) {
-                    if (strtolower($args[0]) === "all") {
-                        if (RepairHandler::getCooldown()->exists($sender->getXuid() . "-repair-all")) {
-                            if (time() >= RepairHandler::getCooldown()->get($sender->getXuid() . "-repair-all")) {
-                                $count = 0;
-                                foreach ($sender->getInventory()->getContents() as $slot => $item) {
-                                    if ($item instanceof Durable) {
-                                        $item->setDamage(0);
-                                        $sender->getInventory()->setItem($slot, $item);
-                                        $count++;
-                                    }
-                                }
-                                foreach ($sender->getArmorInventory()->getContents() as $slot => $item) {
-                                    if ($item instanceof Durable) {
-                                        $item->setDamage(0);
-                                        $sender->getArmorInventory()->setItem($slot, $item);
-                                        $count++;
-                                    }
-                                }
-                                $config = RepairHandler::getCooldown();
-                                $config->set($sender->getXuid() . "-repair-all", time() + 600);
-                                $config->save();
-                                $sender->sendMessage("§aTous les items viennent d'être réparé.");
-                                return;
-                            } else {
-                                $time = RepairHandler::convert(RepairHandler::getCooldown()->get($sender->getXuid() . "-repair-all") - time());
-                                $sender->sendMessage("§cVous pourrez réutiliser cette commande dans $time");
-                                return;
-                            }
-                        } else {
-                            $count = 0;
-                            foreach ($sender->getInventory()->getContents() as $slot => $item) {
-                                if ($item instanceof Durable) {
-                                    $item->setDamage(0);
-                                    $sender->getInventory()->setItem($slot, $item);
-                                    $count++;
-                                }
-                            }
-                            foreach ($sender->getArmorInventory()->getContents() as $slot => $item) {
-                                if ($item instanceof Durable) {
-                                    $item->setDamage(0);
-                                    $sender->getArmorInventory()->setItem($slot, $item);
-                                    $count++;
-                                }
-                            }
-                            $config = RepairHandler::getCooldown();
-                            $config->set($sender->getXuid() . "-repair-all", time() + 600);
-                            $config->save();
-                            $sender->sendMessage("§aTous les items viennent d'être réparé.");
-                        }
+                $item = $sender->getInventory()->getItemInHand();
+                if ($item instanceof Durable) {
+                    if ($item->getDamage() >= 5) {
+                        $item->setDamage(0);
+                        $sender->getInventory()->setItemInHand($item);
+                        $config = RepairHandler::getCooldown();
+                        $config->set($sender->getXuid() . "-repair", time() + 600);
+                        $config->save();
+                        return;
                     } else {
-                        $sender->sendMessage("§cVeuillez faire /repair all.");
+                        $sender->sendMessage("§cL'item dans votre main a déjà sa durabilité au maximum.");
+                        return;
                     }
                 } else {
-                    $sender->sendMessage("§cVous n'avez pas la permission d'utiliser cette commande.");
+                    $sender->sendMessage("§cL'item dans votre main ne possède pas de durabilité.");
+                    return;
                 }
             }
         }

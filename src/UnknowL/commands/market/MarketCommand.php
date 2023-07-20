@@ -50,16 +50,8 @@ class MarketCommand extends BaseCommand
 
 	private function setCategory(LinesiaPlayer $player): void
 	{
-		$form = MenuForm::withOptions("Catégories", "",["Générale", "Blocks", "Armures", "Epées", "Spécial", "Autres"], function (LinesiaPlayer $player, Button $selected) {
-			$this->category = match ($selected->text)
-			{
-				"Générale" => ShopHandler::CATEGORY_ALL,
-				"Blocks" => ShopHandler::CATEGORY_BLOCKS,
-				"Armures" => ShopHandler::CATEGORY_ARMORS,
-				"Epées" => ShopHandler::CATEGORY_SWORDS,
-				"Spécial" => ShopHandler::CATEGORY_SPECIAL,
-				"Autres" => ShopHandler::CATEGORY_OTHER
-			};
+		$form = MenuForm::withOptions("Catégories", "",array_keys(Handler::MARKET()->getConfig()->getNested('market.categories')), function (LinesiaPlayer $player, Button $selected) {
+			$this->category = $selected->text ?? "";
 			$player->sendForm(Handler::MARKET()->getForm($this->category));
 		});
 		$player->sendForm($form);

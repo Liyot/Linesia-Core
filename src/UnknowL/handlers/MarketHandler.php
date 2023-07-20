@@ -2,23 +2,13 @@
 
 namespace UnknowL\handlers;
 
-use pocketmine\data\bedrock\EnchantmentIdMap;
-use pocketmine\data\bedrock\item\upgrade\ItemDataUpgrader;
-use pocketmine\data\bedrock\item\upgrade\ItemIdMetaUpgrader;
-use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
-use pocketmine\item\enchantment\EnchantmentInstance;
-use pocketmine\item\Item;
-use pocketmine\item\ItemTypeIds;
-use pocketmine\item\LegacyStringToItemParser;
+use pocketmine\block\Block;
 use pocketmine\item\StringToItemParser;
-use pocketmine\item\VanillaItems;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\ItemStackInfo;
 use pocketmine\utils\Config;
-use pocketmine\world\format\io\GlobalItemDataHandlers;
 use UnknowL\handlers\dataTypes\MarketData;
 use UnknowL\lib\forms\CustomForm;
 use UnknowL\lib\forms\CustomFormResponse;
+use UnknowL\lib\forms\element\Dropdown;
 use UnknowL\lib\forms\element\Label;
 use UnknowL\lib\forms\element\Slider;
 use UnknowL\lib\forms\menu\Button;
@@ -35,32 +25,32 @@ class MarketHandler extends Handler
 	/**
 	 * @phpstan-param $categories list<string<list<MarketData>>>
 	 */
-	private array $categories = ["all" => [], "blocks" => [], "armors" => [], "swords" => [], "special" => [], "other" => []];
+	private array $categories = [];
 
 	public function __construct()
 	{
-		parent::__construct();
 		$this->db = new Config(Linesia::getInstance()->getDataFolder()."data/market/market.yml", Config::YAML);
-		$this->loadData();
+		parent::__construct();
 	}
 
 	protected function loadData(): void
 	{
-
-		foreach ($this->db->getNested("market.categories") as $category => $name)
+		foreach ($this->db->getNested("market.categories") as $category => $db)
 		{
-			$name = array_keys($name)[0];
-			$value = $this->db->getNested("market.categories")[$category][$name];
-			$data = explode(":", $value["id"]);
-			$item = StringToItemParser::getInstance()->parse(LegacyItemIdToStringIdMap::getInstance()->legacyToString($data[0]));
-			$enchant = new EnchantmentInstance(EnchantmentIdMap::getInstance()->fromId(($str = $value["enchant"])[0]), (int)$str[1]);
-			$this->categories[$category][$name] = new MarketData($item, $enchant, $value["price"], $value["description"],
-				$value["image"], $name, $value["quantities"]);
+			foreach ($db as $marketName => $value)
+			{
+				$id = $value["id"];
+				$item = StringToItemParser::getInstance()->parse($id);
+				$this->categories[$category][$marketName] = new MarketData($item, $value["sellPrice"], $value["description"],
+					$value["image"], $marketName, $value["quantities"], $value["buyPrice"]);
+			}
 		}
 	}
 
 	protected function saveData(): void
-	{}
+	{
+
+	}
 
 	final public function getSellable(string $category, string $sellable)
 	{
@@ -69,32 +59,39 @@ class MarketHandler extends Handler
 
 	final public function getForm(string $category): MenuForm
 	{
-        return MenuForm::withOptions("Acheter ou vendre", "", ["Acheter", "Vendre"], function (LinesiaPlayer $player, Button $selected) use ($category) {
-            $buy = $selected->text === "Acheter";
+		if (empty($category)) MenuForm::withOptions("");
 
-            $buttons = array_values(array_map(function(MarketData $data) {
-            return new Button($data->getName(), Image::path($data->getImage()));
-            }, $this->categories[$category]));
+		$buttons = [];
+		foreach ($this->categories[$category] as $name => $data)
+		{
+			$buttons[] = new Button($data->getName(), Image::path($data->getImage()));
+		}
 
-            $form = new MenuForm(ucfirst($category), "", $buttons,
-                function(LinesiaPlayer $player, Button $selected) use ($buy, $category)
-                {
-                    /**@var MarketData $data **/
-                    $data = array_values(array_filter($this->categories[$category], fn(MarketData $value) => $value->getName() === $selected->text))[0];
-                    $form = new CustomForm($data->getName(),
-                        [
-                            new Label(sprintf("Item: %s \n Description: %s.\n Prix: %d$ !",$data->getName(), $data->getDescription(), $data->getPrice())),
-                            new Slider("Quantités", 1, $data->getQuantities()),
-                        ],
-                        function (LinesiaPlayer $player, CustomFormResponse $response) use ($buy, $data)
-                        {
-                            $quantities = $response->getSlider()->getValue();
-                          $buy ? $data->buy($player, $quantities) : $data->sell($player, $quantities);
-                        });
-                    $player->sendForm($form);
-                });
-            $player->sendForm($form);
-        });
+		return new MenuForm(ucfirst($category), "", $buttons,
+			function(LinesiaPlayer $player, Button $selected) use  ($category)
+			{
+				/**@var MarketData $data **/
+				$data = array_values(array_filter($this->categories[$category], fn(MarketData $value) => $value->getName() === $selected->text))[0];
+				$form = new CustomForm($data->getName(),
+					[
+						new Label(sprintf("§dItem: §5 %s \n §dDescription: §5 %s.\n §dPrix de vente: §5 %d$ \n §dPrix d'achat: §5 %d",$data->getName(), $data->getDescription(), $data->getSellPrice(), $data->getBuyPrice())),
+						new Dropdown('Options:', ["Acheter", "Vendre"]),
+						new Slider("Quantités", 1, $data->getQuantities()),
+					],
+					function (LinesiaPlayer $player, CustomFormResponse $response) use  ($data)
+					{
+						$buy = $response->getDropdown()->getSelectedOption() === "Acheter";
+						$slide = $response->getSlider();
+						$quantities = round($slide->getValue());
+						$buy ? $data->buy($player, $quantities) : $data->sell($player, $quantities);
+					});
+				$player->sendForm($form);
+			});
+	}
+
+	public function getConfig(): Config
+	{
+		return $this->db;
 	}
 
 	public function getName(): string

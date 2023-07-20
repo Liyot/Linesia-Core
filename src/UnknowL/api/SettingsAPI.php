@@ -2,11 +2,13 @@
 
 namespace UnknowL\api;
 
+use pocketmine\command\CommandSender;
 use pocketmine\utils\Config;
 use pocketmine\Server;
 use UnknowL\commands\settings\SettingsCommand;
 use UnknowL\handlers\Handler;
 use UnknowL\Linesia;
+use UnknowL\player\LinesiaPlayer;
 
 class SettingsAPI
 {
@@ -15,8 +17,6 @@ class SettingsAPI
     public function __construct()
     {
         self::$data = new Config(Linesia::getInstance()->getDataFolder() . "Settings.json", Config::JSON);
-
-        Server::getInstance()->getCommandMap()->register("", new SettingsCommand());
     }
 
     public static function createPlayer($player): void
@@ -49,7 +49,7 @@ class SettingsAPI
 
 	public static function getPlayerName($player): string
 	{
-		if ($player instanceof Player) return $player->getDisplayName(); elseif ($player instanceof CommandSender) return "Serveur";
+		if ($player instanceof LinesiaPlayer) return $player->getDisplayName(); elseif ($player instanceof CommandSender) return "Serveur";
 		else return $player;
 	}
 }

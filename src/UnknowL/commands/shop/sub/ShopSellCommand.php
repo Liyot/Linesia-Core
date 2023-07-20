@@ -36,11 +36,24 @@ class ShopSellCommand extends BaseSubCommand
 		$item = $sender->getInventory()->getItemInHand();
 		if ($item->getTypeId() !== VanillaItems::AIR()->getTypeId())
 		{
-			Handler::SHOP()->addSellable(new ShopData($sender->getName(),$args["price"], Handler::SHOP(), $item, time() + 3600 * 24 * 2));
-			$sender->getInventory()->removeItem($item);
-			$sender->sendMessage("[Linesia] §aVotre item a bien été ajouté à la vente");
+			if (Handler::SHOP()->getItemCount($sender) < 10)
+			{
+				if (!($args["price"] <= 0))
+				{
+					if (Handler::SHOP()->applyTaxes($sender, $args["price"]))
+					{
+						Handler::SHOP()->addSellable(new ShopData($sender->getName(),$args["price"], Handler::SHOP(), $item, time() + 3600 * 24 * 2));
+						$sender->getEconomyManager()->reduce($sender->getRank()->getMarketTaxes() * $args["price"]);
+						$sender->getInventory()->setItemInHand(VanillaItems::AIR());
+						$sender->sendMessage("§aVotre item a bien été ajouté à la vente !");
+						return;
+					}
+				}
+				$sender->sendMessage("§cVeuillez saisir un prix supérieur à 0 !");
+			}
+			$sender->sendMessage("§cVous avez déjà trop d'item en vente !");
 			return;
 		}
-		$sender->sendMessage("[Linesia] §cVous n'avez pas d'item en main");
+		$sender->sendMessage("§cVous n'avez pas d'item en main !");
 	}
 }
