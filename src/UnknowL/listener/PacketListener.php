@@ -13,6 +13,8 @@ use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\network\mcpe\cache\CraftingDataCache;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\AnimateEntityPacket;
+use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\CraftingEventPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -82,6 +84,10 @@ final class PacketListener implements Listener
 					$event->cancel();
 				}
 			}
+		}
+		if ($packet instanceof AnimateEntityPacket)
+		{
+			var_dump($packet);
 		}
 	}
 

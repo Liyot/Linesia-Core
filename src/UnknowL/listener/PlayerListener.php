@@ -15,10 +15,12 @@ use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\data\bedrock\item\SavedItemStackData;
 use pocketmine\data\bedrock\PotionTypeIdMap;
 use pocketmine\data\bedrock\PotionTypeIds;
+use pocketmine\entity\Zombie;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityItemPickupEvent;
 use pocketmine\event\entity\EntityTrampleFarmlandEvent;
 use pocketmine\event\entity\ItemSpawnEvent;
 use pocketmine\event\Event;
@@ -228,9 +230,13 @@ final class PlayerListener implements Listener
 
     public function onDamage(EntityDamageEvent $event)
     {
-
         //NOFALL
         $cause = $event->getCause();
+		if ($cause === EntityDamageEvent::CAUSE_DROWNING && $event->getEntity() instanceof Zombie)
+		{
+			$event->cancel();
+		}
+
         if ($cause === EntityDamageEvent::CAUSE_FALL) {
             $event->cancel();
         }

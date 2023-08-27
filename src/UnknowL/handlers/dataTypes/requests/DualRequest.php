@@ -9,6 +9,9 @@ use UnknowL\utils\PositionUtils;
 
 final class DualRequest extends Request
 {
+
+	const TEAM_BLUE = 1;
+	const TEAM_RED = 2;
 	/**
 	 * @var PlayerInventory[]
 	 */
@@ -26,7 +29,7 @@ final class DualRequest extends Request
 
     public function getChatFormat(): string
     {
-		return strtoupper($this->getName());
+		return ucfirst($this->getName());
 	}
 
 	public function send(): void
@@ -40,8 +43,8 @@ final class DualRequest extends Request
 
 	final public function accept(): void
 	{
-		$this->getFrom()->teleport(PositionUtils::getAvailableDualRoom());
-		$this->getTo()->teleport(PositionUtils::getAvailableDualRoom()->add(5, 0, 0));
+		$this->getFrom()->teleport(PositionUtils::getAvailableDualRoom(PositionUtils::DUAL_1V1));
+		$this->getTo()->teleport(PositionUtils::getAvailableDualRoom(PositionUtils::DUAL_1V1)->add(5, 0, 0));
 
 		$this->getFrom()->setInDual();
 		$this->getTo()->setInDual();

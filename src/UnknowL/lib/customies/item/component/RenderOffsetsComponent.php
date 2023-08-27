@@ -24,10 +24,10 @@ final class RenderOffsetsComponent implements ItemComponent {
 		$vertical = ($this->handEquipped ? 0.125 : 0.1) / ($this->textureHeight / 16);
 		$perspectives = [
 			"first_person" => [
-				"scale" => [$horizontal, $vertical, $horizontal],
+				"scale" => [$horizontal, $vertical * 0.8, $horizontal * 0.8],
 			],
 			"third_person" => [
-				"scale" => [$horizontal, $vertical, $horizontal]
+				"scale" => [$horizontal * 2.5, $vertical, $horizontal * 2.5]
 			]
 		];
 		return [

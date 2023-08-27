@@ -81,7 +81,7 @@ final class PlayerProperties
 		return $this->properties;
 	}
 
-	private function arraytoTag(array $array, ?CompoundTag $tag = null): CompoundTag {
+	private function arraytoTag(array $array, ?CompoundTag $nbt = null): CompoundTag {
 		$nbt ??= new CompoundTag();
 		foreach($array as $property => $value){
 			match (gettype($value)){

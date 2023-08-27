@@ -25,8 +25,4 @@ class InventoryAPI
         $inventory->setViewOnly($isViewOnly);
         return $inventory;
     }
-
-    public function getDelaySend(): int {
-        return 10;
-    }
 }

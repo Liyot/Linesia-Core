@@ -14,6 +14,9 @@ use UnknowL\lib\commando\args\IntegerArgument;
 use UnknowL\lib\commando\args\TargetArgument;
 use UnknowL\lib\commando\BaseCommand;
 use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
+use UnknowL\lib\forms\CustomForm;
+use UnknowL\lib\forms\CustomFormResponse;
+use UnknowL\lib\forms\element\Dropdown;
 use UnknowL\lib\inventoryapi\inventories\BaseInventoryCustom;
 use UnknowL\lib\inventoryapi\InventoryAPI;
 use UnknowL\Linesia;
@@ -73,6 +76,17 @@ class DualCommand extends BaseCommand
 			return;
 		}
 		$sender->sendMessage("Vérifiez les informations que vous avez saisi");
+	}
+
+	private function getForm(): CustomForm
+	{
+		$form = new CustomForm("Duels", [new Dropdown("type de duel:", ["1vs1", "2vs2"])],
+			function(LinesiaPlayer $player, CustomFormResponse $response)
+			{
+				$dropdown = $response->getDropdown();
+
+			});
+		return $form;
 	}
 
 	/**

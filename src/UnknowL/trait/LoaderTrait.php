@@ -64,17 +64,29 @@ use UnknowL\commands\warps\SpawnCommand;
 use UnknowL\commands\warps\TutoCommand;
 use UnknowL\entities\FloatingText;
 use UnknowL\entities\MinageNPC;
+use UnknowL\games\GameHandler;
 use UnknowL\handlers\Handler;
 use UnknowL\items\ArcPunch;
+use UnknowL\items\armor\amethyst\AmethystBoots;
+use UnknowL\items\armor\amethyst\AmethystChestplate;
 use UnknowL\items\armor\amethyst\AmethystHelmet;
+use UnknowL\items\armor\amethyst\AmethystLeggings;
+use UnknowL\items\armor\onix\OnixBoots;
+use UnknowL\items\armor\onix\OnixChestplate;
+use UnknowL\items\armor\onix\OnixHelmet;
+use UnknowL\items\armor\onix\OnixLeggings;
+use UnknowL\items\armor\rubis\RubisBoots;
+use UnknowL\items\armor\rubis\RubisChestplate;
+use UnknowL\items\armor\rubis\RubisHelmet;
+use UnknowL\items\armor\rubis\RubisLeggings;
 use UnknowL\items\Gapple;
 use UnknowL\items\Soup;
+use UnknowL\items\sword\AmethystSword;
 use UnknowL\lib\commando\exception\HookAlreadyRegistered;
 use UnknowL\lib\commando\PacketHooker;
 use UnknowL\lib\customies\block\CustomiesBlockFactory;
 use UnknowL\lib\customies\Customies;
 use UnknowL\lib\customies\CustomiesListener;
-use UnknowL\lib\customies\item\component\DamageComponents;
 use UnknowL\lib\customies\item\component\DurabilityComponent;
 use UnknowL\lib\customies\item\CreativeInventoryInfo;
 use UnknowL\lib\customies\item\CustomiesItemFactory;
@@ -111,7 +123,9 @@ trait LoaderTrait
 		$this->loadCommands();
 		$this->loadCrafts();
 		$this->loadListeners();
-		$this->loadBlocksAndItems();
+		$this->loadArmors();
+		$this->loadItems();
+		$this->loadSwords();
 		$this->loadTask();
 		$this->loadFolder();
 		$this->loadApi();
@@ -279,11 +293,41 @@ trait LoaderTrait
 		$entity->spawnToAll();*/
 	}
 
-	private function loadBlocksAndItems(): void
+	private function loadArmors(): void
 	{
-		CustomiesItemFactory::getInstance()->registerItem(AmethystHelmet::class, "customies:amethyst_helmet","Casque en Améthyste");
+		CustomiesItemFactory::getInstance()->registerItem(AmethystHelmet::class, "minecraft:amethyste_helmet", "Casque en Amethyste");
+		CustomiesItemFactory::getInstance()->registerItem(AmethystChestplate::class, "minecraft:amethyste_chestplate", "Plastron en Amethyste");
+		CustomiesItemFactory::getInstance()->registerItem(AmethystLeggings::class, "minecraft:amethyste_leggings", "Jambières en Amethyste");
+		CustomiesItemFactory::getInstance()->registerItem(AmethystBoots::class, "minecraft:amethyste_boots", "Bottes en Amethyste");
+
+		CustomiesItemFactory::getInstance()->registerItem(RubisHelmet::class, "minecraft:rubis_helmet", "Casque en Rubis");
+		CustomiesItemFactory::getInstance()->registerItem(RubisChestplate::class, "minecraft:rubis_chestplate", "Plastron en Rubis");
+		CustomiesItemFactory::getInstance()->registerItem(RubisLeggings::class, "minecraft:rubis_leggings", "Jambières en Rubis");
+		CustomiesItemFactory::getInstance()->registerItem(RubisBoots::class, "minecraft:rubis_boots", "Bottes en Rubis");
+
+		CustomiesItemFactory::getInstance()->registerItem(OnixHelmet::class, "minecraft:onix_helmet", "Casque en Onix");
+		CustomiesItemFactory::getInstance()->registerItem(OnixChestplate::class, "minecraft:onix_chestplate", "Plastron en Onix");
+		CustomiesItemFactory::getInstance()->registerItem(OnixLeggings::class, "minecraft:onix_leggings", "Jambières en Onix");
+		CustomiesItemFactory::getInstance()->registerItem(OnixBoots::class, "minecraft:onix_boots", "Bottes en Onix");
 	}
 
+	private function loadItems(): void
+	{
+		/*CustomiesItemFactory::getInstance()->registerItem(AmethysteIngot::class, "minecraft:amethyste_ingot", "Amethyste");
+		CustomiesItemFactory::getInstance()->registerItem(RubisFragement::class, "minecraft:rubis_fragement", "Fragement de Rubis");
+		CustomiesItemFactory::getInstance()->registerItem(RubisIngot::class, "minecraft:rubis_ingot", "Lingot de Rubis");
+		CustomiesItemFactory::getInstance()->registerItem(OnixBrisure::class, "minecraft:onix_brisure", "Brisure d'Onix");
+		CustomiesItemFactory::getInstance()->registerItem(OnixFragement::class, "minecraft:onix_fragement", "Fragement d'Onix");
+		CustomiesItemFactory::getInstance()->registerItem(OnixIngot::class, "minecraft:onix_ingot", "Lingot d'Onix");*/
+	}
+
+	private function loadSwords(): void
+	{
+		CustomiesItemFactory::getInstance()->registerItem(AmethystSword::class, "minecraft:amethyste_sword", "Epée en Amethyste");
+		/*CustomiesItemFactory::getInstance()->registerItem(RubisSword::class, "minecraft:rubis_sword", "Epée en Rubis");
+		CustomiesItemFactory::getInstance()->registerItem(OnixSword::class, "minecraft:onix_sword", "Epée en Onix");
+		CustomiesItemFactory::getInstance()->registerItem(GodSword::class, "minecraft:god_sword", "Epée en God");*/
+	}
 	private function loadFolder(): void
 	{
 		@mkdir(Linesia::getInstance()->getDataFolder().DIRECTORY_SEPARATOR."data");

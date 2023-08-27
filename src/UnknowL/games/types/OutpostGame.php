@@ -69,7 +69,6 @@ final class OutpostGame extends BaseGame
 		{
 			case $this->phase === self::PHASE_CAPTURING && $this->capturePoints >= 120:
 				$this->phase = self::PHASE_CAPTURED;
-			//	$this->ca
 		}
 	}
 

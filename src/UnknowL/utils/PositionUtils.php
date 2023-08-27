@@ -7,12 +7,16 @@ use pocketmine\world\Position;
 
 abstract class PositionUtils
 {
-	private static array $dualRoom = [150, 60, 25, "world"];
+	private static array $dualRoom = [0 => [150, 60, 25, "world"], 1 => [150, 60, 25, "world"]];
+
+	const DUAL_1V1 = 0;
+	const DUAL_2V2 = 1;
 
 	//TODO: A refaire qd on aura les positions des duels
-	public static function getAvailableDualRoom(): Position
+	public static function getAvailableDualRoom(int $type): Position
 	{
-		return new Position(self::$dualRoom[0], self::$dualRoom[1], self::$dualRoom[2], self::$dualRoom[3]);
+		$room = self::$dualRoom[$type];
+		return new Position($room[0], $room[1], $room[2], $room[3]);
 	}
 
 	public static function getSpawnPosition(): Position

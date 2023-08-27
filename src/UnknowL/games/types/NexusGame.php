@@ -17,4 +17,14 @@ class NexusGame extends BaseGame
     {
 		return "Nexus";
 	}
+
+	public function leave(LinesiaPlayer $player): void
+	{
+
+	}
+
+	public function onTick(): void
+	{
+		// TODO: Implement onTick() method.
+	}
 }

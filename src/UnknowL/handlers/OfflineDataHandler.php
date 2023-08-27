@@ -19,8 +19,6 @@ class OfflineDataHandler extends Handler
 
 	protected function loadData(): void
     {
-		$folder = Server::getInstance()->getDataPath() . "/players";
-
 		$this->loadTopStats();
 	}
 
