@@ -51,6 +51,7 @@ use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\Server;
 use pocketmine\world\Position;
+use pocketmine\world\WorldManager;
 use UnknowL\api\CombatLoggerManager;
 use UnknowL\api\ElevatorAPI;
 use UnknowL\api\KillDeathManager;
@@ -63,6 +64,7 @@ use UnknowL\events\CooldownExpireEvent;
 use UnknowL\form\EnderChestForm;
 use UnknowL\handlers\dataTypes\PlayerCooldown;
 use UnknowL\handlers\Handler;
+use UnknowL\handlers\WorldHandler;
 use UnknowL\lib\customies\item\CustomiesItemFactory;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
@@ -195,23 +197,6 @@ final class PlayerListener implements Listener
             }
         }
     }
-
-
-
-	public function onCraft(CraftItemEvent $event)
-	{
-		$array = [VanillaItems::BOW(), VanillaBlocks::SLIME()->asItem(), VanillaItems::SLIMEBALL(),
-			VanillaItems::BLAZE_POWDER(), VanillaItems::SUGAR(), VanillaItems::BOOK(), VanillaBlocks::BEACON()->asItem(), VanillaItems::PAPER(), VanillaItems::MAGMA_CREAM(),
-			VanillaBlocks::HOPPER()->asItem(), VanillaBlocks::TRIPWIRE_HOOK()->asItem(), VanillaItems::FERMENTED_SPIDER_EYE(), VanillaItems::SPIDER_EYE(), VanillaBlocks::EMERALD()->asItem(),
-			VanillaItems::MELON_SEEDS(), VanillaItems::PUMPKIN_SEEDS(), VanillaItems::PAINTING(), VanillaBlocks::FURNACE()->asItem(), VanillaItems::BONE_MEAL(), VanillaItems::SHEARS()
-		, VanillaItems::FLINT_AND_STEEL(), VanillaBlocks::TNT()->asItem()];
-
-		if (!array_map(fn(Item $item) => in_array($item, $event->getOutputs(), true), $array ))
-		{
-			$event->cancel();
-			$event->getPlayer()->sendToastNotification("Impossible!","§cVous ne pouvez pas crée des objets de ce type!");
-		}
-	}
 
     public function onInventoryTransaction(InventoryTransactionEvent $event) : void
     {
@@ -545,6 +530,14 @@ final class PlayerListener implements Listener
 		/**@var LinesiaPlayer $player*/
         $player = $event->getPlayer();
 		$blocks = $event->getTransaction()->getBlocks();
+
+        foreach ($blocks as $block)
+        {
+            if ($block instanceof MonsterSpawner)
+            {
+                Handler::WORLD()->addSpawner($block->getPosition()->getWorld());
+            }
+        }
 
         //CANCEL
         $item = $event->getItem();

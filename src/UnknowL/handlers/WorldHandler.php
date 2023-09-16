@@ -30,13 +30,20 @@ class WorldHandler extends Handler
 	{
 		if ($this->canPlace($world))
 		{
-			isset($this->data[$world->getFolderName()]) ? $this->data[$world->getFolderName()] = 1 : $this->data[$world->getFolderName()] += 1;
+			isset($this->data[$world->getFolderName()]) ? $this->data[$world->getFolderName()]++ : $this->data[$world->getFolderName()] = 1;
 		}
 	}
 
 	public function canPlace(World $world): bool
 	{
-		return isset($this->data[$world->getFolderName()]) && $this->data[$world->getFolderName()] < 2;
+        if (isset($this->data[$world->getFolderName()]))
+        {
+            if ($this->data[$world->getFolderName()] > 2)
+            {
+                return false;
+            }
+        }
+        return true;
 	}
 
 
