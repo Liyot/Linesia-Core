@@ -41,6 +41,21 @@ trait InventoryContainerTrait
 		return array_filter($inventory->getContents(), fn(Item $item) => $item->getTypeId() === $search->getTypeId());
 	}
 
+    /**
+     * @param int $start
+     * @param int $stop
+     * @return Item[]|ItemBlock[]
+     */
+    final public function getInterval(int $start, int $stop) : array
+    {
+        $items = [];
+        for ($i = $start; $start <= $stop ; $i++)
+        {
+            $items[] = $this->getObject($i);
+        }
+        return $items;
+    }
+
 	public function getObject(int $pos): Item|ItemBlock
 	{
 		return $this->content[$pos] ?? throw new InvalidArgumentException("Unvalid array pos $pos");
