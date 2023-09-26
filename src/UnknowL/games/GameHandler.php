@@ -4,11 +4,13 @@ namespace UnknowL\games;
 
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\scheduler\Task;
+use UnknowL\commands\event\args\GameArgument;
 use UnknowL\games\types\KothGame;
+use UnknowL\games\types\OutpostGame;
 use UnknowL\handlers\Handler;
 use UnknowL\Linesia;
 
-class GameHandler extends Handler
+final class GameHandler extends Handler
 {
 
 	/**@var BaseGame[] $games*/
@@ -47,7 +49,15 @@ class GameHandler extends Handler
 
 	final public function initGames(): void
 	{
-		$this->games[GamesEnum::KOTH] = (new KothGame(new AxisAlignedBB(299, 145, 395, 306, 148, 402)))->start();
+		$this->addGame(new KothGame(new AxisAlignedBB(299, 145, 395, 306, 148, 402)), GamesEnum::KOTH);
+		//$this->addGame(new OutpostGame());
+	}
+
+	final public function addGame(BaseGame $game, string $gamesEnum): void
+	{
+		$this->games[$gamesEnum] = $game;
+		GameArgument::$VALUES[$gamesEnum] = $game;
+		$game->start();
 	}
 	final public function getGame(string $game)
 	{

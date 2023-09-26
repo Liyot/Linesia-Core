@@ -21,6 +21,7 @@ final class KothGame extends BaseGame
 
 	public function __construct(private AxisAlignedBB $zone)
 	{
+
 	}
 
     public function join(LinesiaPlayer $player): void
@@ -77,7 +78,6 @@ final class KothGame extends BaseGame
 
 	protected function win(LinesiaPlayer $player) : void
 	{
-		EffectManager::
 		parent::win($player);
 		$player->getEconomyManager()->add(500);
 		Server::getInstance()->broadcastMessage("Le prochain koth sera dans 2h!");

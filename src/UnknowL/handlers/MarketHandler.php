@@ -64,7 +64,7 @@ class MarketHandler extends Handler
 
 	final public function getForm(string $category): MenuForm
 	{
-		if (empty($category)) MenuForm::withOptions("");
+		//if (empty($category)) MenuForm::withOptions("");
 
 		$buttons = [];
 		foreach ($this->categories[$category] as $name => $data)
@@ -80,12 +80,18 @@ class MarketHandler extends Handler
 				$form = new CustomForm($data->getName(),
 					[
 						new Label(sprintf("§dItem: §5 %s \n §dDescription: §5 %s.\n §dPrix de vente: §5 %d$ \n §dPrix d'achat: §5 %d",$data->getName(), $data->getDescription(), $data->getSellPrice(), $data->getBuyPrice())),
-						new Dropdown('Options:', ["Acheter", "Vendre"]),
+						new Dropdown('Options:', ["Acheter", "Vendre", "Tout vendre"]),
 						new Slider("Quantités", 1, $data->getQuantities()),
 					],
 					function (LinesiaPlayer $player, CustomFormResponse $response) use  ($data)
 					{
-						$buy = $response->getDropdown()->getSelectedOption() === "Acheter";
+						$dropdown = $response->getDropdown()->getSelectedOption();
+						if ($dropdown === "Tout vendre")
+						{
+							$data->sellAll($player);
+							return;
+						}
+						$buy = $dropdown === "Acheter";
 						$slide = $response->getSlider();
 						$quantities = round($slide->getValue());
 						$buy ? $data->buy($player, $quantities) : $data->sell($player, $quantities);

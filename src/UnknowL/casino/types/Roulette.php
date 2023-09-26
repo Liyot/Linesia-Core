@@ -104,7 +104,6 @@ class Roulette extends CasinoGame
 			}
 			});
 		$player->sendForm($form);
-
 	}
 
 	public function win(LinesiaPlayer $player, int $gain): void {/*empty*/}

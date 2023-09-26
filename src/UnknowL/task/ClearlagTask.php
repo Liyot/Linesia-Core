@@ -14,7 +14,7 @@ class ClearlagTask extends Task
 
 	private string $world = "linesia";
 
-	public static int $time = 300 * 20;
+	public static int $time = 100 * 20;
 
 	final public function clear(): \Generator
 	{
@@ -37,7 +37,7 @@ class ClearlagTask extends Task
 			30 * 20 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d30 §fseconde(s) !",
 			10 * 20 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d10 §fseconde(s) !",
 			3 * 20 =>"§d§l» §r§fLe prochain clearlagg aura lieu dans §d3 §fseconde(s) !",
-			2 * 20=> "§d§l» §r§fLe prochain clearlagg aura lieu dans §d2 §fseconde(s) !",
+			2 * 20 => "§d§l» §r§fLe prochain clearlagg aura lieu dans §d2 §fseconde(s) !",
 			20 =>"§d§l» §r§fLe prochain clearlagg aura lieu dans §d1 §fseconde(s) !",
 			default => ''
 

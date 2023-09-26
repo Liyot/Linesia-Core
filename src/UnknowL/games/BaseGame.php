@@ -13,6 +13,12 @@ abstract class BaseGame
 	abstract public function join(LinesiaPlayer $player): void;
 	abstract public function leave(LinesiaPlayer $player): void;
 
+	public function stop(): void
+	{
+		$this->hasStarted = false;
+		Server::getInstance()->broadcastMessage(sprintf("[Linesia] Le %s s'est subitement arréter", $this->getName()));
+	}
+
 	abstract public function getName(): string;
 
 	public function start(): self

@@ -49,7 +49,6 @@ final class Kit
 	final public function canClaim(LinesiaPlayer $player): bool
 	{
 		$return = true;
-		var_dump($this->getPermission());
 		if(!$player->hasPermission($this->getPermission()))
 		{
 			$player->sendMessage("§cVous n'avez pas la permission");

@@ -92,7 +92,7 @@ class VoteCommand extends BaseCommand
 	public function updateVoteParty(LinesiaPlayer $player): void
 	{
 		$this->voteParty++;
-		if ($this->voteParty >= 1)
+		if ($this->voteParty >= 100)
 		{
 			/**@var LinesiaPlayer $player*/
 			foreach (Server::getInstance()->getOnlinePlayers() as $player)

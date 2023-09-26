@@ -6,6 +6,7 @@ namespace UnknowL\handlers\dataTypes\requests;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\color\Color;
 use pocketmine\form\Form;
+use pocketmine\world\Position;
 use UnknowL\lib\forms\ModalForm;
 use UnknowL\player\LinesiaPlayer;
 use UnknowL\utils\PositionUtils;
@@ -33,17 +34,13 @@ class MultiDualRequest extends Request
 		}
 	}
 
-	public function decline(): void
-	{
-		parent::decline();
-	}
-
 	public function accept(): void
 	{
 		parent::accept();
 		foreach ($this->players as $player)
 		{
 			$this->updateInteraction($player);
+
 		}
 	}
 
@@ -64,6 +61,11 @@ class MultiDualRequest extends Request
 			}
 			$this->decline();
 		});
+	}
+
+	private function getDualPosition(): Position
+	{
+		return new Position();
 	}
 
 	private function addPlayer(LinesiaPlayer $player): void
@@ -96,10 +98,7 @@ class MultiDualRequest extends Request
 
 	public function getPositionByTeam(Team $team): void
 	{
-		/*match ($team->getColor())
-		{
-			DyeColor::BLUE();
-		}*/
+
 	}
 
 	public function getName(): string

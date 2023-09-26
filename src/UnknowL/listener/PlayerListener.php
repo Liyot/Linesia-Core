@@ -37,6 +37,7 @@ use pocketmine\event\player\PlayerJumpEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerToggleSneakEvent;
 use pocketmine\event\server\CommandEvent;
+use pocketmine\event\world\ChunkUnloadEvent;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\inventory\PlayerOffHandInventory;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
@@ -64,8 +65,6 @@ use UnknowL\events\CooldownExpireEvent;
 use UnknowL\form\EnderChestForm;
 use UnknowL\handlers\dataTypes\PlayerCooldown;
 use UnknowL\handlers\Handler;
-use UnknowL\handlers\WorldHandler;
-use UnknowL\lib\customies\item\CustomiesItemFactory;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 use UnknowL\player\manager\StatManager;
@@ -90,7 +89,7 @@ final class PlayerListener implements Listener
 
 	public function __construct()
 	{
-		$this->sharedListeners[] = new SimpleSharedListener($this, new ChatGameTask());
+		$this->sharedListeners[] = new SimpleSharedListener($this, ChatGameTask::getInstance());
 	}
 
 	private function sharedExecution(Event $event): void
@@ -100,13 +99,13 @@ final class PlayerListener implements Listener
 
     public function onCreation(PlayerCreationEvent $event)
     {
-        $event->setPlayerClass(LinesiaPlayer::class);
+		$event->setPlayerClass(LinesiaPlayer::class);
     }
 
     public function onJoin(PlayerJoinEvent $event): void {
 
 		/**@var LinesiaPlayer $player*/
-        $player = $event->getPlayer();
+       $player = $event->getPlayer();
         $name = $player->getName();
 
         //SETTINGS
@@ -126,7 +125,7 @@ final class PlayerListener implements Listener
         //Main::$instance->clicks[$event->getPlayer()->getName()] = [];
 
         //EFFECTARMOR
-        /*foreach ($sender->getArmorInventory()->getContents() as $targetItem) {
+     /*   foreach ($sender->getArmorInventory()->getContents() as $targetItem) {
             if ($targetItem instanceof Armor) {
                 $slot = $targetItem->getArmorSlot();
                 $sourceItem = $sender->getArmorInventory()->getItem($slot);
@@ -147,12 +146,12 @@ final class PlayerListener implements Listener
         },  null));*/
 
         //SCORDBOARD
-        ScoreBoardAPI::sendScoreboard($player);
+       ScoreBoardAPI::sendScoreboard($player);
         ScoreBoardAPI::updateServer();
         self::$time[$player->getName()] = time();
     }
 
-    public function onQuit(PlayerQuitEvent $event): void {
+	public function onQuit(PlayerQuitEvent $event): void {
 
         $player = $event->getPlayer();
         $playerName = $player->getName();
@@ -164,8 +163,7 @@ final class PlayerListener implements Listener
         ScoreBoardAPI::updateServer(true);
 
         //CPS
-        if(isset($this->clicks[$event->getPlayer()->getName()]))
-            unset($this->clicks[$event->getPlayer()->getName()]);
+        if(isset($this->clicks[$event->getPlayer()->getName()])) unset($this->clicks[$event->getPlayer()->getName()]);
 
         //COMBAT KILL
         if (isset(CombatLoggerManager::$isLogged[$playerName])) {
@@ -176,6 +174,7 @@ final class PlayerListener implements Listener
                 if(isset(CombatLoggerManager::$isLogged[$playerName])) {
                     $handler = CombatLoggerManager::$isLogged[$playerName]["task"];
                     $handler->getTask()->getHandler()->cancel();
+					var_dump('as');
                     unset(CombatLoggerManager::$isLogged[$playerName]);
                 }
             }), 1);
@@ -189,8 +188,7 @@ final class PlayerListener implements Listener
         if(!is_null($player))
         {
             /**@var PlayerCooldown $cooldown*/
-
-            switch ($cooldown->getPath())
+			switch ($cooldown->getPath())
             {
                 case PathLoader::PATH_RANK_CACHE:
 
@@ -229,9 +227,12 @@ final class PlayerListener implements Listener
 
 	public function onCommand(CommandEvent $event)
 	{
+
 		$player = $event->getSender();
 		$message = $event->getCommand();
 		$playerName = $player->getName();
+		if(!$player instanceof LinesiaPlayer) return;
+		if (!$player->getActiveInteraction(LinesiaPlayer::INTERACTION_COMMAND)) $event->cancel();
 
 		//COMBAT LOGGER
 		if (!in_array($message, ["mute", "ban", "gm1", "unmute", "jail"]) && isset(CombatLoggerManager::$isLogged[$player->getName()])) {
@@ -535,8 +536,12 @@ final class PlayerListener implements Listener
         {
             if ($block instanceof MonsterSpawner)
             {
-                Handler::WORLD()->addSpawner($block->getPosition()->getWorld());
-            }
+				if ($block->getPosition()->getWorld()->getFolderName() === "linesia")
+				{
+					$event->cancel();
+				}
+				Handler::WORLD()->addSpawner($block->getPosition()->getWorld());
+			}
         }
 
         //CANCEL
@@ -554,17 +559,6 @@ final class PlayerListener implements Listener
 		if (!$event->isCancelled())
 		{
 			$player->getStatManager()->handleEvents(StatManager::TYPE_BLOCK_PLACED);
-		}
-
-		foreach ($blocks as $block)
-		{
-			if ($block instanceof MonsterSpawner)
-			{
-				if ($block->getPosition()->getWorld()->getFolderName() === "linesia")
-				{
-					$event->cancel();
-				}
-			}
 		}
     }
 

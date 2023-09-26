@@ -13,7 +13,6 @@ enum GamesEnum : string
 	const KOTH = KothGame::class;
 	const NEXUS = NexusGame::class;
 	const OUTPOST = OutpostGame::class;
-    const BOSS = BossGame::class;
 
 	/**
 	 * @return string

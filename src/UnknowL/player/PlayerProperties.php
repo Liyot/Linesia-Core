@@ -81,7 +81,7 @@ final class PlayerProperties
 		return $this->properties;
 	}
 
-	private function arraytoTag(array $array, ?CompoundTag $nbt = null): CompoundTag {
+	private function arraytoTag(array $array, ?CompoundTag $nbt = null, string $name = ""): CompoundTag {
 		$nbt ??= new CompoundTag();
 		foreach($array as $property => $value){
 			match (gettype($value)){
@@ -89,7 +89,7 @@ final class PlayerProperties
 				"double" => $nbt->setDouble($property, $value),
 				"string" => $nbt->setString($property, $value),
 				"boolean" => $nbt->setByte($property, $value),
-				"array" => $nbt->setTag($property, self::arrayToTag($value, $nbt)),
+				"array" =>  $nbt->setTag($property, self::arrayToTag($value, null)),
 				"object" => $nbt->setString($property, $value->serialize()),
 				"NULL" =>  $nbt->setString($property, "'null'")
 			};

@@ -17,6 +17,7 @@ class OfflineDataHandler extends Handler
 		parent::__construct();
 	}
 
+
 	protected function loadData(): void
     {
 		$this->loadTopStats();

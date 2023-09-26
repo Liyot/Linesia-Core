@@ -64,8 +64,8 @@ abstract class Handler
 
 	public static function init(): void
 	{
+		self::$members = [];
 		self::setup();
-		self::_registryRegister("Casino", new CasinoHandler());
 		RepairHandler::setup();
 	}
 
@@ -84,5 +84,6 @@ abstract class Handler
 			self::register($handler);
 			$handler->loadData();
 		}
+		self::_registryRegister("Casino", new CasinoHandler());
 	}
 }

@@ -6,6 +6,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\item\Armor;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
+use pocketmine\math\AxisAlignedBB;
 use pocketmine\utils\Config;
 use pocketmine\world\format\io\GlobalItemDataHandlers as ItemData;
 use UnknowL\handlers\dataTypes\requests\DualRequest;
@@ -17,13 +18,14 @@ use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
 use UnknowL\lib\forms\CustomForm;
 use UnknowL\lib\forms\CustomFormResponse;
 use UnknowL\lib\forms\element\Dropdown;
+use UnknowL\lib\forms\element\Input;
 use UnknowL\lib\inventoryapi\inventories\BaseInventoryCustom;
 use UnknowL\lib\inventoryapi\InventoryAPI;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 use UnknowL\utils\CommandUtils;
 
-class DualCommand extends BaseCommand
+final class DualCommand extends BaseCommand
 {
 
 	public function __construct()
@@ -50,6 +52,8 @@ class DualCommand extends BaseCommand
      */
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
+		$sender->sendForm($this->getForm());
+		/*
 		if (isset($args["mise"]) && is_int((int)$args["mise"]))
 		{
 			if((($target = CommandUtils::checkTarget($args['joueur'])) !== null) && $target->getDisplayName() !== $sender->getDisplayName())
@@ -74,7 +78,7 @@ class DualCommand extends BaseCommand
 				$form->send($sender);
 			}
 			return;
-		}
+		}*/
 		$sender->sendMessage("Vérifiez les informations que vous avez saisi");
 	}
 
@@ -84,7 +88,15 @@ class DualCommand extends BaseCommand
 			function(LinesiaPlayer $player, CustomFormResponse $response)
 			{
 				$dropdown = $response->getDropdown();
+				$options = match ($dropdown->getSelectedOption())
+				{
+					"2vs2" => [new Input("Nom de votre coéquipier", ""), new Input("Joueur adverse 1", ""), new Input("Joueur adverse 2", "")],
+					default => [new Input("Nom du joueur adverse", "")]
+				};
+				$form = new CustomForm("Choisissez les joueurs", $options, function (LinesiaPlayer $player, CustomFormResponse $response)
+				{
 
+				});
 			});
 		return $form;
 	}

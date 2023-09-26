@@ -24,6 +24,7 @@ final class CasinoHandler extends Handler
 
 	public function __construct()
 	{
+		self::$members = [];
 		self::setup();
 	}
 

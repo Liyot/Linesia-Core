@@ -40,6 +40,20 @@ class MarketData
 		$player->sendMessage("§cVous n'avez pas assez d'item dans votre inventaire !");
     }
 
+	final public function sellAll(LinesiaPlayer $player)
+	{
+		if ($player->getInventory()->contains($this->item))
+		{
+			$count = 0;
+			array_map(fn(Item $item) =>  $count += $item->getCount(),  $player->getInventory()->removeItem($this->getItem()));
+			var_dump($count);
+			$player->getEconomyManager()->add(ceil($count * $this->getSellPrice()));
+			$player->sendMessage("§aVous avez vendu vos items avec succés !");
+			return;
+		}
+		$player->sendMessage("§cVous n'avez pas assez d'item dans votre inventaire !");
+	}
+
 	/**
 	 * @return Item
 	 */
@@ -50,7 +64,7 @@ class MarketData
 
 
 	/**
-	 * @return int
+	 * @return int|float
 	 */
 	public function getSellPrice(): int|float
 	{
