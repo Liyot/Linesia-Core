@@ -2,14 +2,17 @@
 
 namespace UnknowL\commands\dual;
 
+use pocketmine\block\utils\DyeColor;
 use pocketmine\command\CommandSender;
 use pocketmine\item\Armor;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\AxisAlignedBB;
+use pocketmine\Server;
 use pocketmine\utils\Config;
 use pocketmine\world\format\io\GlobalItemDataHandlers as ItemData;
 use UnknowL\handlers\dataTypes\requests\DualRequest;
+use UnknowL\handlers\dataTypes\requests\MultiDualRequest;
 use UnknowL\handlers\Handler;
 use UnknowL\lib\commando\args\IntegerArgument;
 use UnknowL\lib\commando\args\TargetArgument;
@@ -24,6 +27,7 @@ use UnknowL\lib\inventoryapi\InventoryAPI;
 use UnknowL\Linesia;
 use UnknowL\player\LinesiaPlayer;
 use UnknowL\utils\CommandUtils;
+use UnknowL\utils\Team;
 
 final class DualCommand extends BaseCommand
 {
@@ -93,9 +97,24 @@ final class DualCommand extends BaseCommand
 					"2vs2" => [new Input("Nom de votre coéquipier", ""), new Input("Joueur adverse 1", ""), new Input("Joueur adverse 2", "")],
 					default => [new Input("Nom du joueur adverse", "")]
 				};
+
 				$form = new CustomForm("Choisissez les joueurs", $options, function (LinesiaPlayer $player, CustomFormResponse $response)
 				{
+					if (count($response->getElements()) > 1)
+					{
+						$server = Server::getInstance();
+						$mate = $server->getPlayerByPrefix($response->getInput()->getValue());
+						$figher1 = $server->getPlayerByPrefix($response->getInput()->getValue());
+						$figher2 = $server->getPlayerByPrefix($response->getInput()->getValue());
 
+						new MultiDualRequest
+						(
+							$player,
+							(new Team([$player, $mate], "Rouge"))->setColor(DyeColor::RED()),
+							(new Team([$figher1, $figher2], "Bleu"))->setColor(DyeColor::BLUE())
+						);
+						return;
+					}
 				});
 			});
 		return $form;

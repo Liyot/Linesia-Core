@@ -30,7 +30,17 @@ class MultiDualRequest extends Request
 		array_map(fn(LinesiaPlayer $player) => $this->players[$player->getUniqueId()->toString()] = $player, $to->getPlayers());
 		foreach ($this->players as $player)
 		{
-			$player->sendForm($this->getForm($player));
+			$player->sendMessage(sprintf("Vous avez reçu une demande de duel 2vs2 de la part de: %s \n tapez 'yes' pour accepter ne faites rien pour refuser",
+				$originalPlayer->getDisplayName()));
+			$player->awaitChatResponse(function(LinesiaPlayer $player, mixed $message)
+			{
+
+				if ($message === "yes")
+				{
+					$this->addPlayer($player);
+				}
+			});
+//			$player->sendForm($this->getForm($player));
 		}
 	}
 

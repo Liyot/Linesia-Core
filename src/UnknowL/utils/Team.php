@@ -27,9 +27,10 @@ final class Team
 		return $this->color;
 	}
 
-	final public function setColor(DyeColor $color): void
+	final public function setColor(DyeColor $color): self
 	{
 		$this->color = $color;
+		return $this;
 	}
 
 	final public function getPlayers(): array

@@ -82,8 +82,8 @@ class ChatGameTask extends Task implements ISharedListener
 				{
 					0 => $number1 + $number2,
                     1 => $number1 - $number2,
-                    2 => $number1 * $number2,
-                    3 => $number1 / $number2,
+                    2 => round($number1 * $number2),
+                    3 => round($number1 / $number2),
 				};
 				var_dump($this->expectedResponse);
 				break;

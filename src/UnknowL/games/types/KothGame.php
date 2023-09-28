@@ -19,10 +19,7 @@ final class KothGame extends BaseGame
 	public ?LinesiaPlayer $capturingPlayer = null;
 	private int $capturePoints = 0;
 
-	public function __construct(private AxisAlignedBB $zone)
-	{
-
-	}
+	public function __construct(private AxisAlignedBB $zone) {}
 
     public function join(LinesiaPlayer $player): void
     {
