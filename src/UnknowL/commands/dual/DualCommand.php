@@ -57,7 +57,7 @@ final class DualCommand extends BaseCommand
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
 		$sender->sendForm($this->getForm());
-		/*
+
 		if (isset($args["mise"]) && is_int((int)$args["mise"]))
 		{
 			if((($target = CommandUtils::checkTarget($args['joueur'])) !== null) && $target->getDisplayName() !== $sender->getDisplayName())
@@ -82,7 +82,7 @@ final class DualCommand extends BaseCommand
 				$form->send($sender);
 			}
 			return;
-		}*/
+		}
 		$sender->sendMessage("Vérifiez les informations que vous avez saisi");
 	}
 
@@ -98,23 +98,34 @@ final class DualCommand extends BaseCommand
 					default => [new Input("Nom du joueur adverse", "")]
 				};
 
-				$form = new CustomForm("Choisissez les joueurs", $options, function (LinesiaPlayer $player, CustomFormResponse $response)
-				{
-					if (count($response->getElements()) > 1)
+				$form = new CustomForm("Choisissez les joueurs", $options, function (LinesiaPlayer $player, CustomFormResponse $response) use ($dropdown) {
+                    $server = Server::getInstance();
+                    if ($dropdown->getSelectedOption() === "2vs2")
 					{
-						$server = Server::getInstance();
-						$mate = $server->getPlayerByPrefix($response->getInput()->getValue());
-						$figher1 = $server->getPlayerByPrefix($response->getInput()->getValue());
-						$figher2 = $server->getPlayerByPrefix($response->getInput()->getValue());
+						$mate = $server->getPlayerExact($response->getInput()->getValue());
+						$figher1 = $server->getPlayerExact($response->getInput()->getValue());
+						$figher2 = $server->getPlayerExact($response->getInput()->getValue());
+                        if (is_null($mate) || is_null($figher1) || is_null($figher2))
+                        {
+                            $player->sendMessage("[LINESIA] Vérifiez les informations que vous avez saisis!");
+                            return;
+                        }
 
-						new MultiDualRequest
+						Handler::REQUEST()->addRequest(new MultiDualRequest
 						(
 							$player,
 							(new Team([$player, $mate], "Rouge"))->setColor(DyeColor::RED()),
 							(new Team([$figher1, $figher2], "Bleu"))->setColor(DyeColor::BLUE())
-						);
+                        ));
 						return;
 					}
+                    $to = $server->getPlayerExact($response->getInput()->getValue());
+                    if (!($to instanceof LinesiaPlayer))
+                    {
+                        $player->sendMessage("[LINESIA] Vérifiez les informations que vous avez saisis!");
+                        return;
+                    }
+                    new DualRequest($player, $to);
 				});
 			});
 		return $form;

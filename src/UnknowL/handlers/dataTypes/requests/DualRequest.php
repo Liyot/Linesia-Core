@@ -12,6 +12,8 @@ final class DualRequest extends Request
 
 	const TEAM_BLUE = 1;
 	const TEAM_RED = 2;
+
+    private int $queuePosition;
 	/**
 	 * @var PlayerInventory[]
 	 */
@@ -121,4 +123,20 @@ final class DualRequest extends Request
 	{
 		return $this->kit;
 	}
+
+    /**
+     * @return int
+     */
+    final public function getQueuePosition(): int
+    {
+        return $this->queuePosition;
+    }
+
+    /**
+     * @param int $queuePosition
+     */
+    final public function setQueuePosition(int $queuePosition): void
+    {
+        $this->queuePosition = $queuePosition;
+    }
 }

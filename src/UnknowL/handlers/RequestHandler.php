@@ -21,9 +21,18 @@ class RequestHandler extends Handler
 	#[ArrayShape(
 		[
 			"teleportation" => [],
-			"dual" => []
+			"dual" => [],
 		])]
 	private array $requests = [];
+
+    /**
+     * @var $requests list<array<list<Request>>>
+     */
+    #[ArrayShape(
+        [
+            "dual" => [],
+        ])]
+    private array $queue = [];
 
     protected function loadData(): void
 	{ /*None*/ }
@@ -33,12 +42,27 @@ class RequestHandler extends Handler
 
 	final public function addRequest(Request $request)
 	{
-		$this->requests[$request->getName()][] = $request;
+		$this->requests[$request->$request()][$request->getId()] = $request;
+        i
 	}
+
+    final public function sendRequestToQueue(Request $request): void
+    {
+        if ($request->getName() === "dual" && empty($this->queue["dual"])) $request->accept();
+            $this->queue[$request->getName()][] = $request;
+    }
+
+    protected function startNextDual(): void
+    {
+        if (empty($this->queue)) return;
+        
+
+    }
 
 	final public function removeRequest(Request $request): void
 	{
-		unset($this->requests[$request->getName()][array_search($request, $this->requests[$request->getName()], true)]);
+        if (isset($this->queue[$request->getName()]))
+		unset($this->requests[$request->getName()][$request->getId()]);
 	}
 
 	final public function getActiveDual(LinesiaPlayer $player): DualRequest

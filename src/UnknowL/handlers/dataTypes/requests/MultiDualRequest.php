@@ -12,7 +12,7 @@ use UnknowL\player\LinesiaPlayer;
 use UnknowL\utils\PositionUtils;
 use UnknowL\utils\Team;
 
-class MultiDualRequest extends Request
+final class MultiDualRequest extends Request
 {
 
 	/**

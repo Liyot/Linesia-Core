@@ -14,9 +14,10 @@
     <include_path>
       <path value="$PROJECT_DIR$/../../../API/PocketMine-MP" />
       <path value="$USER_HOME$/Downloads/PiggyFactions-2.1.0" />
+      <path value="$PROJECT_DIR$/../../../Source" />
     </include_path>
   </component>
-  <component name="PhpProjectSharedConfiguration" php_language_level="8.2">
+  <component name="PhpProjectSharedConfiguration" php_language_level="8.1">
     <option name="suggestChangeDefaultLanguageLevel" value="false" />
   </component>
   <component name="PhpStanOptionsConfiguration">

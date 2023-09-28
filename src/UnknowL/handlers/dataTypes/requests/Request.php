@@ -12,7 +12,12 @@ abstract class Request
 
 	private bool $request = false;
 
-	public function __construct(private LinesiaPlayer $from, private LinesiaPlayer $to) {}
+    private int $id;
+
+	public function __construct(private LinesiaPlayer $from, private LinesiaPlayer $to)
+    {
+        $this->id = microtime(true);
+    }
 
 	abstract public function getName(): string;
 
@@ -57,6 +62,11 @@ abstract class Request
 	{
 		$this->request = $result;
 	}
+
+    final public function getId(): int
+    {
+        return $this->id;
+    }
 
 	protected function getResult(): bool
 	{
