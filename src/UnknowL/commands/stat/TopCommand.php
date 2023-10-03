@@ -9,6 +9,7 @@ use UnknowL\handlers\Handler;
 use UnknowL\handlers\OfflineDataHandler;
 use UnknowL\lib\commando\BaseCommand;
 use UnknowL\lib\commando\BaseSubCommand;
+use UnknowL\lib\commando\constraint\InGameRequiredConstraint;
 use UnknowL\Linesia;
 
 class TopCommand extends BaseCommand
@@ -25,14 +26,15 @@ class TopCommand extends BaseCommand
     protected function prepare(): void
     {
 		$this->setPermission("pocketmine.group.user");
+		$this->addConstraint(new InGameRequiredConstraint($this));
     }
 
     public function onRun(CommandSender $sender, string $aliasUsed, array $args): void
     {
-	/*	$top = Handler::OFFLINEDATA()->getTopStats();
+		$top = Handler::OFFLINEDATA()->getTopStats();
 		$format = "Top: \n ";
 
 		array_walk($top, fn(array $stat, string $key) =>  $format .= sprintf("%s: %s avec %s", $key, array_values($stat)[0], array_keys($stat)[0]));
-		$sender->sendMessage($format);*/
+		$sender->sendMessage($format);
 	}
 }

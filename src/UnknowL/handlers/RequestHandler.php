@@ -26,7 +26,7 @@ class RequestHandler extends Handler
 	private array $requests = [];
 
     /**
-     * @var $requests list<array<list<Request>>>
+     * @var $queue list<array<list<Request>>>
      */
     #[ArrayShape(
         [
@@ -42,8 +42,8 @@ class RequestHandler extends Handler
 
 	final public function addRequest(Request $request)
 	{
-		$this->requests[$request->$request()][$request->getId()] = $request;
-        i
+		$this->requests[$request->getName()][$request->getId()] = $request;
+		$this->sendRequestToQueue($request);
 	}
 
     final public function sendRequestToQueue(Request $request): void
@@ -52,12 +52,11 @@ class RequestHandler extends Handler
             $this->queue[$request->getName()][] = $request;
     }
 
-    protected function startNextDual(): void
-    {
-        if (empty($this->queue)) return;
-        
-
-    }
+	final public function next(): void
+	{
+		if (empty($this->queue["dual"])) return;
+		$this->queue["dual"][array_keys($this->queue["dual"])[0]]->accept();
+	}
 
 	final public function removeRequest(Request $request): void
 	{

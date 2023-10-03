@@ -2,6 +2,7 @@
 
 namespace UnknowL\handlers;
 
+use customiesdevs\customies\item\CustomiesItemFactory;
 use pocketmine\data\bedrock\EffectIdMap;
 use pocketmine\entity\effect\Effect;
 use pocketmine\entity\effect\EffectInstance;
@@ -34,6 +35,10 @@ class ArmorEffectHandler extends Handler
 	{
 
 		$alias = StringToItemParser::getInstance()->lookupAliases($source)[0];
+		if (is_null($alias))
+		{
+
+		}
 		if(isset($this->data[$alias]))
 		{
             foreach($this->data[$alias] as $effect)

@@ -32,6 +32,7 @@ use UnknowL\commands\box\BoxCommand;
 use UnknowL\commands\casino\CasinoCommand;
 use UnknowL\commands\CommandManager;
 use UnknowL\commands\default\NvCommand;
+use UnknowL\commands\dual\DualCommand;
 use UnknowL\commands\kit\KitCommand;
 use UnknowL\commands\market\MarketCommand;
 use UnknowL\commands\money\MoneyCommand;
@@ -175,6 +176,7 @@ trait LoaderTrait
 		$commandMap->register("", new MarketCommand());
 		$commandMap->register("", new MoneyCommand());
 		$commandMap->register("", new RankCommand());
+		$commandMap->register("", new DualCommand());
 		$commandMap->register("", new TopCommand());
 		$commandMap->register("", new NvCommand());
 		$commandMap->register("", new VoteCommand());

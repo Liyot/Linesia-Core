@@ -2,6 +2,7 @@
 
 namespace UnknowL\handlers;
 
+use customiesdevs\customies\item\CustomiesItemFactory;
 use pocketmine\block\Block;
 use pocketmine\item\StringToItemParser;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacketV1;
@@ -46,6 +47,10 @@ class MarketHandler extends Handler
 			{
 				$id = $value["id"];
 				$item = StringToItemParser::getInstance()->parse($id);
+				if (is_null($item))
+				{
+					$item = CustomiesItemFactory::getInstance()->get($id);
+				}
 				$this->categories[$category][$marketName] = new MarketData($item, $value["sellPrice"], $value["description"],
 					$value["image"], $marketName, $value["quantities"], $value["buyPrice"]);
 			}

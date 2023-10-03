@@ -2,10 +2,12 @@
 
 namespace UnknowL\commands\dual;
 
+use customiesdevs\customies\item\CustomiesItemFactory;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\command\CommandSender;
 use pocketmine\item\Armor;
 use pocketmine\item\Item;
+use pocketmine\item\StringToItemParser;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Server;
@@ -159,12 +161,17 @@ final class DualCommand extends BaseCommand
 		$options = [];
 		foreach ($config->getAll(true) as $data)
 		{
-			$format =
-			$options[$data["name"]] = array_map
-			(
-				fn(array $format) => ItemData::getDeserializer()->deserializeStack(ItemData::getUpgrader()->upgradeItemTypeDataInt($format[0], $format[1], $format[2], null))
-				, explode(":", $data["content"])
-			);
+			foreach (explode(':', $data["content"]) as $format)
+			{
+				$item = StringToItemParser::getInstance()->parse($format[0])?->setCount($format[1]);
+				if (is_null($item))
+				{
+					try {
+						$item = CustomiesItemFactory::getInstance()->get($format[0])->setCount($format[1]);
+					} catch (\Error $error) {}
+				}
+				$options[$data["name"]] = $item;
+			}
 		}
 		return $options;
 	}

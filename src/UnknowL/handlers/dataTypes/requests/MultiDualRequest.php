@@ -5,36 +5,44 @@ namespace UnknowL\handlers\dataTypes\requests;
 
 use pocketmine\block\utils\DyeColor;
 use pocketmine\color\Color;
+use pocketmine\event\Event;
+use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\form\Form;
 use pocketmine\world\Position;
 use UnknowL\lib\forms\ModalForm;
+use UnknowL\listener\ISharedListener;
 use UnknowL\player\LinesiaPlayer;
 use UnknowL\utils\PositionUtils;
 use UnknowL\utils\Team;
 
-final class MultiDualRequest extends Request
+final class MultiDualRequest extends Request implements ISharedListener
 {
 
 	/**
-	 * @var LinesiaPlayer[] $players
+	 * @param list<string<LinesiaPlayer>> $players
 	 */
 	private array $players = [];
 
 	/**
-	 * @param LinesiaPlayer $from
-	 * @param LinesiaPlayer[] $to
+	 * @param list<string<LinesiaPlayer>> $players
 	 */
-	public function __construct(private readonly LinesiaPlayer $originalPlayer, protected Team $from, protected Team $to)
+	private array $deadPlayers = [];
+
+	/**
+	 * @param LinesiaPlayer $originalPlayer
+	 * @param Team $from
+	 * @param Team $to
+	 */
+	public function __construct(private LinesiaPlayer $originalPlayer, protected Team $from, protected Team $to)
 	{
-		array_map(fn(LinesiaPlayer $player) => $this->players[$player->getUniqueId()->toString()] = $player, $from->getPlayers());
-		array_map(fn(LinesiaPlayer $player) => $this->players[$player->getUniqueId()->toString()] = $player, $to->getPlayers());
+		array_map(fn(LinesiaPlayer $player) => $this->players[$from->getColor()->name()][$player->getUniqueId()->toString()] = $player, $from->getPlayers());
+		array_map(fn(LinesiaPlayer $player) => $this->players[$to->getColor()->name()][$player->getUniqueId()->toString()] = $player, $to->getPlayers());
 		foreach ($this->players as $player)
 		{
 			$player->sendMessage(sprintf("Vous avez reçu une demande de duel 2vs2 de la part de: %s \n tapez 'yes' pour accepter ne faites rien pour refuser",
 				$originalPlayer->getDisplayName()));
 			$player->awaitChatResponse(function(LinesiaPlayer $player, mixed $message)
 			{
-
 				if ($message === "yes")
 				{
 					$this->addPlayer($player);
@@ -50,7 +58,6 @@ final class MultiDualRequest extends Request
 		foreach ($this->players as $player)
 		{
 			$this->updateInteraction($player);
-
 		}
 	}
 
@@ -73,10 +80,6 @@ final class MultiDualRequest extends Request
 		});
 	}
 
-	private function getDualPosition(): Position
-	{
-		return new Position();
-	}
 
 	private function addPlayer(LinesiaPlayer $player): void
 	{
@@ -96,19 +99,47 @@ final class MultiDualRequest extends Request
 
 	public function process(): void
 	{
-
 		foreach ($this->players as $player)
 		{
 			if ($this->getResult())
 			{
 				$player->teleport(PositionUtils::getAvailableDualRoom(PositionUtils::DUAL_2V2));
+				$teleported = [DyeColor::RED()->name() => false, DyeColor::GREEN()->name()];
+				$team = $this->getTeam($player);
+				$pos = $this->getPositionByTeam($team);
+				$player->teleport($teleported[$team->getColor()->name()] ? Position::fromObject($pos->add(2, 0, 0), $pos->getWorld()) : $pos);
+				if ($teleported[$team->getColor()->name()] === false) $teleported[$team->getColor()->name()] = true;
 			}
 		}
 	}
 
-	public function getPositionByTeam(Team $team): void
+	final public function getPositionByTeam(Team $team): Position
+	{
+		return match ($team->getColor())
+		{
+			DyeColor::RED() => new Position(),
+			DyeColor::BLUE() => new Position()
+		};
+	}
+
+	final public function win(Team $team): void
 	{
 
+	}
+
+	final public function isInDual(LinesiaPlayer $player)
+	{
+		return in_array($player, $this->players[DyeColor::RED()->name()], true) || in_array($player, $this->players[DyeColor::BLUE()->name()], true);
+	}
+
+	final public function getTeam(LinesiaPlayer $player): Team
+	{
+		return in_array($this->players[DyeColor::RED()->name()], $this->players) ? $this->from : $this->to;
+	}
+
+	final public function getOppositeTeam(Team $team): Team
+	{
+		if ($team->getColor()->name()) {}
 	}
 
 	public function getName(): string
@@ -119,5 +150,21 @@ final class MultiDualRequest extends Request
     public function getChatFormat(): string
     {
 		return "Duel 2vs2";
+	}
+
+	/**@param PlayerDeathEvent $event*/
+	public function onEvent(Event $event): void
+	{
+		$player = $event->getPlayer();
+		if ($player instanceof LinesiaPlayer && $this->isInDual($player))
+		{
+			if (isset($this->deadPlayers[$this->getTeam($player)->getColor()->name()])) $this->win($this->get);
+			$this->deadPlayers[$this->getTeam($player)->getColor()->name()][$player->getUniqueId()->toString()] = $player;
+		}
+	}
+
+	public function getEventName(): string
+	{
+		return PlayerDeathEvent::class;
 	}
 }

@@ -226,7 +226,6 @@ final class LinesiaPlayer extends Player
 			$this->nextChatUpdate--;
 		} else {
 			$this->onChatResponse = null;
-			+
 		}
 
 		$this->nextChatUpdate > 0 ? $this->nextChatUpdate-- : $this->onChatResponse = null;
